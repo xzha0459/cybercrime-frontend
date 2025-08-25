@@ -14,6 +14,8 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@aws-amplify/ui-vue": "^4.3.3",
+    "aws-amplify": "^6.15.5",
     "vue": "^3.5.18"
   },
   "devDependencies": {

@@ -12,7 +12,8 @@
           </button>
         </div>
         <div v-else class="user-menu">
-          <span class="welcome-text">Welcome back!</span>
+          <span class="user-email" v-if="userEmail">{{ userEmail }}</span>
+          <span class="user-email" v-else>Loading...</span>
           <button @click="signOut" class="btn btn-logout">Sign Out</button>
         </div>
       </div>
@@ -21,9 +22,14 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { signInWithRedirect, signOut as amplifySignOut, getCurrentUser } from 'aws-amplify/auth'
+import {
+  signInWithRedirect,
+  signOut as amplifySignOut,
+  getCurrentUser,
+  fetchUserAttributes,
+} from 'aws-amplify/auth'
 
 export default {
   name: 'NavigationBar',
@@ -31,6 +37,7 @@ export default {
     const router = useRouter()
     const isAuthenticated = ref(false)
     const loading = ref(false)
+    const userEmail = ref(null)
 
     const signIn = async () => {
       try {
@@ -46,39 +53,51 @@ export default {
       try {
         await amplifySignOut()
         isAuthenticated.value = false
+        userEmail.value = null
         router.push('/')
       } catch (error) {
         console.error('Sign out error:', error)
       }
     }
 
-    // dashboard 相关已移除
+    const getUserEmail = async () => {
+      try {
+        const attributes = await fetchUserAttributes()
+        userEmail.value = attributes.email || 'No email'
+        console.log('User email:', userEmail.value)
+      } catch (error) {
+        console.error('Error fetching user email:', error)
+        userEmail.value = 'Email unavailable'
+      }
+    }
 
     const checkAuthStatus = async () => {
       try {
         await getCurrentUser()
         isAuthenticated.value = true
+        // 获取用户邮箱
+        await getUserEmail()
       } catch {
         isAuthenticated.value = false
+        userEmail.value = null
       }
     }
 
+    // 监听认证状态变化，当认证状态改变时重新检查
+    watch(isAuthenticated, async (newValue) => {
+      if (newValue && !userEmail.value) {
+        await getUserEmail()
+      }
+    })
+
     onMounted(() => {
       checkAuthStatus()
-
-      // 初始检查一次
-      getCurrentUser()
-        .then(() => {
-          isAuthenticated.value = true
-        })
-        .catch(() => {
-          isAuthenticated.value = false
-        })
     })
 
     return {
       isAuthenticated,
       loading,
+      userEmail,
       signIn,
       signOut,
     }
@@ -124,10 +143,18 @@ export default {
   align-items: center;
 }
 
-.welcome-text {
+.user-email {
   color: var(--forest-dark);
   font-weight: 500;
   font-size: 1rem;
+  background: var(--forest-sage);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .btn {
@@ -187,6 +214,34 @@ export default {
 
   .user-menu {
     gap: 0.5rem;
+    flex-direction: column;
+  }
+
+  .user-email {
+    font-size: 0.9rem;
+    max-width: 150px;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0.8rem;
+  }
+
+  .user-menu {
+    gap: 0.3rem;
+  }
+
+  .user-email {
+    font-size: 0.8rem;
+    max-width: 120px;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
   }
 }
 </style>

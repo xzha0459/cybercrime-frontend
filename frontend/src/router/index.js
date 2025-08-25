@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../page/HomePage.vue'
-import CallbackPage from "../page/CallbackPage.vue";
+import CallbackPage from '../page/CallbackPage.vue'
 
 const routes = [
   {
@@ -11,8 +11,8 @@ const routes = [
   {
     path: '/callback',
     name: 'Callback',
-    component: CallbackPage
-  }
+    component: CallbackPage,
+  },
 ]
 
 const router = createRouter({

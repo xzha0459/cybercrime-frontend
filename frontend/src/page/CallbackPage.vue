@@ -1,25 +1,43 @@
 <template>
   <div class="callback-container">
     <div v-if="loading" class="loading">
-      <h2>Processing login...</h2>
-      <p>Please wait while we complete your authentication.</p>
+      <h2>Processing authentication...</h2>
+      <p>Please wait while we complete your sign in.</p>
+      <div class="spinner"></div>
+      <div class="debug-info">
+        <p>
+          <small>{{ debugMessage }}</small>
+        </p>
+      </div>
     </div>
     <div v-else-if="error" class="error">
-      <h2>Login failed</h2>
+      <h2>Authentication Error</h2>
       <p>{{ error }}</p>
-      <button @click="goHome">Back to Home</button>
+      <div class="error-details">
+        <details>
+          <summary>Technical Details</summary>
+          <pre>{{ errorDetails }}</pre>
+        </details>
+      </div>
+      <button @click="goHome" class="btn-home">Back to Home</button>
+    </div>
+    <div v-else class="success">
+      <h2>Authentication Successful!</h2>
+      <p>Redirecting to home page...</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { getCurrentUser, signInWithRedirect } from 'aws-amplify/auth'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const loading = ref(true)
 const error = ref(null)
+const errorDetails = ref('')
+const debugMessage = ref('Starting...')
 
 const goHome = () => {
   router.push('/')
@@ -27,30 +45,64 @@ const goHome = () => {
 
 onMounted(async () => {
   try {
-    // 等待Amplify处理OAuth callback
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    debugMessage.value = 'Checking URL parameters...'
 
-    // 检查用户是否已认证
-    const user = await getCurrentUser()
-    console.log('User authenticated:', user)
+    // 获取URL参数
+    const urlParams = new URLSearchParams(window.location.search)
+    const authCode = urlParams.get('code')
+    const state = urlParams.get('state')
+    const errorParam = urlParams.get('error')
+    const errorDescription = urlParams.get('error_description')
 
-    // 认证成功，跳转回首页（不保留历史记录）
-    router.replace('/')
-  } catch (err) {
-    console.error('Callback processing error:', err)
-    // 对于注册完成但未登录的情况，直接跳转到登录页（Hosted UI）
-    const message = err && err.message ? err.message.toLowerCase() : ''
-    if (
-      message.includes('authenticated') ||
-      message.includes('access') ||
-      message.includes('signin')
-    ) {
-      await signInWithRedirect({ provider: 'COGNITO' })
-      return
+    console.log('OAuth Callback received:', {
+      code: authCode ? authCode.substring(0, 10) + '...' : 'Missing',
+      state: state ? state.substring(0, 10) + '...' : 'Missing',
+      error: errorParam,
+      error_description: errorDescription,
+      fullURL: window.location.href,
+    })
+
+    if (errorParam) {
+      throw new Error(`OAuth Error: ${errorParam} - ${errorDescription || 'No description'}`)
     }
 
-    error.value = err?.message || 'Authentication failed'
+    if (!authCode) {
+      throw new Error('Authorization code missing from callback URL')
+    }
+
+    debugMessage.value = 'Authorization code received, processing...'
+
+    // 让Amplify有足够时间处理OAuth回调
+    // Amplify v6会自动处理token交换
+    debugMessage.value = 'Waiting for token exchange...'
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+
+    debugMessage.value = 'Authentication complete, redirecting...'
     loading.value = false
+
+    // 跳转到首页
+    setTimeout(() => {
+      router.replace('/')
+    }, 1000)
+  } catch (err) {
+    console.error('Callback processing error:', err)
+    error.value = err.message || 'Authentication processing failed'
+    errorDetails.value = JSON.stringify(
+      {
+        message: err.message,
+        stack: err.stack,
+        url: window.location.href,
+        timestamp: new Date().toISOString(),
+      },
+      null,
+      2,
+    )
+    loading.value = false
+
+    // 10秒后自动跳转到首页
+    setTimeout(() => {
+      router.push('/')
+    }, 10000)
   }
 })
 </script>
@@ -62,27 +114,111 @@ onMounted(async () => {
   align-items: center;
   min-height: 100vh;
   text-align: center;
+  background: var(--bg-primary, #f5f5f0);
+  padding: 2rem;
 }
 
 .loading,
-.error {
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.error,
+.success {
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(45, 58, 45, 0.1);
+  background: var(--forest-sage, #d4d4c4);
+  max-width: 600px;
+  width: 100%;
 }
 
-.error {
-  background-color: #fee;
-  border: 1px solid #fcc;
+.success {
+  background: var(--forest-light, #f5f5f0);
+  border: 2px solid var(--forest-medium, #8b9a8b);
 }
 
-.error button {
+.loading h2,
+.error h2,
+.success h2 {
+  color: var(--forest-dark, #2d3a2d);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.loading p,
+.error p,
+.success p {
+  color: var(--forest-deep, #5a6b5a);
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.debug-info {
   margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
+  padding: 1rem;
+  background: rgba(45, 58, 45, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.error-details {
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.error-details summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--forest-dark, #2d3a2d);
+}
+
+.error-details pre {
+  background: white;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  border: 1px solid #ccc;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--forest-sage, #d4d4c4);
+  border-top: 4px solid var(--forest-dark, #2d3a2d);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 2rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  background: var(--forest-light, #f5f5f0);
+  border: 1px solid #dc3545;
+}
+
+.btn-home {
+  padding: 0.8rem 2rem;
+  background: var(--forest-dark, #2d3a2d);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.btn-home:hover {
+  background: var(--forest-deep, #5a6b5a);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 58, 45, 0.2);
 }
 </style>

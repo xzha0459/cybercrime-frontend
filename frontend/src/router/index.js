@@ -1,7 +1,6 @@
-// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '@/page/HomePage.vue'
-import RegisterPage from '@/page/RegisterPage.vue'
+import HomePage from '../page/HomePage.vue'
+import CallbackPage from "../page/CallbackPage.vue";
 
 const routes = [
   {
@@ -10,10 +9,10 @@ const routes = [
     component: HomePage,
   },
   {
-    path: '/register',
-    name: 'Register',
-    component: RegisterPage,
-  },
+    path: '/callback',
+    name: 'Callback',
+    component: CallbackPage
+  }
 ]
 
 const router = createRouter({

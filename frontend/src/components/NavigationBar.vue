@@ -2,29 +2,87 @@
   <nav class="navbar">
     <div class="nav-container">
       <!-- Logo/Brand -->
-      <div class="nav-brand">Logo</div>
+      <div class="nav-brand">CyberSafe</div>
 
       <!-- Right side buttons -->
       <div class="nav-buttons">
-        <button @click="goToLogin" class="btn btn-login">Login</button>
-        <button @click="goToRegister" class="btn btn-register">Register</button>
+        <div v-if="!isAuthenticated">
+          <button @click="signIn" class="btn btn-login" :disabled="loading">
+            {{ loading ? 'Signing in...' : 'Login' }}
+          </button>
+        </div>
+        <div v-else class="user-menu">
+          <span class="welcome-text">Welcome back!</span>
+          <button @click="signOut" class="btn btn-logout">Sign Out</button>
+        </div>
       </div>
     </div>
   </nav>
 </template>
 
-<script setup>
+<script>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { signInWithRedirect, signOut as amplifySignOut, getCurrentUser } from 'aws-amplify/auth'
 
-const router = useRouter()
+export default {
+  name: 'NavigationBar',
+  setup() {
+    const router = useRouter()
+    const isAuthenticated = ref(false)
+    const loading = ref(false)
 
-const goToLogin = () => {
-  console.log('Navigate to Login')
-  // 如果有登录页面: router.push('/login')
-}
+    const signIn = async () => {
+      try {
+        loading.value = true
+        await signInWithRedirect({ provider: 'COGNITO' })
+      } catch (error) {
+        console.error('Sign in error:', error)
+        loading.value = false
+      }
+    }
 
-const goToRegister = () => {
-  router.push('/register')
+    const signOut = async () => {
+      try {
+        await amplifySignOut()
+        isAuthenticated.value = false
+        router.push('/')
+      } catch (error) {
+        console.error('Sign out error:', error)
+      }
+    }
+
+    // dashboard 相关已移除
+
+    const checkAuthStatus = async () => {
+      try {
+        await getCurrentUser()
+        isAuthenticated.value = true
+      } catch {
+        isAuthenticated.value = false
+      }
+    }
+
+    onMounted(() => {
+      checkAuthStatus()
+
+      // 初始检查一次
+      getCurrentUser()
+        .then(() => {
+          isAuthenticated.value = true
+        })
+        .catch(() => {
+          isAuthenticated.value = false
+        })
+    })
+
+    return {
+      isAuthenticated,
+      loading,
+      signIn,
+      signOut,
+    }
+  },
 }
 </script>
 
@@ -39,9 +97,9 @@ const goToRegister = () => {
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: 1rem 8rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -60,6 +118,18 @@ const goToRegister = () => {
   gap: 1rem;
 }
 
+.user-menu {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.welcome-text {
+  color: var(--forest-dark);
+  font-weight: 500;
+  font-size: 1rem;
+}
+
 .btn {
   padding: 0.6rem 1.5rem;
   border-radius: 6px;
@@ -70,28 +140,34 @@ const goToRegister = () => {
   font-size: 0.95rem;
 }
 
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 .btn-login {
-  background: transparent;
-  color: var(--forest-dark);
-  border: 2px solid var(--forest-medium);
-}
-
-.btn-login:hover {
-  background: var(--forest-medium);
-  color: var(--text-light);
-  transform: translateY(-1px);
-}
-
-.btn-register {
   background: var(--forest-dark);
   color: var(--text-light);
   box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
-.btn-register:hover {
+.btn-login:hover:not(:disabled) {
   background: var(--forest-deep);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px var(--shadow-dark);
+}
+
+.btn-logout {
+  background: transparent;
+  color: var(--forest-dark);
+  border: 2px solid var(--forest-medium);
+}
+
+.btn-logout:hover {
+  background: var(--forest-medium);
+  color: var(--text-light);
+  transform: translateY(-1px);
 }
 
 /* Responsive */
@@ -107,6 +183,10 @@ const goToRegister = () => {
 
   .nav-brand {
     font-size: 1.5rem;
+  }
+
+  .user-menu {
+    gap: 0.5rem;
   }
 }
 </style>

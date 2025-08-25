@@ -2,24 +2,71 @@
   <section class="hero-section">
     <div class="hero-container">
       <div class="hero-content">
-        <h1 class="hero-title">You're Not Alone in Your Journey</h1>
-        <p class="hero-subtitle">Mental health is essential...</p>
-        <button class="btn btn-primary">GET STARTED</button>
+        <h1 class="hero-title">Learn, Assess, Protect Your Digital Journey Starts Here</h1>
+        <p class="hero-subtitle">FOSTERING DIGITAL CITIZENSHIP FOR YOUNG AUSTRALIANS</p>
+
+        <!-- 未登录状态 -->
+        <div v-if="!isAuthenticated" class="auth-actions">
+          <button @click="$emit('sign-in')" class="btn btn-primary" :disabled="loading">
+            {{ loading ? 'SIGNING IN...' : 'EXPLORE TOOLS' }}
+          </button>
+        </div>
+
+        <!-- 已登录状态 -->
+        <div v-else class="authenticated-actions">
+          <p class="welcome-message">Welcome back! Ready to continue your journey?</p>
+          <div class="action-buttons">
+            <button @click="scrollToContent" class="btn btn-primary">EXPLORE CONTENT</button>
+            <button @click="$emit('sign-out')" class="btn btn-secondary">SIGN OUT</button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </template>
 
+<script>
+export default {
+  name: 'HomeHeroSection',
+  props: {
+    isAuthenticated: {
+      type: Boolean,
+      default: false,
+    },
+    loading: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ['sign-in', 'sign-out'],
+  methods: {
+    scrollToContent() {
+      // 滚动到页面内容区域，或者你可以添加其他逻辑
+      const contentElement = document.querySelector('.content-section')
+      if (contentElement) {
+        contentElement.scrollIntoView({ behavior: 'smooth' })
+      }
+    },
+  },
+}
+</script>
+
 <style scoped>
 .hero-section {
-  background: linear-gradient(
-    135deg,
-    var(--forest-light) 0%,
-    var(--forest-sage) 25%,
-    var(--forest-medium) 50%,
-    var(--forest-deep) 75%,
-    var(--forest-dark) 100%
-  );
+  /* Gradient overlay + background image */
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(245, 245, 240, 0.85) 0%,
+      /* --forest-light */ rgba(212, 212, 196, 0.85) 25%,
+      /* --forest-sage */ rgba(139, 154, 139, 0.85) 50%,
+      /* --forest-medium */ rgba(90, 107, 90, 0.85) 75%,
+      /* --forest-deep */ rgba(45, 58, 45, 0.85) 100% /* --forest-dark */
+    ),
+    url('/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: var(--text-light);
   margin: 0;
   padding: 0;
@@ -28,14 +75,14 @@
 
 .hero-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   min-height: 100vh;
-  padding: 2rem;
+  padding: 2rem 8rem;
 }
 
 .hero-content {
-  text-align: center;
+  text-align: left;
   max-width: 900px;
   width: 100%;
 }
@@ -75,6 +122,25 @@
   line-height: 1.4;
 }
 
+.auth-actions,
+.authenticated-actions {
+  margin-top: 2rem;
+}
+
+.welcome-message {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: var(--forest-light);
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
 .btn {
   padding: 1rem 2.5rem;
   font-size: 1.2rem;
@@ -85,6 +151,13 @@
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
+  min-width: 180px;
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 .btn-primary {
@@ -93,9 +166,36 @@
   box-shadow: 0 4px 15px var(--shadow-medium);
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--forest-deep);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--shadow-dark);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-light);
+  border: 2px solid var(--forest-light);
+  box-shadow: 0 4px 15px var(--shadow-light);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--forest-light);
+  color: var(--forest-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--shadow-medium);
+}
+
+@media (max-width: 767px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    min-width: 160px;
+  }
 }
 </style>

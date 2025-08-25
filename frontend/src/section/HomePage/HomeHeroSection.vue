@@ -17,7 +17,6 @@
           <p class="welcome-message">Welcome back! Ready to continue your journey?</p>
           <div class="action-buttons">
             <button @click="scrollToContent" class="btn btn-primary">EXPLORE CONTENT</button>
-            <button @click="$emit('sign-out')" class="btn btn-secondary">SIGN OUT</button>
           </div>
         </div>
       </div>
@@ -38,7 +37,7 @@ export default {
       default: false,
     },
   },
-  emits: ['sign-in', 'sign-out'],
+  emits: ['sign-in'],
   methods: {
     scrollToContent() {
       // 滚动到页面内容区域，或者你可以添加其他逻辑

@@ -4,15 +4,13 @@
       :isAuthenticated="isAuthenticated"
       :loading="loading"
       @sign-in="signIn"
-      @sign-out="signOut"
     />
   </div>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { signInWithRedirect, signOut as amplifySignOut, getCurrentUser } from 'aws-amplify/auth'
+import { signInWithRedirect, getCurrentUser } from 'aws-amplify/auth'
 import HomeHeroSection from '@/section/HomePage/HomeHeroSection.vue'
 
 export default {
@@ -21,7 +19,6 @@ export default {
     HeroSection: HomeHeroSection,
   },
   setup() {
-    const router = useRouter()
     const isAuthenticated = ref(false)
     const loading = ref(false)
 
@@ -32,15 +29,6 @@ export default {
       } catch (error) {
         console.error('Sign in error:', error)
         loading.value = false
-      }
-    }
-
-    const signOut = async () => {
-      try {
-        await amplifySignOut()
-        isAuthenticated.value = false
-      } catch (error) {
-        console.error('Sign out error:', error)
       }
     }
 
@@ -56,7 +44,7 @@ export default {
             console.log('User is authenticated:', user)
             isAuthenticated.value = true
             return
-          } catch (error) {
+          } catch {
             attempts++
             console.log(`Auth check attempt ${attempts}/${maxAttempts}`)
 
@@ -82,7 +70,6 @@ export default {
       isAuthenticated,
       loading,
       signIn,
-      signOut,
     }
   },
 }

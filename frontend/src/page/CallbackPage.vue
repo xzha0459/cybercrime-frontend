@@ -1,14 +1,7 @@
 <template>
   <div class="callback-container">
     <div v-if="loading" class="loading">
-      <h2>Processing authentication...</h2>
-      <p>Please wait while we complete your sign in.</p>
       <div class="spinner"></div>
-      <div class="debug-info">
-        <p>
-          <small>{{ debugMessage }}</small>
-        </p>
-      </div>
     </div>
     <div v-else-if="error" class="error">
       <h2>Authentication Error</h2>
@@ -30,10 +23,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const route = useRoute()
 const loading = ref(true)
 const error = ref(null)
 const errorDetails = ref('')
@@ -118,7 +110,19 @@ onMounted(async () => {
   padding: 2rem;
 }
 
-.loading,
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(45, 58, 45, 0.1);
+  background: var(--forest-sage, #d4d4c4);
+  max-width: 600px;
+  width: 100%;
+  min-height: 200px;
+}
+
 .error,
 .success {
   padding: 3rem;
@@ -127,11 +131,6 @@ onMounted(async () => {
   background: var(--forest-sage, #d4d4c4);
   max-width: 600px;
   width: 100%;
-}
-
-.success {
-  background: var(--forest-light, #f5f5f0);
-  border: 2px solid var(--forest-medium, #8b9a8b);
 }
 
 .loading h2,
@@ -180,13 +179,12 @@ onMounted(async () => {
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border: 4px solid var(--forest-sage, #d4d4c4);
   border-top: 4px solid var(--forest-dark, #2d3a2d);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 2rem;
 }
 
 @keyframes spin {
@@ -201,6 +199,11 @@ onMounted(async () => {
 .error {
   background: var(--forest-light, #f5f5f0);
   border: 1px solid #dc3545;
+}
+
+.success {
+  background: var(--forest-light, #f5f5f0);
+  border: 2px solid var(--forest-medium, #8b9a8b);
 }
 
 .btn-home {

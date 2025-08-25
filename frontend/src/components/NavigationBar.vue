@@ -62,28 +62,51 @@ export default {
 
     const getUserEmail = async () => {
       try {
+        console.log('🔍 Fetching user attributes...')
         const attributes = await fetchUserAttributes()
-        userEmail.value = attributes.email || 'No email'
-        console.log('User email:', userEmail.value)
+        console.log('📧 User attributes:', attributes)
+
+        userEmail.value = attributes.email || attributes['custom:email'] || 'No email available'
+        console.log('✅ User email set to:', userEmail.value)
       } catch (error) {
-        console.error('Error fetching user email:', error)
-        userEmail.value = 'Email unavailable'
+        console.error('❌ Error fetching user email:', error)
+
+        // 如果获取属性失败，尝试从 getCurrentUser 获取基本信息
+        try {
+          const user = await getCurrentUser()
+          console.log('📋 Current user info:', user)
+
+          // 尝试从用户对象的不同属性中获取邮箱
+          if (user.signInDetails?.loginId && user.signInDetails.loginId.includes('@')) {
+            userEmail.value = user.signInDetails.loginId
+          } else if (user.username && user.username.includes('@')) {
+            userEmail.value = user.username
+          } else {
+            // 如果都没有邮箱，使用用户名作为显示
+            userEmail.value = user.username || user.userId || 'User'
+          }
+
+          console.log('📧 Fallback email from user:', userEmail.value)
+        } catch (fallbackError) {
+          console.error('❌ Fallback also failed:', fallbackError)
+          userEmail.value = 'Email unavailable'
+        }
       }
     }
 
     const checkAuthStatus = async () => {
       try {
-        await getCurrentUser()
+        const user = await getCurrentUser()
+        console.log('✅ Navigation: User authenticated:', user.username)
         isAuthenticated.value = true
-        // 获取用户邮箱
         await getUserEmail()
-      } catch {
+      } catch (error) {
+        console.log('ℹ️ Navigation: User not authenticated:', error.message)
         isAuthenticated.value = false
         userEmail.value = null
       }
     }
 
-    // 监听认证状态变化，当认证状态改变时重新检查
     watch(isAuthenticated, async (newValue) => {
       if (newValue && !userEmail.value) {
         await getUserEmail()

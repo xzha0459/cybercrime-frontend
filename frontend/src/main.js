@@ -14,15 +14,13 @@ const amplifyConfig = {
       loginWith: {
         oauth: {
           domain: 'ap-southeast-2pinizgulj.auth.ap-southeast-2.amazoncognito.com',
-          scopes: ['openid', 'email'], // 添加profile scope
+          scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
           redirectSignIn: ['http://localhost:5173/callback'],
           redirectSignOut: ['http://localhost:5173/'],
           responseType: 'code',
-          // 重要：明确指定这些参数
           providers: ['COGNITO']
         },
       },
-      // 添加这个配置
       userAttributes: {
         email: {
           required: true,

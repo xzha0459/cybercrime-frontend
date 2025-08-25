@@ -5,6 +5,7 @@
       :loading="loading"
       @sign-in="signIn"
     />
+    <FooterSection />
   </div>
 </template>
 
@@ -12,11 +13,13 @@
 import { ref, onMounted } from 'vue'
 import { signInWithRedirect, getCurrentUser } from 'aws-amplify/auth'
 import HomeHeroSection from '@/section/HomePage/HomeHeroSection.vue'
+import FooterSection from '@/section/HomePage/FooterSection.vue'
 
 export default {
   name: 'HomePage',
   components: {
     HeroSection: HomeHeroSection,
+    FooterSection,
   },
   setup() {
     const isAuthenticated = ref(false)

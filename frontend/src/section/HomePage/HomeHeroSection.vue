@@ -41,7 +41,6 @@ export default {
   emits: ['sign-in'],
   methods: {
     scrollToContent() {
-      // 滚动到页面内容区域，或者你可以添加其他逻辑
       const contentElement = document.querySelector('.content-section')
       if (contentElement) {
         contentElement.scrollIntoView({ behavior: 'smooth' })
@@ -170,20 +169,6 @@ export default {
   background: var(--forest-deep);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--shadow-dark);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--text-light);
-  border: 2px solid var(--forest-light);
-  box-shadow: 0 4px 15px var(--shadow-light);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: var(--forest-light);
-  color: var(--forest-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--shadow-medium);
 }
 
 @media (max-width: 767px) {

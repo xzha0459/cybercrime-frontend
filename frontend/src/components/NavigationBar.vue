@@ -4,6 +4,12 @@
       <!-- Logo/Brand -->
       <div class="nav-brand">GuardU</div>
 
+      <!-- Navigation Links -->
+      <div class="nav-links">
+        <router-link to="/" class="nav-link">Home</router-link>
+        <router-link to="/link-check" class="nav-link">Link Check</router-link>
+      </div>
+
       <!-- Right side buttons -->
       <div class="nav-buttons">
         <div v-if="!isAuthenticated">
@@ -131,6 +137,32 @@ export default {
   align-items: center;
 }
 
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--forest-dark);
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background: var(--forest-sage);
+  color: var(--forest-dark);
+}
+
+.nav-link.router-link-active {
+  background: var(--forest-medium);
+  color: var(--text-light);
+}
+
 .nav-brand {
   font-size: 1.8rem;
   font-weight: 700;
@@ -207,6 +239,15 @@ export default {
 @media (max-width: 768px) {
   .nav-container {
     padding: 1rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
   }
 
   .btn {

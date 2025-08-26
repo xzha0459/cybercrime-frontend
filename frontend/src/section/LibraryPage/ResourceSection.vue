@@ -1,0 +1,372 @@
+<template>
+  <section class="resource-section">
+    <div class="section-header">
+      <h2 class="section-title">Learning Resources</h2>
+      <p class="section-description">
+        Access 3-5 minute cybersecurity videos and articles perfect for learning during breaks between classes
+      </p>
+    </div>
+
+    <div class="section-content">
+      <!-- Featured Article Carousel -->
+      <div class="featured-article">
+        <div class="article-content">
+          <div class="content-info">
+            <h3 class="article-title">Social Media Privacy Guide</h3>
+            <p class="article-description">Essential tips to protect your privacy on social media platforms. Learn how to secure your accounts, control your data sharing, and avoid common privacy pitfalls that could compromise your personal information.</p>
+            <div class="article-meta">
+              <span class="article-type">Article</span>
+              <span class="article-duration">3 min read</span>
+            </div>
+            <button class="view-btn">View</button>
+          </div>
+          <div class="article-cover">
+            <div class="cover-image">
+              <div class="cover-icon">📱</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button class="nav-arrow nav-prev">◀</button>
+        <button class="nav-arrow nav-next">▶</button>
+      </div>
+
+      <!-- Featured Video Carousel -->
+      <div class="featured-video">
+        <div class="video-content">
+          <div class="content-info">
+            <h3 class="video-title">Phishing Email Detection</h3>
+            <p class="video-description">Learn to identify common phishing email red flags in just 3 minutes. This comprehensive guide will help you spot suspicious emails and protect yourself from cyber threats. Perfect for quick learning during breaks.</p>
+            <div class="video-meta">
+              <span class="video-type">Video</span>
+              <span class="video-duration">3:45 min</span>
+            </div>
+            <button class="play-btn">Play</button>
+          </div>
+          <div class="video-preview">
+            <div class="preview-image">
+              <div class="play-icon">▶</div>
+              <div class="duration-badge">3:45</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button class="nav-arrow nav-prev">◀</button>
+        <button class="nav-arrow nav-next">▶</button>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script>
+export default {
+  name: 'ResourceSection'
+}
+</script>
+
+<style scoped>
+.resource-section {
+  padding: 3rem 0;
+  margin-bottom: 3rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.section-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Featured Article Carousel */
+.featured-article {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto 3rem auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px var(--shadow-light);
+  overflow: hidden;
+}
+
+.article-content {
+  display: flex;
+  min-height: 400px;
+}
+
+.content-info {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.article-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.article-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.article-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.article-type {
+  background: var(--forest-medium);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.article-duration {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.view-btn {
+  align-self: flex-start;
+  padding: 0.75rem 2rem;
+  background: var(--forest-dark);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.view-btn:hover {
+  background: var(--forest-deep);
+}
+
+.article-cover {
+  flex: 1;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cover-image {
+  width: 80%;
+  height: 80%;
+  background: var(--forest-medium);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cover-icon {
+  font-size: 4rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Featured Video Carousel */
+.featured-video {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto 3rem auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px var(--shadow-light);
+  overflow: hidden;
+}
+
+.video-content {
+  display: flex;
+  min-height: 400px;
+}
+
+.video-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.video-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.video-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.video-type {
+  background: var(--forest-deep);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.video-duration {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.play-btn {
+  align-self: flex-start;
+  padding: 0.75rem 2rem;
+  background: var(--forest-dark);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.play-btn:hover {
+  background: var(--forest-deep);
+}
+
+.video-preview {
+  flex: 1;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.preview-image {
+  width: 80%;
+  height: 80%;
+  background: var(--forest-medium);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.play-icon {
+  font-size: 4rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.duration-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Navigation Arrows */
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 2px solid var(--border-light);
+  color: var(--text-secondary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.nav-arrow:hover {
+  border-color: var(--forest-medium);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.nav-prev {
+  left: -20px;
+}
+
+.nav-next {
+  right: -20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .resource-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .article-content,
+  .video-content {
+    flex-direction: column;
+  }
+
+  .content-info {
+    padding: 2rem;
+  }
+
+  .article-cover,
+  .video-preview {
+    min-height: 250px;
+  }
+
+  .nav-arrow {
+    display: none;
+  }
+}
+</style>

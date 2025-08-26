@@ -8,6 +8,26 @@
     </div>
 
     <div class="section-content">
+      <!-- Filter Controls -->
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label class="filter-label">Content Type:</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Videos</button>
+            <button class="filter-btn">Articles</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Duration:</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Under 3 min</button>
+            <button class="filter-btn">3-5 min</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Featured Article Carousel -->
       <div class="featured-article">
         <div class="article-content">
@@ -27,9 +47,17 @@
           </div>
         </div>
 
-        <!-- Navigation Arrows -->
-        <button class="nav-arrow nav-prev">◀</button>
-        <button class="nav-arrow nav-next">▶</button>
+        <!-- Navigation Arrows - Updated Style -->
+        <button class="nav-arrow nav-prev">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="nav-arrow nav-next">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
 
       <!-- Featured Video Carousel -->
@@ -52,9 +80,17 @@
           </div>
         </div>
 
-        <!-- Navigation Arrows -->
-        <button class="nav-arrow nav-prev">◀</button>
-        <button class="nav-arrow nav-next">▶</button>
+        <!-- Navigation Arrows - Updated Style -->
+        <button class="nav-arrow nav-prev">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="nav-arrow nav-next">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   </section>
@@ -91,6 +127,56 @@ export default {
   margin: 0 auto;
 }
 
+/* Filter Controls */
+.filter-controls {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filter-label {
+  font-size: 1.125rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.filter-btn {
+  padding: 0.625rem 1.25rem;
+  background: var(--bg-light);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--forest-medium);
+  color: var(--forest-medium);
+}
+
+.filter-btn.active {
+  background: var(--forest-medium);
+  color: white;
+  border-color: var(--forest-medium);
+}
+
 /* Featured Article Carousel */
 .featured-article {
   position: relative;
@@ -99,7 +185,7 @@ export default {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px var(--shadow-light);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .article-content {
@@ -205,7 +291,7 @@ export default {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px var(--shadow-light);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .video-content {
@@ -307,38 +393,55 @@ export default {
   font-weight: 600;
 }
 
-/* Navigation Arrows */
+/* Navigation Arrows - Updated Modern Style */
 .nav-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
   background: white;
-  border: 2px solid var(--border-light);
-  color: var(--text-secondary);
-  width: 40px;
-  height: 40px;
+  border: 2px solid var(--forest-medium);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1.2rem;
-  font-weight: bold;
+  color: var(--forest-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 .nav-arrow:hover {
-  border-color: var(--forest-medium);
-  color: var(--text-primary);
-  box-shadow: 0 2px 8px var(--shadow-medium);
+  background: var(--forest-medium);
+  color: white;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.nav-arrow svg {
+  width: 24px;
+  height: 24px;
 }
 
 .nav-prev {
-  left: -20px;
+  left: -25px;
 }
 
 .nav-next {
-  right: -20px;
+  right: -25px;
+}
+
+/* Active state for arrows */
+.nav-arrow:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Focus state for accessibility */
+.nav-arrow:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 154, 139, 0.3);
 }
 
 /* Responsive Design */
@@ -349,6 +452,27 @@ export default {
 
   .section-title {
     font-size: 2rem;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .filter-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .filter-btn {
+    width: 100%;
+    text-align: center;
   }
 
   .article-content,
@@ -365,6 +489,29 @@ export default {
     min-height: 250px;
   }
 
+  /* Mobile arrows positioning */
+  .nav-arrow {
+    width: 40px;
+    height: 40px;
+    border-width: 1px;
+  }
+
+  .nav-arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nav-prev {
+    left: -20px;
+  }
+
+  .nav-next {
+    right: -20px;
+  }
+}
+
+/* Very small screens - hide arrows completely */
+@media (max-width: 480px) {
   .nav-arrow {
     display: none;
   }

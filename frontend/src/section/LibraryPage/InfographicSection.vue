@@ -155,26 +155,7 @@
         </div>
       </div>
 
-      <!-- Download Instructions -->
-      <div class="download-info">
-        <h3 class="download-title">Download Options</h3>
-        <div class="download-options">
-          <div class="download-option">
-            <div class="option-icon">🖼️</div>
-            <div class="option-content">
-              <h4>PNG Format</h4>
-              <p>High-quality images perfect for viewing on devices or printing</p>
-            </div>
-          </div>
-          <div class="download-option">
-            <div class="option-icon">📄</div>
-            <div class="option-content">
-              <h4>PDF Format</h4>
-              <p>Professional documents ideal for sharing and offline viewing</p>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   </section>
 </template>
@@ -341,54 +322,6 @@ export default {
   margin-left: auto;
 }
 
-.download-info {
-  background: var(--bg-primary);
-  border-radius: 12px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 2px 12px var(--shadow-light);
-}
-
-.download-title {
-  font-size: 1.5rem;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
-}
-
-.download-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-.download-option {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  text-align: left;
-}
-
-.option-icon {
-  font-size: 2.5rem;
-  flex-shrink: 0;
-}
-
-.option-content h4 {
-  color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
-  font-size: 1.125rem;
-}
-
-.option-content p {
-  color: var(--text-secondary);
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
 @media (max-width: 768px) {
   .infographic-section {
     padding: 2rem 1.5rem;
@@ -401,16 +334,6 @@ export default {
   .infographic-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
-  }
-
-  .download-options {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .download-option {
-    flex-direction: column;
-    text-align: center;
   }
 }
 </style>

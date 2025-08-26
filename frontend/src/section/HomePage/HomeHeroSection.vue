@@ -2,7 +2,8 @@
   <section class="hero-section">
     <div class="hero-container">
       <div class="hero-content">
-        <h1 class="hero-title">Learn, Assess, Protect Your Digital Journey Starts Here</h1>
+        <h1 class="hero-title">Learn, Assess, Protect</h1>
+        <h1 class="hero-title">Your Digital Journey Starts Here</h1>
         <p class="hero-subtitle">FOSTERING DIGITAL CITIZENSHIP FOR YOUNG AUSTRALIANS</p>
 
         <!-- 未登录状态 -->

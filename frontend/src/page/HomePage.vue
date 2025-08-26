@@ -37,36 +37,33 @@ export default {
 
     const checkAuthStatus = async () => {
       try {
-        // 给Amplify更多时间处理OAuth回调
-        let attempts = 0
-        const maxAttempts = 10
+        const maxAttempts = 3
 
-        while (attempts < maxAttempts) {
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           try {
-            const user = await getCurrentUser()
-            console.log('User is authenticated:', user)
+            await getCurrentUser()
             isAuthenticated.value = true
             return
           } catch {
-            attempts++
-            console.log(`Auth check attempt ${attempts}/${maxAttempts}`)
-
-            if (attempts < maxAttempts) {
-              await new Promise((resolve) => setTimeout(resolve, 1000))
+            if (attempt < maxAttempts) {
+              await new Promise((resolve) => setTimeout(resolve, 500))
             }
           }
         }
 
-        console.log('User not authenticated after all attempts')
         isAuthenticated.value = false
       } catch (error) {
-        console.error('Auth check error:', error)
         isAuthenticated.value = false
       }
     }
 
     onMounted(() => {
-      checkAuthStatus()
+      const urlParams = new URLSearchParams(window.location.search)
+      const hasAuthParams = urlParams.get('code') || urlParams.get('error')
+
+      if (!hasAuthParams) {
+        checkAuthStatus()
+      }
     })
 
     return {

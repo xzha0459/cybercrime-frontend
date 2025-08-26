@@ -30,22 +30,6 @@ const amplifyConfig = {
   },
 }
 
-console.log('=== AMPLIFY CONFIGURATION DEBUG ===')
-console.log('Full config:', JSON.stringify(amplifyConfig, null, 2))
-console.log('===========================================')
-
-// 重要：确保在配置之前清理任何现有的认证状态
-try {
-  // 清理localStorage中的Amplify数据
-  Object.keys(localStorage).forEach(key => {
-    if (key.startsWith('amplify')) {
-      localStorage.removeItem(key)
-    }
-  })
-} catch (error) {
-  console.warn('Failed to clear localStorage:', error)
-}
-
 Amplify.configure(amplifyConfig)
 
 const app = createApp(App)

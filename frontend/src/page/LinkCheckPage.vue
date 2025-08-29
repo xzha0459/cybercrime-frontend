@@ -3,7 +3,7 @@
     <div class="page-header">
       <div class="container">
         <h1 class="page-title">Link Safety Checker</h1>
-        <p class="page-subtitle">Verify the safety of links and analyze webpage content for potential threats</p>
+        <p class="page-subtitle">Verify the safety of links before visiting websites</p>
       </div>
     </div>
 
@@ -11,9 +11,6 @@
       <div class="container">
         <!-- US 1.1 Section -->
         <LinkSafetySection />
-
-        <!-- US 1.2 Section -->
-        <ContentAnalysisSection />
       </div>
     </div>
   </div>
@@ -21,13 +18,11 @@
 
 <script>
 import LinkSafetySection from '../section/LinkCheckPage/LinkSafetySection.vue'
-import ContentAnalysisSection from '../section/LinkCheckPage/ContentAnalysisSection.vue'
 
 export default {
   name: 'LinkCheckPage',
   components: {
-    LinkSafetySection,
-    ContentAnalysisSection
+    LinkSafetySection
   }
 }
 </script>

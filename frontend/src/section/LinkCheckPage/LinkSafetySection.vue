@@ -1,108 +1,91 @@
 <template>
   <section class="link-safety-section">
-    <div class="section-header">
-      <h2 class="section-title">Link Safety Check</h2>
-      <p class="section-description">
-        Check the safety of a link based on URL analysis before visiting the website
-      </p>
-    </div>
+    <div class="background-pattern"></div>
 
-    <div class="section-content">
-      <div class="url-input-container">
-        <div class="input-group">
-          <label for="url-input" class="input-label">Enter URL to check:</label>
-          <div class="input-wrapper">
+    <div class="main-card">
+      <div class="card-content">
+        <p class="top-text">Live your digital life worry-free</p>
+        <h1 class="main-title">Is This Link Really Safe?</h1>
+        <p class="description">Check any URL for malware, fraudulent websites, or phishing schemes.</p>
+
+        <div class="input-button-row">
+          <div class="input-container">
             <input
-              id="url-input"
               v-model="inputUrl"
               type="url"
-              placeholder="https://example.com"
+              placeholder="example-url.com"
               class="url-input"
               @keyup.enter="checkUrlSafety"
               :disabled="isLoading"
             />
-            <button 
-              class="check-btn"
-              @click="checkUrlSafety"
-              :disabled="isLoading || !inputUrl.trim()"
-            >
-              <span v-if="isLoading" class="loading-spinner"></span>
-              {{ isLoading ? 'Checking...' : 'Check Safety' }}
-            </button>
           </div>
+          <button
+            class="check-button"
+            @click="checkUrlSafety"
+            :disabled="isLoading || !inputUrl.trim()"
+          >
+            <span v-if="isLoading" class="loading-spinner"></span>
+            {{ isLoading ? 'Checking...' : 'Check URL' }}
+          </button>
         </div>
+
+        <p class="footer-text">
+          Add your link or paste it from the device's clipboard. Your data is processed by our
+          <a href="#" class="privacy-link">privacy policy.</a>
+        </p>
+      </div>
+    </div>
+
+    <div v-if="error" class="error-container">
+      <div class="error-message">
+        <span class="error-icon">⚠️</span>
+        {{ error }}
+      </div>
+    </div>
+
+    <div v-if="results && !error" class="results-container">
+      <div class="result-header">
+        <h3>Safety Check Results</h3>
+        <span :class="['result-status', results.is_safe ? 'safe' : 'unsafe']">
+          {{ results.is_safe ? '✅ Safe' : '❌ Potentially Unsafe' }}
+        </span>
       </div>
 
-      <!-- Error Message -->
-      <div v-if="error" class="error-container">
-        <div class="error-message">
-          <span class="error-icon">⚠️</span>
-          {{ error }}
-        </div>
-      </div>
-
-      <!-- Results Display -->
-      <div v-if="results && !error" class="results-container">
-        <div class="result-header">
-          <h3>Safety Check Results</h3>
-          <span :class="['result-status', getStatusClass()]">
-            {{ getStatusIcon() }} {{ getStatusText() }}
+      <div class="result-details">
+        <div class="result-item">
+          <strong>Risk Level:</strong>
+          <span :class="['risk-level', results.is_safe ? 'safe' : 'unsafe']">
+            {{ getRiskLevel() }}
           </span>
         </div>
+        <div class="result-item">
+          <strong>Analysis:</strong> {{ getAnalysisText() }}
+        </div>
+        <div v-if="results.blacklisted !== undefined" class="result-item">
+          <strong>Blacklisted:</strong>
+          <span :class="results.blacklisted ? 'text-danger' : 'text-success'">
+            {{ results.blacklisted ? 'Yes' : 'No' }}
+          </span>
+        </div>
+      </div>
 
-        <div class="result-details">
-          <div class="result-item">
-            <strong>URL:</strong> {{ results.url }}
+      <div v-if="results.details" class="domain-details">
+        <h4>Domain Information</h4>
+        <div class="detail-grid">
+          <div v-if="results.details.domain_name" class="detail-item">
+            <strong>Domain:</strong> {{ results.details.domain_name }}
           </div>
-          <div class="result-item">
-            <strong>Risk Level:</strong>
-            <span :class="['risk-level', getRiskLevelClass()]">
-              {{ getRiskLevel() }}
-            </span>
-          </div>
-          <div class="result-item">
-            <strong>Analysis:</strong> {{ getAnalysisText() }}
-          </div>
-          <div v-if="results.blacklisted !== undefined" class="result-item">
-            <strong>Blacklisted:</strong> 
-            <span :class="results.blacklisted ? 'text-danger' : 'text-success'">
-              {{ results.blacklisted ? 'Yes' : 'No' }}
-            </span>
+          <div v-if="results.details.registrar" class="detail-item">
+            <strong>Registrar:</strong> {{ results.details.registrar }}
           </div>
         </div>
+      </div>
 
-        <!-- Domain Details -->
-        <div v-if="results.details" class="domain-details">
-          <h4 class="details-title">Domain Information</h4>
-          <div class="detail-grid">
-            <div v-if="results.details.domain_name" class="detail-item">
-              <strong>Domain:</strong> {{ results.details.domain_name }}
-            </div>
-            <div v-if="results.details.registrar" class="detail-item">
-              <strong>Registrar:</strong> {{ results.details.registrar }}
-            </div>
-            <div v-if="results.details.name_servers && results.details.name_servers.length" class="detail-item">
-              <strong>Name Servers:</strong>
-              <ul class="name-servers-list">
-                <li v-for="server in results.details.name_servers" :key="server">{{ server }}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Threat Matches -->
-        <div v-if="results.matches && results.matches.length" class="threat-matches">
-          <h4 class="details-title">Security Matches</h4>
-          <div class="matches-list">
-            <div v-for="(match, index) in results.matches" :key="index" class="match-item">
-              <div class="match-header">
-                <strong>Threat Type:</strong> {{ match.threatType }}
-              </div>
-              <div class="match-details">
-                <span><strong>Platform:</strong> {{ match.platformType }}</span>
-                <span><strong>Entry Type:</strong> {{ match.threatEntryType }}</span>
-              </div>
-            </div>
+      <div v-if="results.matches?.length" class="threat-matches">
+        <h4>Security Matches</h4>
+        <div class="matches-list">
+          <div v-for="match in results.matches" :key="match.threatType" class="match-item">
+            <strong>Threat Type:</strong> {{ match.threatType }}
           </div>
         </div>
       </div>
@@ -128,7 +111,6 @@ export default {
         return;
       }
 
-      // Basic URL validation
       try {
         new URL(this.inputUrl.trim());
       } catch {
@@ -148,70 +130,31 @@ export default {
             'Content-Type': 'application/json',
             'X-CSRFTOKEN': 'DBAoITRog95H98YQPPDR93kkNCX1ZCfwB8nTPSBX2H16EY3osrdZ6lUoH2dxQniA'
           },
-          body: JSON.stringify({
-            url: this.inputUrl.trim()
-          })
+          body: JSON.stringify({ url: this.inputUrl.trim() })
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        this.results = data;
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        this.results = await response.json();
       } catch (err) {
         this.error = `Failed to check URL safety: ${err.message}`;
-        console.error('API Error:', err);
       } finally {
         this.isLoading = false;
       }
     },
 
-    getStatusClass() {
-      if (!this.results) return '';
-      return this.results.is_safe ? 'safe' : 'unsafe';
-    },
-
-    getStatusIcon() {
-      if (!this.results) return '';
-      return this.results.is_safe ? '✅' : '❌';
-    },
-
-    getStatusText() {
-      if (!this.results) return 'Unknown';
-      return this.results.is_safe ? 'Safe' : 'Potentially Unsafe';
-    },
-
-    getRiskLevelClass() {
-      if (!this.results) return '';
-      return this.results.is_safe ? 'safe' : 'unsafe';
-    },
-
     getRiskLevel() {
       if (!this.results) return 'Unknown';
-      
       if (this.results.blacklisted) return 'High';
       if (!this.results.is_safe) return 'Medium';
-      if (this.results.matches && this.results.matches.length > 0) return 'Low-Medium';
+      if (this.results.matches?.length) return 'Low-Medium';
       return 'Low';
     },
 
     getAnalysisText() {
       if (!this.results) return 'No analysis available';
-      
-      if (this.results.blacklisted) {
-        return 'This URL is blacklisted and should be avoided.';
-      }
-      
-      if (!this.results.is_safe) {
-        return 'This URL has been flagged as potentially unsafe. Exercise caution when visiting.';
-      }
-      
-      if (this.results.matches && this.results.matches.length > 0) {
-        const threatTypes = this.results.matches.map(m => m.threatType).join(', ');
-        return `URL matched security database entries: ${threatTypes}. Review carefully before proceeding.`;
-      }
-      
+      if (this.results.blacklisted) return 'This URL is blacklisted and should be avoided.';
+      if (!this.results.is_safe) return 'This URL has been flagged as potentially unsafe. Exercise caution when visiting.';
+      if (this.results.matches?.length) return `URL matched security database entries. Review carefully before proceeding.`;
       return 'This URL appears to be safe based on our analysis.';
     }
   }
@@ -220,60 +163,91 @@ export default {
 
 <style scoped>
 .link-safety-section {
-  background: var(--bg-secondary);
-  border-radius: 16px;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 2rem 2rem 2rem;
+}
+
+.background-pattern {
+  height: 40vh;
+  background: var(--forest-deep);
+  border-radius: 24px;
+  z-index: 1;
+  margin: 6vh auto 2rem auto;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.main-card {
+  position: relative;
+  z-index: 2;
+  background: var(--forest-light);
+  border-radius: 24px;
   padding: 3rem;
-  margin-bottom: 3rem;
-  box-shadow: 0 4px 20px var(--shadow-light);
-}
-
-.section-header {
+  max-width: 1200px;
+  width: 100%;
+  box-shadow: 0 12px 40px var(--shadow-dark);
   text-align: center;
-  margin-bottom: 3rem;
+  margin-top: -35vh;
 }
 
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.section-description {
+.top-text {
   font-size: 1.125rem;
-  color: var(--text-secondary);
-  max-width: 600px;
+  color: var(--forest-medium);
+  margin: 0;
+  font-weight: 500;
+}
+
+.main-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--forest-deep);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.description {
+  font-size: 1.25rem;
+  color: var(--forest-dark);
+  margin: 0 auto;
+  max-width: 1000px;
+  line-height: 1.5;
+}
+
+.input-button-row {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  max-width: 700px;
+  width: 100%;
   margin: 0 auto;
 }
 
-.url-input-container {
-  max-width: 600px;
-  margin: 0 auto 3rem auto;
-}
-
-.input-group {
+.input-container {
+  position: relative;
+  flex: 1;
+  min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.input-label {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 1.125rem;
-}
-
-.input-wrapper {
-  display: flex;
-  gap: 1rem;
+  align-items: center;
 }
 
 .url-input {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
   padding: 1rem 1.25rem;
-  border: 2px solid var(--border-light);
-  border-radius: 8px;
+  border: 2px solid var(--forest-sage);
+  border-radius: 12px;
   font-size: 1rem;
+  background: white;
   transition: border-color 0.3s ease;
 }
 
@@ -287,28 +261,51 @@ export default {
   cursor: not-allowed;
 }
 
-.check-btn {
+
+
+.check-button {
   padding: 1rem 2rem;
   background: var(--forest-deep);
-  color: var(--text-light);
+  color: var(--forest-light);
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 140px;
+  max-width: 200px;
+  justify-content: center;
 }
 
-.check-btn:hover:not(:disabled) {
+.check-button:hover:not(:disabled) {
   background: var(--forest-dark);
 }
 
-.check-btn:disabled {
+.check-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.footer-text {
+  font-size: 0.875rem;
+  color: var(--forest-medium);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.privacy-link {
+  color: var(--forest-deep);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.privacy-link:hover {
+  text-decoration: underline;
 }
 
 .loading-spinner {
@@ -324,16 +321,19 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-.error-container {
-  max-width: 800px;
-  margin: 0 auto 2rem auto;
+.error-container, .results-container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  width: 100%;
+  margin-top: 2rem;
 }
 
 .error-message {
   background: #f8d7da;
   color: #721c24;
   padding: 1rem 1.25rem;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid #f5c6cb;
   display: flex;
   align-items: center;
@@ -345,12 +345,10 @@ export default {
 }
 
 .results-container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: var(--bg-primary);
-  border-radius: 12px;
+  background: var(--forest-light);
+  border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 2px 12px var(--shadow-light);
+  box-shadow: 0 4px 20px var(--shadow-medium);
 }
 
 .result-header {
@@ -359,12 +357,12 @@ export default {
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid var(--border-light);
+  border-bottom: 2px solid var(--forest-sage);
 }
 
 .result-header h3 {
   font-size: 1.5rem;
-  color: var(--text-primary);
+  color: var(--forest-dark);
   margin: 0;
 }
 
@@ -392,12 +390,12 @@ export default {
 .result-item {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: var(--bg-secondary);
+  background: var(--forest-sage);
   border-radius: 8px;
 }
 
 .result-item strong {
-  color: var(--text-primary);
+  color: var(--forest-dark);
 }
 
 .risk-level {
@@ -430,12 +428,12 @@ export default {
 .domain-details, .threat-matches {
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--border-light);
+  border-top: 1px solid var(--forest-sage);
 }
 
-.details-title {
+.domain-details h4, .threat-matches h4 {
   font-size: 1.25rem;
-  color: var(--text-primary);
+  color: var(--forest-dark);
   margin-bottom: 1rem;
 }
 
@@ -446,18 +444,8 @@ export default {
 
 .detail-item {
   padding: 0.75rem;
-  background: var(--bg-secondary);
+  background: var(--forest-sage);
   border-radius: 8px;
-}
-
-.name-servers-list {
-  margin: 0.5rem 0 0 1rem;
-  padding: 0;
-}
-
-.name-servers-list li {
-  margin-bottom: 0.25rem;
-  color: var(--text-secondary);
 }
 
 .matches-list {
@@ -468,33 +456,45 @@ export default {
 
 .match-item {
   padding: 1rem;
-  background: var(--bg-secondary);
+  background: var(--forest-sage);
   border-radius: 8px;
   border-left: 4px solid #ffc107;
 }
 
-.match-header {
-  margin-bottom: 0.5rem;
-}
-
-.match-details {
-  display: flex;
-  gap: 1.5rem;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
 @media (max-width: 768px) {
   .link-safety-section {
+    padding: 1rem;
+  }
+
+  .main-card {
     padding: 2rem 1.5rem;
   }
 
-  .section-title {
+  .main-title {
     font-size: 2rem;
   }
 
-  .input-wrapper {
+  .description {
+    font-size: 1.125rem;
+  }
+
+  .input-button-row {
     flex-direction: column;
+    width: 100%;
+  }
+
+  .input-container {
+    width: 100%;
+  }
+
+  .check-button {
+    min-width: auto;
+    width: 100%;
+    max-width: none;
+  }
+
+  .background-pattern {
+    height: 75vh;
   }
 
   .result-header {
@@ -502,10 +502,20 @@ export default {
     gap: 1rem;
     text-align: center;
   }
+}
 
-  .match-details {
-    flex-direction: column;
-    gap: 0.5rem;
+@media (max-width: 480px) {
+  .background-pattern {
+    height: 80vh;
+  }
+
+  .main-card {
+    padding: 1.5rem 1rem;
+    margin-top: -1rem;
+  }
+
+  .main-title {
+    font-size: 1.75rem;
   }
 }
 </style>

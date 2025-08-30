@@ -9,6 +9,7 @@
         <router-link to="/" class="nav-link">Home</router-link>
         <router-link to="/link-check" class="nav-link">Link Check</router-link>
         <router-link to="/library" class="nav-link">Library</router-link>
+        <router-link to="/test" class="nav-link">Test</router-link>
       </div>
 
       <!-- Right side buttons -->

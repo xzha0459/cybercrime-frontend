@@ -3,6 +3,7 @@ import HomePage from '../page/HomePage.vue'
 import CallbackPage from '../page/CallbackPage.vue'
 import LinkCheckPage from '../page/LinkCheckPage.vue'
 import LibraryPage from '../page/LibraryPage.vue'
+import TestPage from '../page/TestPage.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/library',
     name: 'Library',
     component: LibraryPage,
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    component: TestPage,
   },
 ]
 

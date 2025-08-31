@@ -76,7 +76,7 @@ export default {
       try {
         const attributes = await fetchUserAttributes()
         userEmail.value = attributes.email || attributes['custom:email'] || 'No email available'
-      } catch (error) {
+      } catch {
         try {
           const user = await getCurrentUser()
           if (user.signInDetails?.loginId && user.signInDetails.loginId.includes('@')) {
@@ -86,7 +86,7 @@ export default {
           } else {
             userEmail.value = user.username || user.userId || 'User'
           }
-        } catch (fallbackError) {
+        } catch {
           userEmail.value = 'Email unavailable'
         }
       }
@@ -97,7 +97,7 @@ export default {
         await getCurrentUser()
         isAuthenticated.value = true
         await getUserEmail()
-      } catch (error) {
+      } catch {
         isAuthenticated.value = false
         userEmail.value = null
       }

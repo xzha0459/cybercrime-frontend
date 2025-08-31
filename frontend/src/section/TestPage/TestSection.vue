@@ -24,30 +24,19 @@
       <!-- Welcome Page -->
               <div v-if="currentStep === 0" class="welcome-section">
           <div class="welcome-card">
-          <!-- Debug Section -->
-          <div class="debug-section" style="background: #f0f0f0; padding: 15px; margin-bottom: 20px; border-radius: 8px; font-family: monospace; font-size: 12px;">
-            <h4>Debug Info:</h4>
-            <p>isAuthenticated: {{ isAuthenticated }}</p>
-            <p>selectedCategory: {{ selectedCategory }}</p>
-            <p>currentStep: {{ currentStep }}</p>
-            <p>questions.length: {{ questions.length }}</p>
-            <p>totalQuestions: {{ totalQuestions }}</p>
-            <p>loading: {{ loading }}</p>
-            <p>error: {{ error }}</p>
-            <p>currentUser: {{ currentUser ? 'Yes' : 'No' }}</p>
-          </div>
+
 
           <!-- Loading State -->
           <div v-if="loading" class="loading-section">
             <div class="loading-spinner"></div>
-            <p>{{ loadingMessage }}</p>
+            <p>Loading...</p>
           </div>
 
           <!-- Error State -->
           <div v-else-if="error" class="error-section">
             <div class="error-icon">⚠️</div>
-            <p class="error-message">Failed to load questions: {{ error }}</p>
-            <button @click="loadQuestions" class="retry-btn">Retry</button>
+            <p class="error-message">{{ error }}</p>
+            <button @click="startTest" class="retry-btn">Retry</button>
           </div>
 
           <!-- Category Selection -->
@@ -123,7 +112,7 @@
             </div>
             <div class="option-text">
               <span class="option-label">{{ String.fromCharCode(65 + index) }}.</span>
-              <span class="option-content">{{ option }}</span>
+              <span class="option-content">{{ option.text }}</span>
             </div>
           </div>
         </div>
@@ -164,39 +153,7 @@
 
             </div>
 
-            <div class="score-breakdown" v-if="selectedCategory === 'mixed'">
-              <h3>Detailed Score Analysis</h3>
-              <div class="category-scores">
-                <div class="category-item">
-                  <span class="category-name">Password Security</span>
-                  <div class="category-bar">
-                    <div class="category-fill" :style="{ width: getCategoryScore('Password Security') + '%' }"></div>
-                  </div>
-                  <span class="category-score">{{ getCategoryScore('Password Security') }}%</span>
-                </div>
-                <div class="category-item">
-                  <span class="category-name">Cyber Harassment</span>
-                  <div class="category-bar">
-                    <div class="category-fill" :style="{ width: getCategoryScore('Cyber Harassment') + '%' }"></div>
-                  </div>
-                  <span class="category-score">{{ getCategoryScore('Cyber Harassment') }}%</span>
-                </div>
-                <div class="category-item">
-                  <span class="category-name">Privacy Protection</span>
-                  <div class="category-bar">
-                    <div class="category-fill" :style="{ width: getCategoryScore('Privacy Protection') + '%' }"></div>
-                  </div>
-                  <span class="category-score">{{ getCategoryScore('Privacy Protection') }}%</span>
-                </div>
-                <div class="category-item">
-                  <span class="category-name">Cyber Scam</span>
-                  <div class="category-bar">
-                    <div class="category-fill" :style="{ width: getCategoryScore('Cyber Scam') + '%' }"></div>
-                  </div>
-                  <span class="category-score">{{ getCategoryScore('Cyber Scam') }}%</span>
-                </div>
-              </div>
-            </div>
+            <!-- 简化版分数显示，移除复杂的类别分数分析 -->
           </div>
 
                       <div class="feedback-section">
@@ -221,11 +178,14 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth'
+import { useRouter } from 'vue-router'
+import { getCurrentUser, fetchAuthSession, signInWithRedirect } from 'aws-amplify/auth'
 
 export default {
   name: 'TestSection',
   setup() {
+    const router = useRouter()
+
     // Authentication state
     const isAuthenticated = ref(false)
     const currentUser = ref(null)
@@ -244,90 +204,262 @@ export default {
       }
     }
 
-    // Get access token helper function
-    const getAccessToken = async () => {
+    // Redirect to login function
+    const redirectToLogin = async () => {
       try {
-        const session = await fetchAuthSession()
-        return session.tokens?.accessToken?.toString()
+        await signInWithRedirect({ provider: 'COGNITO' })
       } catch (error) {
-        console.error('Error getting access token:', error)
-        throw error
+        console.error('Sign in redirect error:', error)
+        // Fallback to home page if redirect fails
+        router.push('/')
       }
     }
 
-    // Redirect to login function
-    const redirectToLogin = () => {
-      // You can customize this route based on your routing setup
-      window.location.href = '/login'
-    }
-
+    // 状态变量
+    const currentAttemptId = ref(null)
+    const questions = ref([])
     const currentStep = ref(0)
     const selectedAnswer = ref(null)
     const correctAnswers = ref(0)
-    const totalQuestions = ref(15)
-    const questions = ref([])
+    const totalQuestions = ref(20)
     const loading = ref(false)
     const error = ref(null)
     const selectedCategory = ref('')
-    const loadingMessage = ref('Loading test questions...')
 
-    // Track category scores for mixed test
-    const categoryScores = ref({
-      'Cyber Harassment': { correct: 0, total: 0 },
-      'Cyber Scam': { correct: 0, total: 0 },
-      'Password Security': { correct: 0, total: 0 },
-      'Privacy Protection': { correct: 0, total: 0 },
-      'Social Media Security': { correct: 0, total: 0 }
-    })
+    // 存储用户所有答案
+    const userAnswers = ref({})
 
-    // Available categories - updated to match your API categories
+    // Available categories
     const availableCategories = ref([
       {
         value: 'Cyber Harassment',
         label: 'Cyber Harassment',
         description: 'Test your knowledge about identifying and handling cyber harassment',
         icon: '🛡️',
-        questionCount: 15
+        questionCount: 20
       },
       {
         value: 'Cyber Scam',
         label: 'Cyber Scam',
         description: 'Learn to identify and avoid various cyber scams and fraudulent activities',
         icon: '🎣',
-        questionCount: 15
+        questionCount: 20
       },
       {
         value: 'Privacy Protection',
         label: 'Privacy Protection',
         description: 'Learn about protecting personal information and data privacy',
         icon: '🔐',
-        questionCount: 15
+        questionCount: 20
       },
       {
         value: 'mixed',
         label: 'Mixed Categories',
         description: 'Comprehensive test covering all cybersecurity areas',
         icon: '🎯',
-        questionCount: 25
+        questionCount: 20
       }
     ])
 
     // API configuration
     const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
 
-    // Category selection function
-    const selectCategory = (category) => {
-      selectedCategory.value = category
-      if (category === 'mixed') {
-        totalQuestions.value = 25
-      } else {
-        totalQuestions.value = 15
+    // 获取ID Token
+    const getIdToken = async () => {
+      try {
+        const session = await fetchAuthSession()
+        return session.tokens?.idToken?.toString()
+      } catch (error) {
+        console.error('Error getting ID token:', error)
+        throw error
       }
-      // Reset questions when category changes
+    }
+
+    // 1. 开始测试 - 调用POST /quizzes/attempt/
+    const startTest = async () => {
+      if (!selectedCategory.value) return
+
+      try {
+        loading.value = true
+        error.value = null
+
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempt/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await getIdToken()}`
+          },
+          body: JSON.stringify({
+            category: selectedCategory.value === 'mixed' ? null : selectedCategory.value
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to start test: ${response.status}`)
+        }
+
+                const data = await response.json()
+
+        // 保存attempt ID和题目
+        currentAttemptId.value = data.attempt_id
+        questions.value = data.questions || []
+        totalQuestions.value = questions.value.length
+
+        if (questions.value.length > 0) {
+          currentStep.value = 1
+          selectedAnswer.value = null
+          correctAnswers.value = 0
+          userAnswers.value = {} // 重置用户答案
+        } else {
+          throw new Error('No questions received')
+        }
+
+      } catch (err) {
+        console.error('Error starting test:', err)
+        error.value = `Failed to start test: ${err.message}`
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 2. 下一题逻辑 - 最后一题时完成测试
+    const nextQuestion = async () => {
+      if (selectedAnswer.value === null || !currentQuestion.value) return
+
+      // 检查答案是否正确 - 比较选中的选项identifier与正确答案
+      const selectedOption = currentQuestion.value.options[selectedAnswer.value]
+      const correctOption = currentQuestion.value.options.find(opt => opt.is_answer === true)
+      const isCorrect = selectedOption && correctOption && selectedOption.identifier === correctOption.identifier
+
+      if (isCorrect) {
+        correctAnswers.value++
+      }
+
+      // 如果是最后一题，直接完成测试
+      if (currentStep.value === totalQuestions.value) {
+        await finishTest()
+      } else {
+        // 继续下一题
+        currentStep.value++
+        selectedAnswer.value = null
+      }
+    }
+
+    // 3. 完成测试 - 调用PATCH /quizzes/attempt/{id} with is_final: true
+    const finishTest = async () => {
+      if (!currentAttemptId.value) return
+
+      try {
+        loading.value = true
+
+                // 收集所有用户答案
+        const allAnswers = []
+
+        // 遍历所有题目，收集用户的答案
+        for (let i = 0; i < questions.value.length; i++) {
+          const question = questions.value[i]
+          let userAnswer = null
+          let isCorrect = false
+
+          if (i < currentStep.value - 1) {
+            // 已答题目
+            userAnswer = getUserAnswerForQuestion(question.id)
+            // 找到正确答案的identifier
+            const correctOption = question.options.find(opt => opt.is_answer === true)
+            isCorrect = userAnswer !== null && correctOption && userAnswer === correctOption.identifier
+          } else if (i === currentStep.value - 1) {
+            // 当前题目
+            userAnswer = selectedAnswer.value
+            // 找到正确答案的identifier
+            const correctOption = question.options.find(opt => opt.is_answer === true)
+            isCorrect = userAnswer !== null && correctOption && userAnswer === correctOption.identifier
+          }
+
+          if (userAnswer !== null) {
+            allAnswers.push({
+              question_id: question.id,
+              chosen_answer: userAnswer,
+              is_correct: isCorrect
+            })
+          }
+        }
+
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempt/${currentAttemptId.value}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await getIdToken()}`
+          },
+          body: JSON.stringify({
+            is_final: true,
+            quiz_question_attempts: allAnswers
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to finish test: ${response.status}`)
+        }
+
+        // 显示结果页面
+        currentStep.value = totalQuestions.value + 1
+
+      } catch (err) {
+        console.error('Error finishing test:', err)
+        // 即使提交失败，也显示结果页面
+        currentStep.value = totalQuestions.value + 1
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 4. 存储用户答案（用于最终提交）
+    const selectAnswer = (index) => {
+      selectedAnswer.value = index
+      // 保存用户答案 - 存储选项的identifier
+      if (currentQuestion.value && currentQuestion.value.options[index]) {
+        userAnswers.value[currentQuestion.value.id] = currentQuestion.value.options[index].identifier
+      }
+    }
+
+    const getUserAnswerForQuestion = (questionId) => {
+      return userAnswers.value[questionId] || null
+    }
+
+    // 5. 计算属性
+    const currentQuestion = computed(() => {
+      if (currentStep.value > 0 && currentStep.value <= totalQuestions.value) {
+        const question = questions.value[currentStep.value - 1]
+        if (question) {
+          // 处理API返回的选项格式，找到正确答案的索引
+          const correctIndex = question.options.findIndex(option => option.is_answer === true)
+          return {
+            ...question,
+            title: question.question_text,
+            correct: correctIndex >= 0 ? correctIndex : 0
+          }
+        }
+      }
+      return null
+    })
+
+    // 6. 重置函数
+    const resetTest = () => {
+      currentAttemptId.value = null
       questions.value = []
       currentStep.value = 0
       selectedAnswer.value = null
       correctAnswers.value = 0
+      userAnswers.value = {}
+      error.value = null
+    }
+
+    const retakeTest = () => {
+      resetTest()
+    }
+
+    const selectCategory = (category) => {
+      selectedCategory.value = category
+      resetTest()
     }
 
     // Get category label
@@ -336,270 +468,12 @@ export default {
       return category ? category.label : ''
     }
 
-    // Calculate category score percentage
-    const getCategoryScore = (categoryName) => {
-      const score = categoryScores.value[categoryName]
-      if (score.total === 0) return 0
-      return Math.round((score.correct / score.total) * 100)
-    }
-
-    // Updated API call function
-    const fetchRandomQuestions = async (category, count) => {
-      try {
-        loading.value = true
-        error.value = null
-        loadingMessage.value = `Loading ${count} questions...`
-
-        let url = `${API_BASE_URL}/quizzes/random/?count=${count}`
-
-        // 如果不是混合类别，添加category参数
-        if (category !== 'mixed') {
-          url += `&category=${encodeURIComponent(category)}`
-        }
-
-        console.log(`Fetching questions from:`, url)
-
-        const response = await fetch(url)
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const data = await response.json()
-        console.log('API response:', data)
-
-        // 处理单个问题或问题数组
-        const questions = Array.isArray(data) ? data : [data]
-
-        return questions
-      } catch (err) {
-        console.error('Error fetching questions:', err)
-        error.value = err.message
-        throw err
-      } finally {
-        loading.value = false
-      }
-    }
-
-    // Updated question processing function
-    const processQuestions = (apiQuestions) => {
-      console.log('Processing questions:', apiQuestions)
-
-      if (!Array.isArray(apiQuestions)) {
-        console.log('Converting single question to array')
-        apiQuestions = [apiQuestions]
-      }
-
-      if (apiQuestions.length === 0) {
-        console.log('No questions to process')
-        return []
-      }
-
-      const processed = apiQuestions.map((question, index) => {
-        console.log('Processing question:', question)
-
-        // 从API响应中提取选项
-        const options = question.options && Array.isArray(question.options)
-          ? question.options.map((option, idx) => {
-              // 如果选项是对象格式 {text: "...", is_answer: true/false}
-              if (typeof option === 'object' && option.text) {
-                return {
-                  text: option.text,
-                  isCorrect: option.is_answer === true
-                }
-              }
-              // 如果选项是简单字符串格式
-              return {
-                text: option,
-                isCorrect: idx === 0 // 暂时设第一个为正确答案，需要根据实际API调整
-              }
-            })
-          : []
-
-        // 查找正确答案的索引
-        let correctAnswerIndex = options.findIndex(opt => opt.isCorrect)
-
-        // 如果没有找到标记的正确答案，默认设置第一个为正确答案
-        if (correctAnswerIndex === -1 && options.length > 0) {
-          correctAnswerIndex = 0
-          options[0].isCorrect = true
-        }
-
-        const processedQuestion = {
-          id: question.id || `q_${index}`,
-          title: question.question_text || `Question ${index + 1}`,
-          description: `Category: ${question.category || 'Cybersecurity'}`,
-          options: options.map(opt => opt.text),
-          correct: correctAnswerIndex,
-          category: question.category || 'General',
-          explanation: question.explanation || ''
-        }
-
-        console.log('Processed question:', processedQuestion)
-        return processedQuestion
-      })
-
-      console.log('All processed questions:', processed)
-      return processed
-    }
-
-    // Updated load questions function
-    const loadQuestions = async () => {
-      console.log('loadQuestions called. Category:', selectedCategory.value)
-
-      if (!selectedCategory.value) {
-        console.log('No category selected, cannot load questions')
-        return
-      }
-
-      try {
-        console.log('Loading questions for category:', selectedCategory.value)
-        console.log('Question count:', totalQuestions.value)
-
-        const apiQuestions = await fetchRandomQuestions(selectedCategory.value, totalQuestions.value)
-        console.log('Raw API questions:', apiQuestions)
-
-        const processedQuestions = processQuestions(apiQuestions)
-        console.log('Processed questions:', processedQuestions)
-
-        questions.value = processedQuestions
-
-        // 确保totalQuestions反映实际获取的问题数量
-        if (processedQuestions.length > 0) {
-          totalQuestions.value = processedQuestions.length
-        }
-
-        console.log('Questions loaded successfully. Count:', questions.value.length)
-        console.log('Total questions updated to:', totalQuestions.value)
-      } catch (err) {
-        console.error('Failed to load questions:', err)
-        error.value = `Failed to load questions: ${err.message}`
-        questions.value = []
-        totalQuestions.value = 0
-      }
-    }
-
-    const currentQuestion = computed(() => {
-      if (currentStep.value > 0 && currentStep.value <= totalQuestions.value && questions.value.length > 0) {
-        return questions.value[currentStep.value - 1]
-      }
-      return null
-    })
-
-    const startTest = async () => {
-      console.log('startTest called. Category:', selectedCategory.value, 'Authenticated:', isAuthenticated.value)
-
-      if (!selectedCategory.value || !isAuthenticated.value) {
-        console.log('Cannot start test - missing category or not authenticated')
-        return
-      }
-
-      try {
-        console.log('Starting test process...')
-        // Load questions first
-        if (questions.value.length === 0) {
-          console.log('No questions loaded, loading now...')
-          await loadQuestions()
-        }
-
-        if (questions.value.length > 0) {
-          // Start the test by moving to first question
-          currentStep.value = 1
-          selectedAnswer.value = null
-          correctAnswers.value = 0
-
-          // Reset category scores for mixed test
-          if (selectedCategory.value === 'mixed') {
-            Object.keys(categoryScores.value).forEach(category => {
-              categoryScores.value[category].correct = 0
-              categoryScores.value[category].total = 0
-            })
-          }
-
-          console.log('Test started successfully with', questions.value.length, 'questions')
-          console.log('Current step set to:', currentStep.value)
-        } else {
-          throw new Error('No questions available for the selected category')
-        }
-      } catch (error) {
-        console.error('Error starting test:', error)
-        error.value = 'Failed to start test. Please try again.'
-      }
-    }
-
-    const selectAnswer = (index) => {
-      selectedAnswer.value = index
-    }
-
-    const nextQuestion = async () => {
-      if (selectedAnswer.value === null || !currentQuestion.value) return
-
-      const isCorrect = selectedAnswer.value === currentQuestion.value.correct
-
-      if (isCorrect) {
-        correctAnswers.value++
-      }
-
-
-
-      // Track category scores for mixed test
-      if (selectedCategory.value === 'mixed' && currentQuestion.value.category) {
-        const category = currentQuestion.value.category
-        if (categoryScores.value[category]) {
-          categoryScores.value[category].total++
-          if (isCorrect) {
-            categoryScores.value[category].correct++
-          }
-        }
-      }
-
-      // Continue to next question or complete test
-      if (currentStep.value < totalQuestions.value) {
-        currentStep.value++
-        selectedAnswer.value = null
-              } else {
-          // Complete test
-          currentStep.value = totalQuestions.value + 1 // Show results page
-        }
-    }
-
-
-
     const previousQuestion = () => {
       if (currentStep.value > 1) {
         currentStep.value--
         selectedAnswer.value = null
       }
     }
-
-    const getPerformanceFeedback = () => {
-      const percentage = (correctAnswers.value / totalQuestions.value) * 100
-      if (percentage >= 90) {
-        return 'Excellent! You have a strong understanding of cybersecurity principles.'
-      } else if (percentage >= 75) {
-        return 'Good job! You have solid cybersecurity knowledge with room for improvement.'
-      } else if (percentage >= 60) {
-        return 'Fair performance. Consider reviewing cybersecurity best practices.'
-      } else {
-        return 'There is significant room for improvement. We recommend additional cybersecurity training.'
-      }
-    }
-
-    const retakeTest = () => {
-      currentStep.value = 0
-      selectedAnswer.value = null
-      correctAnswers.value = 0
-      questions.value = []
-      error.value = null
-
-      // Reset category scores
-      Object.keys(categoryScores.value).forEach(category => {
-        categoryScores.value[category].correct = 0
-        categoryScores.value[category].total = 0
-      })
-    }
-
-
 
     // Check authentication on mount
     onMounted(async () => {
@@ -611,9 +485,9 @@ export default {
       isAuthenticated,
       currentUser,
       checkAuthStatus,
-      getAccessToken,
       redirectToLogin,
-      // Test functionality
+
+      // 状态
       currentStep,
       selectedAnswer,
       correctAnswers,
@@ -624,17 +498,15 @@ export default {
       error,
       selectedCategory,
       availableCategories,
-      loadingMessage,
-      selectCategory,
-      getCategoryLabel,
-      getCategoryScore,
+
+      // 方法
       startTest,
       selectAnswer,
       nextQuestion,
       previousQuestion,
       retakeTest,
-      loadQuestions,
-      getPerformanceFeedback
+      selectCategory,
+      getCategoryLabel
     }
   }
 }
@@ -1083,57 +955,7 @@ export default {
   text-align: center;
 }
 
-.score-breakdown h3 {
-  color: var(--forest-dark);
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.category-scores {
-  background: var(--forest-light);
-  border-radius: 12px;
-  padding: 20px;
-}
-
-.category-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.category-item:last-child {
-  margin-bottom: 0;
-}
-
-.category-name {
-  width: 120px;
-  color: var(--forest-dark);
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.category-bar {
-  flex: 1;
-  height: 8px;
-  background: var(--forest-sage);
-  border-radius: 4px;
-  margin: 0 15px;
-  overflow: hidden;
-}
-
-.category-fill {
-  height: 100%;
-  background: var(--forest-medium);
-  border-radius: 4px;
-}
-
-.category-score {
-  width: 40px;
-  color: var(--forest-dark);
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-align: right;
-}
+/* 移除复杂的类别分数分析样式 */
 
 .feedback-content {
   background: rgba(255, 255, 255, 0.8);
@@ -1292,3 +1114,4 @@ export default {
   box-shadow: 0 6px 20px var(--shadow-dark);
 }
 </style>
+

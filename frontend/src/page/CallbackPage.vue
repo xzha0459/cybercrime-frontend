@@ -15,45 +15,20 @@
       </div>
       <button @click="goHome" class="btn-home">Back to Home</button>
     </div>
-    <div v-else class="success">
-      <h2>Authentication Successful!</h2>
-      <p>Redirecting to home page...</p>
 
-      <!-- 添加Token显示区域 -->
-      <div v-if="tokens" class="token-info">
-        <details>
-          <summary>🔑 View Tokens (Click to expand)</summary>
-          <div class="token-display">
-            <div class="token-section">
-              <h4>Access Token:</h4>
-              <textarea readonly :value="tokens.accessToken" class="token-textarea"></textarea>
-            </div>
-            <div class="token-section">
-              <h4>ID Token:</h4>
-              <textarea readonly :value="tokens.idToken" class="token-textarea"></textarea>
-            </div>
-            <div class="token-section" v-if="tokens.refreshToken">
-              <h4>Refresh Token:</h4>
-              <textarea readonly :value="tokens.refreshToken" class="token-textarea"></textarea>
-            </div>
-          </div>
-        </details>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth'
+
 
 const router = useRouter()
 const loading = ref(true)
 const error = ref(null)
 const errorDetails = ref('')
 const debugMessage = ref('Starting...')
-const tokens = ref(null) // 添加tokens状态
 
 const goHome = () => {
   router.push('/')
@@ -90,56 +65,15 @@ onMounted(async () => {
 
     // 让Amplify有足够时间处理OAuth回调
     // Amplify v6会自动处理token交换
-    debugMessage.value = 'Waiting for token exchange...'
-    await new Promise((resolve) => setTimeout(resolve, 5000))
-
-    // ===== 添加获取Token的代码 =====
-    debugMessage.value = 'Fetching tokens...'
-
-    try {
-      // 确保用户已登录
-      const currentUser = await getCurrentUser()
-      console.log('当前用户:', currentUser)
-
-      // 获取认证会话和tokens
-      const session = await fetchAuthSession()
-      console.log('认证会话:', session)
-
-      if (session.tokens) {
-        const tokenData = {
-          accessToken: session.tokens.accessToken?.toString(),
-          idToken: session.tokens.idToken?.toString(),
-          refreshToken: session.tokens.refreshToken?.toString()
-        }
-
-        // 保存到组件状态中显示
-        tokens.value = tokenData
-
-        // 在控制台打印token信息
-        console.log('=== 🔑 TOKEN信息 ===')
-        console.log('Access Token:', tokenData.accessToken)
-        console.log('ID Token:', tokenData.idToken)
-        console.log('Refresh Token:', tokenData.refreshToken)
-        console.log('================')
-
-        debugMessage.value = 'Tokens retrieved successfully!'
-      } else {
-        console.warn('未找到tokens')
-        debugMessage.value = 'Tokens not found in session'
-      }
-    } catch (tokenError) {
-      console.error('获取tokens失败:', tokenError)
-      debugMessage.value = 'Failed to retrieve tokens, but authentication may still be successful'
-    }
-    // ===== Token获取代码结束 =====
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     debugMessage.value = 'Authentication complete, redirecting...'
     loading.value = false
 
-    // 跳转到首页（延长时间让用户有机会查看tokens）
+    // 跳转到首页
     setTimeout(() => {
       router.replace('/')
-    }, 10000) // 改为10秒让用户有时间查看
+    }, 2000)
 
   } catch (err) {
     console.error('Callback processing error:', err)
@@ -189,76 +123,30 @@ onMounted(async () => {
   min-height: 200px;
 }
 
-.error,
-.success {
+.error {
   padding: 3rem;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(45, 58, 45, 0.1);
   background: var(--forest-sage, #d4d4c4);
-  max-width: 800px; /* 增加宽度以容纳token */
+  max-width: 600px;
   width: 100%;
 }
 
 .loading h2,
-.error h2,
-.success h2 {
+.error h2 {
   color: var(--forest-dark, #2d3a2d);
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
 
 .loading p,
-.error p,
-.success p {
+.error p {
   color: var(--forest-deep, #5a6b5a);
   margin-bottom: 2rem;
   font-size: 1.1rem;
 }
 
-/* Token显示样式 */
-.token-info {
-  margin-top: 2rem;
-  text-align: left;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 1rem;
-  border: 1px solid var(--forest-medium, #8b9a8b);
-}
 
-.token-info summary {
-  cursor: pointer;
-  font-weight: bold;
-  color: var(--forest-dark, #2d3a2d);
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-.token-display {
-  margin-top: 1rem;
-}
-
-.token-section {
-  margin-bottom: 1.5rem;
-}
-
-.token-section h4 {
-  color: var(--forest-dark, #2d3a2d);
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.token-textarea {
-  width: 100%;
-  height: 120px;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.8rem;
-  background: #f8f9fa;
-  resize: vertical;
-  word-break: break-all;
-}
 
 .debug-info {
   margin-top: 1rem;
@@ -313,10 +201,7 @@ onMounted(async () => {
   border: 1px solid #dc3545;
 }
 
-.success {
-  background: var(--forest-light, #f5f5f0);
-  border: 2px solid var(--forest-medium, #8b9a8b);
-}
+
 
 .btn-home {
   padding: 0.8rem 2rem;

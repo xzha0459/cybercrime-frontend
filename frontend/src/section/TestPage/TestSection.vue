@@ -1,20 +1,41 @@
 <template>
   <div class="test-page">
-
-
-    <!-- Test Progress Indicator -->
-    <div class="progress-section" v-if="currentStep > 0">
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: `${(currentStep / totalQuestions) * 100}%` }"></div>
+    <!-- 未认证时显示登录提示 -->
+    <div v-if="!isAuthenticated" class="auth-required">
+      <div class="auth-card">
+        <h2>Login Required</h2>
+        <p>Please log in to take the cybersecurity test</p>
+        <button @click="redirectToLogin" class="login-btn">Login</button>
       </div>
-      <p class="progress-text">Question {{ currentStep }} / {{ totalQuestions }}</p>
     </div>
+
+    <!-- 认证后显示测试内容 -->
+    <div v-else>
+      <!-- Test Progress Indicator -->
+      <div class="progress-section" v-if="currentStep > 0">
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: `${(currentStep / totalQuestions) * 100}%` }"></div>
+        </div>
+        <p class="progress-text">Question {{ currentStep }} / {{ totalQuestions }}</p>
+      </div>
 
     <!-- Test Content Area -->
     <div class="test-content">
       <!-- Welcome Page -->
               <div v-if="currentStep === 0" class="welcome-section">
           <div class="welcome-card">
+          <!-- Debug Section -->
+          <div class="debug-section" style="background: #f0f0f0; padding: 15px; margin-bottom: 20px; border-radius: 8px; font-family: monospace; font-size: 12px;">
+            <h4>Debug Info:</h4>
+            <p>isAuthenticated: {{ isAuthenticated }}</p>
+            <p>selectedCategory: {{ selectedCategory }}</p>
+            <p>currentStep: {{ currentStep }}</p>
+            <p>questions.length: {{ questions.length }}</p>
+            <p>totalQuestions: {{ totalQuestions }}</p>
+            <p>loading: {{ loading }}</p>
+            <p>error: {{ error }}</p>
+            <p>currentUser: {{ currentUser ? 'Yes' : 'No' }}</p>
+          </div>
 
           <!-- Loading State -->
           <div v-if="loading" class="loading-section">
@@ -192,6 +213,7 @@
           <div class="results-actions">
             <button @click="retakeTest" class="action-btn retake-btn">Retake Test</button>
           </div>
+        </div>
       </div>
     </div>
   </div>
@@ -199,10 +221,46 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
+import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth'
 
 export default {
   name: 'TestSection',
   setup() {
+    // Authentication state
+    const isAuthenticated = ref(false)
+    const currentUser = ref(null)
+
+    // Check user authentication status
+    const checkAuthStatus = async () => {
+      try {
+        const user = await getCurrentUser()
+        isAuthenticated.value = true
+        currentUser.value = user
+        console.log('User authenticated:', user)
+      } catch (authError) {
+        isAuthenticated.value = false
+        currentUser.value = null
+        console.log('User not authenticated:', authError)
+      }
+    }
+
+    // Get access token helper function
+    const getAccessToken = async () => {
+      try {
+        const session = await fetchAuthSession()
+        return session.tokens?.accessToken?.toString()
+      } catch (error) {
+        console.error('Error getting access token:', error)
+        throw error
+      }
+    }
+
+    // Redirect to login function
+    const redirectToLogin = () => {
+      // You can customize this route based on your routing setup
+      window.location.href = '/login'
+    }
+
     const currentStep = ref(0)
     const selectedAnswer = ref(null)
     const correctAnswers = ref(0)
@@ -387,7 +445,12 @@ export default {
 
     // Updated load questions function
     const loadQuestions = async () => {
-      if (!selectedCategory.value) return
+      console.log('loadQuestions called. Category:', selectedCategory.value)
+
+      if (!selectedCategory.value) {
+        console.log('No category selected, cannot load questions')
+        return
+      }
 
       try {
         console.log('Loading questions for category:', selectedCategory.value)
@@ -407,6 +470,7 @@ export default {
         }
 
         console.log('Questions loaded successfully. Count:', questions.value.length)
+        console.log('Total questions updated to:', totalQuestions.value)
       } catch (err) {
         console.error('Failed to load questions:', err)
         error.value = `Failed to load questions: ${err.message}`
@@ -422,34 +486,44 @@ export default {
       return null
     })
 
-    const startTest = () => {
-      if (!selectedCategory.value) {
-        console.log('No category selected')
+    const startTest = async () => {
+      console.log('startTest called. Category:', selectedCategory.value, 'Authenticated:', isAuthenticated.value)
+
+      if (!selectedCategory.value || !isAuthenticated.value) {
+        console.log('Cannot start test - missing category or not authenticated')
         return
       }
 
-      console.log('Starting test with category:', selectedCategory.value)
-      console.log('Current questions count:', questions.value.length)
+      try {
+        console.log('Starting test process...')
+        // Load questions first
+        if (questions.value.length === 0) {
+          console.log('No questions loaded, loading now...')
+          await loadQuestions()
+        }
 
-      if (questions.value.length === 0) {
-        console.log('No questions loaded, loading now...')
-        loadQuestions().then(() => {
-          console.log('Questions loaded, starting test. Count:', questions.value.length)
-          if (questions.value.length > 0) {
-            currentStep.value = 1
-            selectedAnswer.value = null
-            correctAnswers.value = 0
-          } else {
-            console.log('No questions available after loading')
+        if (questions.value.length > 0) {
+          // Start the test by moving to first question
+          currentStep.value = 1
+          selectedAnswer.value = null
+          correctAnswers.value = 0
+
+          // Reset category scores for mixed test
+          if (selectedCategory.value === 'mixed') {
+            Object.keys(categoryScores.value).forEach(category => {
+              categoryScores.value[category].correct = 0
+              categoryScores.value[category].total = 0
+            })
           }
-        }).catch(err => {
-          console.error('Error in startTest:', err)
-        })
-      } else {
-        console.log('Questions already loaded, starting test directly')
-        currentStep.value = 1
-        selectedAnswer.value = null
-        correctAnswers.value = 0
+
+          console.log('Test started successfully with', questions.value.length, 'questions')
+          console.log('Current step set to:', currentStep.value)
+        } else {
+          throw new Error('No questions available for the selected category')
+        }
+      } catch (error) {
+        console.error('Error starting test:', error)
+        error.value = 'Failed to start test. Please try again.'
       }
     }
 
@@ -457,36 +531,39 @@ export default {
       selectedAnswer.value = index
     }
 
-    const nextQuestion = () => {
+    const nextQuestion = async () => {
       if (selectedAnswer.value === null || !currentQuestion.value) return
 
-      if (selectedAnswer.value === currentQuestion.value.correct) {
-        correctAnswers.value++
+      const isCorrect = selectedAnswer.value === currentQuestion.value.correct
 
-        // Track category scores for mixed test
-        if (selectedCategory.value === 'mixed' && currentQuestion.value.category) {
-          const category = currentQuestion.value.category
-          if (categoryScores.value[category]) {
+      if (isCorrect) {
+        correctAnswers.value++
+      }
+
+
+
+      // Track category scores for mixed test
+      if (selectedCategory.value === 'mixed' && currentQuestion.value.category) {
+        const category = currentQuestion.value.category
+        if (categoryScores.value[category]) {
+          categoryScores.value[category].total++
+          if (isCorrect) {
             categoryScores.value[category].correct++
           }
         }
       }
 
-      // Track total questions per category for mixed test
-      if (selectedCategory.value === 'mixed' && currentQuestion.value.category) {
-        const category = currentQuestion.value.category
-        if (categoryScores.value[category]) {
-          categoryScores.value[category].total++
-        }
-      }
-
+      // Continue to next question or complete test
       if (currentStep.value < totalQuestions.value) {
         currentStep.value++
         selectedAnswer.value = null
-      } else {
-        currentStep.value = totalQuestions.value + 1
-      }
+              } else {
+          // Complete test
+          currentStep.value = totalQuestions.value + 1 // Show results page
+        }
     }
+
+
 
     const previousQuestion = () => {
       if (currentStep.value > 1) {
@@ -524,12 +601,19 @@ export default {
 
 
 
-    // Don't auto-load on mount, wait for user selection
-    onMounted(() => {
-      // Remove auto-load
+    // Check authentication on mount
+    onMounted(async () => {
+      await checkAuthStatus()
     })
 
     return {
+      // Authentication
+      isAuthenticated,
+      currentUser,
+      checkAuthStatus,
+      getAccessToken,
+      redirectToLogin,
+      // Test functionality
       currentStep,
       selectedAnswer,
       correctAnswers,
@@ -1172,5 +1256,39 @@ export default {
   .score-percent {
     font-size: 1.2rem;
   }
+}
+
+.auth-required {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.auth-card {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+}
+
+.login-btn {
+  background: var(--forest-dark);
+  color: var(--forest-light);
+  border: none;
+  padding: 15px 40px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--shadow-dark);
 }
 </style>

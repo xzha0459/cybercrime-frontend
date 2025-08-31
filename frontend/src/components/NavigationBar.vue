@@ -20,7 +20,7 @@
           </button>
         </div>
         <div v-else class="user-menu">
-          <span class="user-email" v-if="userEmail">{{ userEmail }}</span>
+          <span class="user-email clickable" v-if="userEmail" @click="goToUserCenter">{{ userEmail }}</span>
           <span class="user-email" v-else>Loading...</span>
           <button @click="signOut" class="btn btn-logout">Sign Out</button>
         </div>
@@ -66,6 +66,10 @@ export default {
       } catch (error) {
         console.error('Sign out error:', error)
       }
+    }
+
+    const goToUserCenter = () => {
+      router.push('/user-center')
     }
 
     const getUserEmail = async () => {
@@ -115,6 +119,7 @@ export default {
       userEmail,
       signIn,
       signOut,
+      goToUserCenter,
     }
   },
 }
@@ -195,6 +200,17 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.user-email.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-email.clickable:hover {
+  background: var(--forest-medium);
+  color: var(--text-light);
+  transform: translateY(-1px);
 }
 
 .btn {

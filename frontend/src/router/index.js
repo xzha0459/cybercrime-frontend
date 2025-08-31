@@ -4,6 +4,7 @@ import CallbackPage from '../page/CallbackPage.vue'
 import LinkCheckPage from '../page/LinkCheckPage.vue'
 import LibraryPage from '../page/LibraryPage.vue'
 import TestPage from '../page/TestPage.vue'
+import UserCenterPage from '../page/UserCenterPage.vue'
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
     path: '/test',
     name: 'Test',
     component: TestPage,
+  },
+  {
+    path: '/user-center',
+    name: 'UserCenter',
+    component: UserCenterPage,
   },
 ]
 

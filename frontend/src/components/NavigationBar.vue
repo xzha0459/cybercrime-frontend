@@ -2,7 +2,9 @@
   <nav class="navbar">
     <div class="nav-container">
       <!-- Logo/Brand -->
-      <div class="nav-brand">GuardU</div>
+      <div class="nav-brand">
+        <img src="/logo.png" alt="GuardU Logo" class="nav-logo">GuardU
+      </div>
 
       <!-- Navigation Links -->
       <div class="nav-links">
@@ -175,6 +177,15 @@ export default {
   font-weight: 700;
   color: var(--forest-dark);
   letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-logo {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-buttons {

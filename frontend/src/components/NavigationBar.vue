@@ -3,7 +3,7 @@
     <div class="nav-container">
       <!-- Logo/Brand -->
       <div class="nav-brand">
-        <img src="/logo.png" alt="GuardU Logo" class="nav-logo">GuardU
+        <img src="./../assets/logo.png" alt="GuardU Logo" class="nav-logo">GuardU
       </div>
 
       <!-- Navigation Links -->
@@ -183,7 +183,7 @@ export default {
 }
 
 .nav-logo {
-  height: 2rem;
+  height: 4rem;
   width: auto;
   object-fit: contain;
 }

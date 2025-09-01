@@ -62,7 +62,7 @@ export default {
       /* --forest-medium */ rgba(90, 107, 90, 0.85) 75%,
       /* --forest-deep */ rgba(45, 58, 45, 0.85) 100% /* --forest-dark */
     ),
-    url('/background.jpg');
+    url('/../assets/background.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

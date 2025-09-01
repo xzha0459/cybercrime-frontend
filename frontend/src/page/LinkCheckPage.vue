@@ -6,25 +6,24 @@
         <LinkSafetySection />
       </div>
     </div>
+    <FooterSection />
   </div>
 </template>
 
 <script>
 import LinkSafetySection from '../section/LinkCheckPage/LinkSafetySection.vue'
+import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
   name: 'LinkCheckPage',
   components: {
-    LinkSafetySection
+    LinkSafetySection,
+    FooterSection
   }
 }
 </script>
 
 <style scoped>
-.link-check-page {
-  min-height: 100vh;
-}
-
 .page-content {
   padding: 0;
 }

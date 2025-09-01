@@ -164,11 +164,11 @@ export default {
 <style scoped>
 .link-safety-section {
   position: relative;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0 2rem 2rem 2rem;
+  min-height: 90vh;
 }
 
 .background-pattern {

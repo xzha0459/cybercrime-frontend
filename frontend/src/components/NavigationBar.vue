@@ -183,7 +183,7 @@ export default {
 }
 
 .nav-logo {
-  height: 4rem;
+  height: 2rem;
   width: auto;
   object-fit: contain;
 }

@@ -62,21 +62,21 @@ export default {
       /* --forest-medium */ rgba(90, 107, 90, 0.85) 75%,
       /* --forest-deep */ rgba(45, 58, 45, 0.85) 100% /* --forest-dark */
     ),
-    url('/../assets/background.jpg');
+    url('./../../assets/background.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: var(--text-light);
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  /* min-height: 100vh; */
 }
 
 .hero-container {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  min-height: 100vh;
+  min-height: 90vh;
   padding: 2rem 8rem;
 }
 
@@ -163,13 +163,14 @@ export default {
   background: var(--forest-dark);
   color: var(--text-light);
   box-shadow: 0 4px 15px var(--shadow-medium);
+  transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--forest-deep);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--shadow-dark);
+  background: var(--forest-medium);
 }
+
+
 
 @media (max-width: 767px) {
   .action-buttons {

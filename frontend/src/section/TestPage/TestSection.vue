@@ -50,7 +50,11 @@
                 :class="{ 'selected': selectedCategory === category.value }"
                 @click="selectCategory(category.value)"
               >
-                <div class="category-icon">{{ category.icon }}</div>
+                <div class="category-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                    <path :d="category.icon" />
+                  </svg>
+                </div>
                 <div class="category-info">
                   <h4>{{ category.label }}</h4>
                   <p>{{ category.description }}</p>
@@ -183,7 +187,8 @@ import { getCurrentUser, fetchAuthSession, signInWithRedirect } from 'aws-amplif
 
 export default {
   name: 'TestSection',
-  setup() {
+  emits: ['test-status-changed'],
+  setup(props, { emit }) {
     const router = useRouter()
 
     // Authentication state
@@ -235,28 +240,28 @@ export default {
         value: 'Cyber Harassment',
         label: 'Cyber Harassment',
         description: 'Test your knowledge about identifying and handling cyber harassment',
-        icon: '🛡️',
+        icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
         questionCount: 20
       },
       {
         value: 'Cyber Scam',
         label: 'Cyber Scam',
         description: 'Learn to identify and avoid various cyber scams and fraudulent activities',
-        icon: '🎣',
+        icon: 'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
         questionCount: 20
       },
       {
         value: 'Privacy Protection',
         label: 'Privacy Protection',
         description: 'Learn about protecting personal information and data privacy',
-        icon: '🔐',
+        icon: 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z',
         questionCount: 20
       },
       {
         value: 'mixed',
         label: 'Mixed Categories',
         description: 'Comprehensive test covering all cybersecurity areas',
-        icon: '🎯',
+        icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
         questionCount: 20
       }
     ])
@@ -310,6 +315,8 @@ export default {
           selectedAnswer.value = null
           correctAnswers.value = 0
           userAnswers.value = {} // 重置用户答案
+          // 发射测试开始事件
+          emit('test-status-changed', true)
         } else {
           throw new Error('No questions received')
         }
@@ -455,6 +462,8 @@ export default {
 
     const retakeTest = () => {
       resetTest()
+      // 发射测试结束事件，重新显示FooterSection
+      emit('test-status-changed', false)
     }
 
     const selectCategory = (category) => {
@@ -514,7 +523,7 @@ export default {
 
 <style scoped>
 .test-page {
-  min-height: 100vh;
+  min-height: 60vh;
   background: var(--forest-light);
   padding: 0;
 }
@@ -594,12 +603,6 @@ export default {
   background: rgba(255, 255, 255, 0.8);
 }
 
-.category-option:hover {
-  border-color: var(--forest-medium);
-  background: var(--forest-light);
-  transform: translateY(-2px);
-}
-
 .category-option.selected {
   border-color: var(--forest-medium);
   background: var(--forest-light);
@@ -607,9 +610,16 @@ export default {
 }
 
 .category-icon {
-  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
   margin-right: 15px;
-  min-width: 40px;
+  min-width: 60px;
+  background: var(--forest-medium);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--forest-light);
 }
 
 .category-info h4 {
@@ -678,8 +688,7 @@ export default {
 }
 
 .start-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--shadow-dark);
+  background: var(--forest-medium);
 }
 
 .start-btn:disabled {
@@ -752,6 +761,7 @@ export default {
 .question-section {
   max-width: 1200px;
   margin: 0 auto;
+  padding-bottom: 60px;
 }
 
 
@@ -889,6 +899,7 @@ export default {
 .results-section {
   max-width: 1200px;
   margin: 0 auto;
+  padding-bottom: 60px;
 }
 
 
@@ -1049,8 +1060,10 @@ export default {
   }
 
   .category-icon {
-    font-size: 2rem;
+    width: 50px;
+    height: 50px;
     margin-right: 10px;
+    min-width: 50px;
   }
 
   .question-card {

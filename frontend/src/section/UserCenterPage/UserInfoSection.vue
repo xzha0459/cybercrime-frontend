@@ -27,21 +27,7 @@
               </div>
             </div>
 
-            <!-- User Stats -->
-            <div class="user-stats">
-              <div class="stat-item">
-                <div class="stat-number">{{ userInfo.testCount || 0 }}</div>
-                <div class="stat-label">Tests Taken</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">{{ userInfo.linkChecks || 0 }}</div>
-                <div class="stat-label">Links Checked</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">{{ userInfo.libraryVisits || 0 }}</div>
-                <div class="stat-label">Library Visits</div>
-              </div>
-            </div>
+
 
 
           </div>
@@ -270,40 +256,7 @@ export default {
   color: #888;
 }
 
-/* User Stats */
-.user-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  padding: 2rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-}
 
-.stat-item {
-  text-align: center;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #dee2e6;
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--forest-dark, #2c5530);
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  color: #666;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
 
 
@@ -395,11 +348,7 @@ export default {
     font-size: 1.5rem;
   }
 
-  .user-stats {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    padding: 1.5rem;
-  }
+
 
 
 }
@@ -409,16 +358,6 @@ export default {
     padding: 1rem;
   }
 
-  .user-stats {
-    padding: 1rem;
-  }
 
-  .stat-item {
-    padding: 1rem;
-  }
-
-  .stat-number {
-    font-size: 2rem;
-  }
 }
 </style>

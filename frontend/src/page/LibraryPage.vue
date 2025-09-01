@@ -16,18 +16,21 @@
         <InfographicSection />
       </div>
     </div>
+    <FooterSection />
   </div>
 </template>
 
 <script>
 import ResourceSection from '../section/LibraryPage/ResourceSection.vue'
 import InfographicSection from '../section/LibraryPage/InfographicSection.vue'
+import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
   name: 'LibraryPage',
   components: {
     ResourceSection,
-    InfographicSection
+    InfographicSection,
+    FooterSection
   }
 }
 </script>

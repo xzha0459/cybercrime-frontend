@@ -30,7 +30,7 @@
     <!-- 测试记录列表 -->
     <div v-else-if="testAttempts.length > 0" class="test-list">
       <div
-        v-for="attempt in testAttempts"
+        v-for="attempt in paginatedTestAttempts"
         :key="attempt.id"
         class="test-card"
         @click="viewTestDetails(attempt)"
@@ -59,6 +59,36 @@
             ></div>
           </div>
         </div>
+      </div>
+
+      <!-- 分页控件 -->
+      <div v-if="totalPages > 1" class="pagination">
+        <button 
+          @click="goToPage(currentPage - 1)" 
+          :disabled="currentPage === 1"
+          class="page-btn prev-btn"
+        >
+          Previous
+        </button>
+        
+        <div class="page-numbers">
+          <span 
+            v-for="page in visiblePages" 
+            :key="page"
+            @click="goToPage(page)"
+            :class="['page-number', { active: page === currentPage }]"
+          >
+            {{ page }}
+          </span>
+        </div>
+        
+        <button 
+          @click="goToPage(currentPage + 1)" 
+          :disabled="currentPage === totalPages"
+          class="page-btn next-btn"
+        >
+          Next
+        </button>
       </div>
     </div>
 
@@ -129,7 +159,9 @@ export default {
       testAttempts: [],
       loading: true,
       error: null,
-      selectedAttempt: null
+      selectedAttempt: null,
+      currentPage: 1,
+      itemsPerPage: 5
     }
   },
   computed: {
@@ -149,6 +181,30 @@ export default {
 
       const total = validAttempts.reduce((sum, attempt) => sum + Number(attempt.accuracy_pct), 0)
       return Math.round(total / validAttempts.length)
+    },
+    totalPages() {
+      return Math.ceil(this.testAttempts.length / this.itemsPerPage)
+    },
+    paginatedTestAttempts() {
+      const start = (this.currentPage - 1) * this.itemsPerPage
+      const end = start + this.itemsPerPage
+      return this.testAttempts.slice(start, end)
+    },
+    visiblePages() {
+      const pages = []
+      const maxVisible = 5
+      let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2))
+      let end = Math.min(this.totalPages, start + maxVisible - 1)
+      
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1)
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+      
+      return pages
     }
   },
   async mounted() {
@@ -269,6 +325,13 @@ export default {
     getFormattedScore(accuracyPct) {
       if (accuracyPct === null || accuracyPct === undefined || isNaN(accuracyPct)) return 0
       return Math.round(Number(accuracyPct))
+    },
+
+    // 分页方法
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page
+      }
     }
   }
 }
@@ -591,5 +654,83 @@ export default {
   font-size: 13px;
   color: var(--forest-deep);
   font-weight: 500;
+}
+
+/* 分页控件样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  padding: 20px 0;
+}
+
+.page-btn {
+  padding: 10px 20px;
+  border: 2px solid var(--forest-medium);
+  background: white;
+  color: var(--forest-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--forest-medium);
+  color: white;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+.page-number {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--forest-sage);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: white;
+  color: var(--forest-dark);
+}
+
+.page-number:hover {
+  border-color: var(--forest-medium);
+  background: var(--forest-light);
+}
+
+.page-number.active {
+  background: var(--forest-dark);
+  color: white;
+  border-color: var(--forest-dark);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .pagination {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .page-numbers {
+    order: 2;
+  }
+  
+  .page-btn {
+    order: 1;
+  }
 }
 </style>

@@ -10,26 +10,59 @@
     <div class="page-content">
       <div class="container">
         <!-- Test Section -->
-        <TestSection />
+        <TestSection @test-status-changed="handleTestStatusChanged" />
       </div>
     </div>
+
+    <!-- Footer only shows when authenticated and test is not active -->
+    <FooterSection v-if="isAuthenticated && !isTestActive" />
   </div>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue'
+import { getCurrentUser } from 'aws-amplify/auth'
 import TestSection from '../section/TestPage/TestSection.vue'
+import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
   name: 'TestPage',
   components: {
-    TestSection
+    TestSection,
+    FooterSection
+  },
+  setup() {
+    const isAuthenticated = ref(false)
+    const isTestActive = ref(false)
+
+    const checkAuthStatus = async () => {
+      try {
+        await getCurrentUser()
+        isAuthenticated.value = true
+      } catch {
+        isAuthenticated.value = false
+      }
+    }
+
+    const handleTestStatusChanged = (isActive) => {
+      isTestActive.value = isActive
+    }
+
+    onMounted(() => {
+      checkAuthStatus()
+    })
+
+    return {
+      isAuthenticated,
+      isTestActive,
+      handleTestStatusChanged
+    }
   }
 }
 </script>
 
 <style scoped>
 .test-page {
-  min-height: 100vh;
   background-color: var(--bg-primary);
 }
 

@@ -15,8 +15,14 @@ const amplifyConfig = {
         oauth: {
           domain: 'ap-southeast-2pinizgulj.auth.ap-southeast-2.amazoncognito.com',
           scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
-          redirectSignIn: ['http://localhost:5173/callback'],
-          redirectSignOut: ['http://localhost:5173/'],
+          redirectSignIn: [
+            'http://localhost:5173/callback',
+            'https://cybercrime-frontend.vercel.app/callback'
+          ],
+          redirectSignOut: [
+            'http://localhost:5173/',
+            'https://cybercrime-frontend.vercel.app/'
+          ],
           responseType: 'code',
           providers: ['COGNITO']
         },

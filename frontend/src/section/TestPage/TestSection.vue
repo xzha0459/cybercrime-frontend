@@ -288,22 +288,34 @@ export default {
         loading.value = true
         error.value = null
 
-        const response = await fetch(`${API_BASE_URL}/quizzes/attempt/`, {
+        // 构建查询参数
+        const params = new URLSearchParams()
+
+        // 根据选择的类别设置参数
+        if (selectedCategory.value === 'mixed') {
+          // 混合类别不设置 category 参数（或设置为 null）
+          params.append('count', totalQuestions.value.toString())
+        } else {
+          // 特定类别
+          params.append('category', selectedCategory.value)
+          params.append('count', totalQuestions.value.toString())
+        }
+
+        // 使用查询参数而不是请求体
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempt/?${params.toString()}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${await getIdToken()}`
-          },
-          body: JSON.stringify({
-            category: selectedCategory.value === 'mixed' ? null : selectedCategory.value
-          })
+          }
+          // 移除 body，因为参数现在在 URL 中
         })
 
         if (!response.ok) {
           throw new Error(`Failed to start test: ${response.status}`)
         }
 
-                const data = await response.json()
+        const data = await response.json()
 
         // 保存attempt ID和题目
         currentAttemptId.value = data.attempt_id

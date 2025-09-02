@@ -17,11 +17,13 @@ const amplifyConfig = {
           scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
           redirectSignIn: [
             'http://localhost:5173/callback',
-            'https://cybercrime-frontend.vercel.app/callback'
+            'https://cybercrime-frontend.vercel.app/callback',
+            'https://guardu.org/callback'
           ],
           redirectSignOut: [
             'http://localhost:5173/',
-            'https://cybercrime-frontend.vercel.app/'
+            'https://cybercrime-frontend.vercel.app/',
+            'https://guardu.org/'
           ],
           responseType: 'code',
           providers: ['COGNITO']

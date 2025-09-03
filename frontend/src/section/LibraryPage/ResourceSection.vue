@@ -60,49 +60,111 @@
         </button>
       </div>
 
-      <!-- Featured Video Carousel -->
-      <div class="featured-video">
-        <div class="video-content">
-          <div class="content-info">
-            <h3 class="video-title">Phishing Email Detection</h3>
-            <p class="video-description">Learn to identify common phishing email red flags in just 3 minutes. This comprehensive guide will help you spot suspicious emails and protect yourself from cyber threats. Perfect for quick learning during breaks.</p>
-            <div class="video-meta">
-              <span class="video-type">Video</span>
-              <span class="video-duration">3:45 min</span>
+        <!-- Featured Video Carousel (Single Visible Video with Arrows) -->
+        <div class="featured-video" v-if="videos.length">
+          <div class="video-content">
+            <div class="content-info">
+              <h3 class="video-title">{{ videos[currentIndex].title }}</h3>
+              <div class="video-description">
+                <span>Video by: {{ videos[currentIndex].author }}</span><br />
+                <span>Published date: {{ videos[currentIndex].publish_date }}</span>
+              </div>    
+              <div class="video-meta">
+                <span class="video-type">Video</span>
+                <span class="video-duration">{{ videos[currentIndex].suggested_reading_time }} min</span>
+              </div>
             </div>
-            <button class="play-btn">Play</button>
-          </div>
-          <div class="video-preview">
-            <div class="preview-image">
-              <div class="play-icon">▶</div>
-              <div class="duration-badge">3:45</div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Navigation Arrows - Updated Style -->
-        <button class="nav-arrow nav-prev">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button class="nav-arrow nav-next">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
+            <div class="video-preview">
+              <iframe
+                :src="`https://www.youtube.com/embed/${extractYouTubeId(videos[currentIndex].link)}?rel=0`"
+                frameborder="0"
+                allowfullscreen
+                class="youtube-embed-wrapper"
+              ></iframe>
+            </div>
+          </div>
+
+          <!-- Navigation Arrows -->
+          <button
+            class="nav-arrow nav-prev absolute left-[-30px] top-1/2 transform -translate-y-1/2 z-10"
+            @click="prevVideo"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            class="nav-arrow nav-next absolute right-[-30px] top-1/2 transform -translate-y-1/2 z-10"
+            @click="nextVideo"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M9 18L15 12L9 6"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
     </div>
   </section>
 </template>
 
-<script>
-export default {
-  name: 'ResourceSection'
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import YouTubePlayer from '@/components/YoutubePlayer.vue'
+
+const videos = ref([])
+const currentIndex = ref(0)
+const playVideo = ref(false)
+
+const currentVideo = computed(() => videos.value[currentIndex.value] || {})
+
+const fetchVideos = async () => {
+  try {
+    const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/')
+    const data = await res.json()
+    videos.value = data
+  } catch (err) {
+    console.error('Error fetching videos:', err)
+  }
 }
+
+const extractYouTubeId = (url) => {
+  const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/
+  const match = url.match(regex)
+  return match ? match[1] : null
+}
+
+const getYouTubeThumbnail = (url) => {
+  const id = extractYouTubeId(url)
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : ''
+}
+
+const nextVideo = () => {
+  currentIndex.value = (currentIndex.value + 1) % videos.value.length
+  playVideo.value = false
+}
+
+const prevVideo = () => {
+  currentIndex.value = (currentIndex.value - 1 + videos.value.length) % videos.value.length
+  playVideo.value = false
+}
+
+onMounted(fetchVideos)
 </script>
 
 <style scoped>
+
 .resource-section {
   padding: 3rem 0;
   margin-bottom: 3rem;
@@ -296,7 +358,8 @@ export default {
 
 .video-content {
   display: flex;
-  min-height: 400px;
+  height: 420px;
+  overflow: hidden;
 }
 
 .video-title {
@@ -357,11 +420,14 @@ export default {
 
 .video-preview {
   flex: 1;
-  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  overflow: hidden;
+  height: auto;
 }
 
 .preview-image {
@@ -433,6 +499,34 @@ export default {
   right: -25px;
 }
 
+.youtube-embed-wrapper {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0e0;
+}
+
+
 /* Active state for arrows */
 .nav-arrow:active {
   transform: translateY(-50%) scale(0.95);
@@ -478,14 +572,13 @@ export default {
   .article-content,
   .video-content {
     flex-direction: column;
+    min-height: unset;
   }
-
   .content-info {
     padding: 2rem;
   }
 
-  .article-cover,
-  .video-preview {
+  .article-cover {
     min-height: 250px;
   }
 
@@ -507,13 +600,6 @@ export default {
 
   .nav-next {
     right: -20px;
-  }
-}
-
-/* Very small screens - hide arrows completely */
-@media (max-width: 480px) {
-  .nav-arrow {
-    display: none;
   }
 }
 </style>

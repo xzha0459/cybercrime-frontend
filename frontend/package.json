@@ -17,7 +17,8 @@
     "@aws-amplify/ui-vue": "^4.3.3",
     "aws-amplify": "^6.15.5",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vue3-youtube": "^0.1.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",

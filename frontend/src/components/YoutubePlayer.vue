@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
-import { getIdToken } from '@/auth/auth.js'
+import { getIdToken, userPool } from '@/auth/auth.js'
 
 
 const props = defineProps({

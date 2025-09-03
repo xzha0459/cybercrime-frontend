@@ -4,9 +4,9 @@
 
     <div class="main-card">
       <div class="card-content">
-        <p class="top-text">Live your digital life worry-free</p>
+        <p class="top-text">Stay safe from suspicious links</p>
         <h1 class="main-title">Is This Link Really Safe?</h1>
-        <p class="description">Check any URL for malware, fraudulent websites, or phishing schemes.</p>
+        <p class="description">Instantly analyze any link for malware, phishing attempts, and suspicious content.</p>
 
         <div class="input-button-row">
           <div class="input-container">
@@ -107,7 +107,7 @@ export default {
   methods: {
     async checkUrlSafety() {
       if (!this.inputUrl.trim()) {
-        this.error = 'Please enter a valid URL';
+        this.error = 'Please enter a valid URL format (e.g., https://example.com)';
         return;
       }
 
@@ -135,8 +135,8 @@ export default {
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         this.results = await response.json();
-      } catch (err) {
-        this.error = `Failed to check URL safety: ${err.message}`;
+      } catch {
+        this.error = 'Please enter a valid URL format (e.g., https://example.com)';
       } finally {
         this.isLoading = false;
       }
@@ -330,14 +330,15 @@ export default {
 }
 
 .error-message {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--forest-light);
+  color: var(--forest-deep);
   padding: 1rem 1.25rem;
   border-radius: 12px;
-  border: 1px solid #f5c6cb;
+  border: 2px solid var(--forest-sage);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  box-shadow: 0 4px 20px var(--shadow-medium);
 }
 
 .error-icon {

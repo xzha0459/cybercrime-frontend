@@ -181,7 +181,6 @@ const videos = ref([])
 const currentIndex = ref(0)
 const playVideo = ref(false)
 const handleSaveProgress = ({ id, time }) => {
-  console.log("Progress saved:", id, time)
 }
 
 const relatedItems = ref([])

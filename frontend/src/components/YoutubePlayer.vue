@@ -13,25 +13,13 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
-import { getIdToken, userPool } from '@/auth/auth.js'
+import { getIdToken } from '@/auth/auth.js'
 
 
 const props = defineProps({
   videoId: String,
   videoKey: [String, Number]
 })
-
-const getIdToken = () => {
-  const currentUser = userPool.getCurrentUser();
-  return new Promise((resolve, reject) => {
-    if (!currentUser) return reject('No user');
-    currentUser.getSession((err, session) => {
-      if (err) return reject(err);
-      resolve(session.getIdToken().getJwtToken());
-    });
-  });
-};
-
 
 const emit = defineEmits([
   'save-progress',

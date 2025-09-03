@@ -19,6 +19,18 @@ const props = defineProps({
   videoKey: [String, Number]
 })
 
+const getIdToken = () => {
+  const currentUser = userPool.getCurrentUser();
+  return new Promise((resolve, reject) => {
+    if (!currentUser) return reject('No user');
+    currentUser.getSession((err, session) => {
+      if (err) return reject(err);
+      resolve(session.getIdToken().getJwtToken());
+    });
+  });
+};
+
+
 const emit = defineEmits([
   'save-progress',
   'video-ended',
@@ -37,44 +49,58 @@ const computedSrc = computed(() => {
 
 const handleVideoEnd = async () => {
   try {
-    const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/related/`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
+    const token = await getIdToken()
+    const res = await fetch(
+      `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/related/`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       }
-    });
+    )
 
-    if (!res.ok) throw new Error(`Failed to fetch related content: ${res.status}`);
-    
-    const data = await res.json();
+    if (!res.ok) throw new Error(`Failed to fetch related content: ${res.status}`)
+    const data = await res.json()
 
     emit('video-ended', {
       relatedVideos: data.related_videos || [],
       relatedQuiz: data.related_quiz || null
-    });
+    })
   } catch (err) {
-    console.error('Error fetching related content:', err);
+    console.error('Error fetching related content:', err)
   }
-};
+}
+
 
 
 const setupPlayerPolling = () => {
   interval = setInterval(() => {
-    if (player && typeof player.getCurrentTime === 'function') {
-      const time = player.getCurrentTime()
-      localStorage.setItem(`video-progress-${props.videoKey}`, Math.floor(time))
+    (async () => {
+      if (player && typeof player.getCurrentTime === 'function') {
+        const time = player.getCurrentTime()
+        localStorage.setItem(`video-progress-${props.videoKey}`, Math.floor(time))
 
-      fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/progress/`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ progress: Math.floor(time) })
-      })
+        try {
+          const token = await getIdToken()
+          await fetch(
+            `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/progress/`,
+            {
+              method: 'PATCH',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ progress: Math.floor(time) })
+            }
+          )
+        } catch (e) {
+          console.error('Error saving progress:', e)
+        }
 
-      emit('save-progress', { id: props.videoId, time })
-    }
+        emit('save-progress', { id: props.videoId, time })
+      }
+    })()
   }, 5000)
 }
 
@@ -113,12 +139,17 @@ const createPlayer = () => {
 
 const fetchBackendProgress = async () => {
   try {
-    const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/progress/`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
+    const token = await getIdToken()
+    const res = await fetch(
+      `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/progress/`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       }
-    })
+    )
+
     if (res.ok) {
       const data = await res.json()
       backendStartTime.value = data.progress || 0

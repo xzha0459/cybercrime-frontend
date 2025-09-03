@@ -1,8 +1,20 @@
 <template>
   <div class="TypeRate-section">
     <div class="header">
-      <h3>Cybercrime Risk Assessment by Demographics</h3>
-      <p>Victimization rates and risk levels across age groups for major cybercrime categories</p>
+      <div class="header-content">
+        <div class="title-section">
+          <h3>Cybercrime Risk Assessment by Demographics</h3>
+          <p>Victimization rates and risk levels across age groups for major cybercrime categories</p>
+        </div>
+        <div class="download-section">
+          <button @click="downloadChart" class="download-btn" :disabled="loading || hasError">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            Download Chart
+          </button>
+        </div>
+      </div>
     </div>
 
     <div v-if="loading" class="loading">
@@ -174,6 +186,46 @@ export default {
       }
     },
 
+    downloadChart() {
+      try {
+        // 获取图表容器的 HTML 内容
+        const chartContainer = this.$el.querySelector('.visualizations-container')
+        if (!chartContainer) {
+          console.error('Chart container not found')
+          return
+        }
+
+        // 使用 html2canvas 将图表转换为图片
+        import('html2canvas').then(html2canvas => {
+          html2canvas.default(chartContainer, {
+            backgroundColor: '#ffffff',
+            scale: 2, // 提高图片质量
+            useCORS: true,
+            allowTaint: true
+          }).then(canvas => {
+            // 创建下载链接
+            const link = document.createElement('a')
+            link.download = 'cybercrime-risk-assessment.png'
+            link.href = canvas.toDataURL('image/png')
+
+            // 触发下载
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }).catch(error => {
+            console.error('Error generating chart image:', error)
+            alert('Failed to download chart. Please try again.')
+          })
+        }).catch(error => {
+          console.error('Error loading html2canvas:', error)
+          alert('Download feature not available. Please try again later.')
+        })
+      } catch (error) {
+        console.error('Download error:', error)
+        alert('Failed to download chart. Please try again.')
+      }
+    },
+
     processData() {
       const processedMap = new Map()
 
@@ -283,7 +335,7 @@ export default {
     },
 
     getRiskLevel(rate) {
-      if (rate >= 20) return 'high'
+      if (rate >= 22) return 'high'
       if (rate >= 15) return 'medium'
       return 'low'
     },
@@ -345,14 +397,14 @@ export default {
 
     // 获取受害率单元格的样式类
     getRateCellClass(rate) {
-      if (rate >= 20) return 'rate-high'
+      if (rate >= 22) return 'rate-high'
       if (rate >= 15) return 'rate-medium'
       return 'rate-low'
     },
 
     // 获取风险等级单元格的样式类
     getRiskCellClass(rate) {
-      if (rate >= 20) return 'risk-high'
+      if (rate >= 22) return 'risk-high'
       if (rate >= 15) return 'risk-medium'
       return 'risk-low'
     }
@@ -372,21 +424,65 @@ export default {
 
 /* 头部样式 */
 .header {
-  text-align: center;
   margin-bottom: 2rem;
 }
 
-.header h3 {
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.title-section {
+  flex: 1;
+  text-align: left;
+}
+
+.title-section h3 {
   font-size: 1.8rem;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
-.header p {
+.title-section p {
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.5;
+  margin: 0;
+}
+
+.download-section {
+  flex-shrink: 0;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--forest-dark);
+  color: var(--forest-light);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.download-btn:hover:not(:disabled) {
+  background: var(--forest-medium);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.download-btn:disabled {
+  background: var(--forest-sage);
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* 加载和错误状态 */
@@ -612,6 +708,19 @@ export default {
   .TypeRate-section {
     padding: 1rem;
     margin: 1rem 0;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .title-section {
+    text-align: center;
+  }
+
+  .download-section {
+    align-self: center;
   }
 
   .filter-controls {

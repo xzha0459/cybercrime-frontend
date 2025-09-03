@@ -4,9 +4,9 @@
 
     <div class="main-card">
       <div class="card-content">
-        <p class="top-text">Live your digital life worry-free</p>
+        <p class="top-text">Stay safe from suspicious links</p>
         <h1 class="main-title">Is This Link Really Safe?</h1>
-        <p class="description">Check any URL for malware, fraudulent websites, or phishing schemes.</p>
+        <p class="description">Instantly analyze any link for malware, phishing attempts, and suspicious content.</p>
 
         <div class="input-button-row">
           <div class="input-container">

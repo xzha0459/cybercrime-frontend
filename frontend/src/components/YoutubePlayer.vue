@@ -13,7 +13,12 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
-import { getIdToken } from '@/auth/auth.js'
+import { fetchAuthSession } from 'aws-amplify/auth'
+
+const getIdToken = async () => {
+  const session = await fetchAuthSession()
+  return session.tokens?.idToken?.toString()
+}
 
 
 const props = defineProps({

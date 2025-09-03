@@ -107,7 +107,7 @@ export default {
   methods: {
     async checkUrlSafety() {
       if (!this.inputUrl.trim()) {
-        this.error = 'Please enter a valid URL';
+        this.error = 'Please enter a valid URL format (e.g., https://example.com)';
         return;
       }
 
@@ -135,8 +135,8 @@ export default {
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         this.results = await response.json();
-      } catch (err) {
-        this.error = `Failed to check URL safety: ${err.message}`;
+      } catch {
+        this.error = 'Please enter a valid URL format (e.g., https://example.com)';
       } finally {
         this.isLoading = false;
       }
@@ -330,14 +330,15 @@ export default {
 }
 
 .error-message {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--forest-light);
+  color: var(--forest-deep);
   padding: 1rem 1.25rem;
   border-radius: 12px;
-  border: 1px solid #f5c6cb;
+  border: 2px solid var(--forest-sage);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  box-shadow: 0 4px 20px var(--shadow-medium);
 }
 
 .error-icon {

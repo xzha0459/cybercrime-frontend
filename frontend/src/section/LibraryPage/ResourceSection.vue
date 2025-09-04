@@ -169,29 +169,77 @@
           </div>
         </div>
       </div>
+
+      <!-- View More Button -->
+      <div class="view-more-section">
+        <button class="view-more-btn" @click="showAllContent = true">
+          <span>View More</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- All Content Modal -->
+    <div v-if="showAllContent" class="modal-overlay" @click="showAllContent = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">All Learning Video Resources</h2>
+          <button class="modal-close" @click="showAllContent = false">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="content-grid">
+            <div v-for="video in allVideos" :key="video.id" class="content-card" @click="loadVideo(video.id)">
+              <div class="card-thumbnail">
+                <img :src="getYouTubeThumbnail(video.link)" :alt="video.title" class="thumbnail-image" />
+                <div class="play-overlay">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div class="duration-badge">{{ video.suggested_reading_time }} min</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">{{ video.title }}</h3>
+                <p class="card-author">by {{ video.author }}</p>
+                <p class="card-date">{{ video.publish_date }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import YoutubePlayer from '@/components/YoutubePlayer.vue'
 
 const videos = ref([])
+const allVideos = ref([])
 const currentIndex = ref(0)
 const playVideo = ref(false)
-const handleSaveProgress = ({ id, time }) => {
+const showAllContent = ref(false)
+const handleSaveProgress = () => {
+  // Handle save progress functionality
 }
 
-const relatedItems = ref([])
-const showRelated = ref(false)
+// const relatedItems = ref([])
+// const showRelated = ref(false)
 
 const relatedVideos = ref([])
 const relatedQuiz = ref(null)
 const showRecommendations = ref(false)
 
 
-const currentVideo = computed(() => videos.value[currentIndex.value] || {})
+// const currentVideo = computed(() => videos.value[currentIndex.value] || {})
 
 const selectedContentType = ref('all')
 const selectedDuration = ref('all')
@@ -240,14 +288,25 @@ const fetchVideos = async () => {
     const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/')
     const data = await res.json()
     videos.value = data
+    allVideos.value = data // Store all videos for the modal
   } catch (err) {
     console.error('Error fetching videos:', err)
   }
 }
 
+// const fetchAllVideos = async () => {
+//   try {
+//     const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/')
+//     const data = await res.json()
+//     allVideos.value = data
+//   } catch (err) {
+//     console.error('Error fetching all videos:', err)
+//   }
+// }
+
 
 const extractYouTubeId = (url) => {
-  const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/
+  const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
   const match = url.match(regex)
   return match ? match[1] : null
 }
@@ -262,9 +321,9 @@ const loadVideo = (id) => {
   if (index !== -1) {
     currentIndex.value = index
     showRecommendations.value = false
-    showRecommendations.value = false
     relatedVideos.value = []
     relatedQuiz.value = null
+    showAllContent.value = false // Close modal when video is loaded
   }
 }
 
@@ -275,7 +334,7 @@ const loadVideoFromRecommendation = (video) => {
   if (index !== -1) {
     currentIndex.value = index
   } else {
-    
+
     videos.value.push(video)
     currentIndex.value = videos.value.length - 1
   }
@@ -302,16 +361,16 @@ const prevVideo = () => {
 }
 
 
-const fetchRelatedItems = async (videoId) => {
-  try {
-    const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${videoId}/related/`)
-    const data = await res.json()
-    relatedItems.value = data
-    showRelated.value = true
-  } catch (err) {
-    console.error("Failed to load related content:", err)
-  }
-}
+// const fetchRelatedItems = async (videoId) => {
+//   try {
+//     const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${videoId}/related/`)
+//     const data = await res.json()
+//     relatedItems.value = data
+//     showRelated.value = true
+//   } catch (err) {
+//     console.error("Failed to load related content:", err)
+//   }
+// }
 
 const handleVideoEnded = (payload) => {
   relatedVideos.value = payload.relatedVideos
@@ -353,8 +412,33 @@ onMounted(fetchVideos)
   display: flex;
   justify-content: center;
   gap: 2rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
+}
+
+/* View More Section */
+.view-more-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.view-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: var(--forest-medium);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.view-more-btn:hover {
+  background: var(--forest-dark);
 }
 
 .filter-group {
@@ -415,7 +499,7 @@ onMounted(fetchVideos)
 }
 
 .content-info {
-  flex: 1;
+  flex: 0.4;
   padding: 3rem;
   display: flex;
   flex-direction: column;
@@ -578,17 +662,17 @@ onMounted(fetchVideos)
 }
 
 .video-preview {
-  flex: 1;
+  flex: 0.6;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   background: transparent;
   border-radius: 0;
-  overflow: visible; 
+  overflow: visible;
   width: 100%;
-  height: auto;    
-  aspect-ratio: unset; 
+  height: auto;
+  aspect-ratio: unset;
   position: relative;
 }
 
@@ -801,14 +885,14 @@ onMounted(fetchVideos)
 
   .video-content {
   display: flex;
-  flex-direction: column; 
-  height: auto; 
+  flex-direction: column;
+  height: auto;
   overflow: visible;
 }
 
   .video-preview {
   height: auto;
-  aspect-ratio: unset; 
+  aspect-ratio: unset;
 }
   .video-meta,
   .video-description {
@@ -845,7 +929,7 @@ onMounted(fetchVideos)
     border: none;
   }
 
-  
+
   .content-info {
     padding: 1rem;
     font-size: 0.9rem;
@@ -873,6 +957,197 @@ onMounted(fetchVideos)
 
   .nav-next {
     right: -20px;
+  }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-light);
+}
+
+.modal-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 2rem;
+  max-height: calc(90vh - 120px);
+  overflow-y: auto;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.content-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+}
+
+.content-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-thumbnail {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.content-card:hover .play-overlay {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.duration-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.card-content {
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-author {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.25rem 0;
+}
+
+.card-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    max-height: calc(95vh - 100px);
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .card-thumbnail {
+    height: 200px;
   }
 }
 </style>

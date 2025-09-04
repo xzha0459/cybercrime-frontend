@@ -63,17 +63,17 @@
 
       <!-- 分页控件 -->
       <div v-if="totalPages > 1" class="pagination">
-        <button 
-          @click="goToPage(currentPage - 1)" 
+        <button
+          @click="goToPage(currentPage - 1)"
           :disabled="currentPage === 1"
           class="page-btn prev-btn"
         >
           Previous
         </button>
-        
+
         <div class="page-numbers">
-          <span 
-            v-for="page in visiblePages" 
+          <span
+            v-for="page in visiblePages"
             :key="page"
             @click="goToPage(page)"
             :class="['page-number', { active: page === currentPage }]"
@@ -81,9 +81,9 @@
             {{ page }}
           </span>
         </div>
-        
-        <button 
-          @click="goToPage(currentPage + 1)" 
+
+        <button
+          @click="goToPage(currentPage + 1)"
           :disabled="currentPage === totalPages"
           class="page-btn next-btn"
         >
@@ -135,13 +135,61 @@
             :key="index"
             class="question-item"
           >
-            <div class="question-header">
-              <span class="question-number">Q{{ index + 1 }}</span>
-              <span class="answer-result" :class="qa.is_correct ? 'correct' : 'incorrect'">
+            <!-- 题目内容 -->
+            <div v-if="qa.question" class="question-content">
+              <div class="question-text">
+                <strong>Q{{ index + 1 }}:</strong> {{ qa.question.question_text }}
+              </div>
+
+              <!-- 选项列表 -->
+              <div class="options-list">
+                <div
+                  v-for="(option, optIndex) in qa.question.options"
+                  :key="optIndex"
+                  class="option-item"
+                  :class="{
+                    'correct-option': option.is_answer,
+                    'user-selected': qa.chosen_answer === option.identifier,
+                    'wrong-selected': qa.chosen_answer === option.identifier && !option.is_answer
+                  }"
+                >
+                  <span class="option-identifier">{{ option.identifier }}.</span>
+                  <span class="option-text">{{ option.text }}</span>
+                  <span v-if="option.is_answer" class="correct-mark">✓</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="answer-info">
+              <span class="user-answer">
+                Your answer: {{ getUserAnswerText(qa) }}
+              </span>
+              <span
+                class="answer-result"
+                :class="qa.is_correct ? 'correct' : 'incorrect'"
+                @click="toggleQuestionExpansion(index)"
+                style="cursor: pointer;"
+              >
                 {{ qa.is_correct ? 'Correct' : 'Incorrect' }}
+                <span class="expand-hint">(Click to see details)</span>
               </span>
             </div>
-            <p class="user-answer">Your answer: Option {{ String.fromCharCode(65 + qa.chosen_answer) }}</p>
+
+            <!-- 展开的正确答案和解释 -->
+            <div v-if="isQuestionExpanded(index)" class="explanation-section">
+              <div class="explanation-content">
+                <h5>Answer Details & Explanation:</h5>
+                <p class="correct-answer">
+                  <strong>Correct Answer:</strong> {{ getCorrectAnswerText(qa) }}
+                </p>
+                <div v-if="getExplanationText(qa)" class="explanation-text">
+                  <strong>Explanation:</strong> {{ getExplanationText(qa) }}
+                </div>
+                <div v-else class="explanation-text no-explanation">
+                  <strong>Explanation:</strong> No explanation available for this question.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -161,7 +209,8 @@ export default {
       error: null,
       selectedAttempt: null,
       currentPage: 1,
-      itemsPerPage: 5
+      itemsPerPage: 5,
+      expandedQuestions: new Set() // 跟踪展开的问题
     }
   },
   computed: {
@@ -195,15 +244,15 @@ export default {
       const maxVisible = 5
       let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2))
       let end = Math.min(this.totalPages, start + maxVisible - 1)
-      
+
       if (end - start + 1 < maxVisible) {
         start = Math.max(1, end - maxVisible + 1)
       }
-      
+
       for (let i = start; i <= end; i++) {
         pages.push(i)
       }
-      
+
       return pages
     }
   },
@@ -266,7 +315,8 @@ export default {
         })
 
         if (response.ok) {
-          this.selectedAttempt = await response.json()
+          const detailedAttempt = await response.json()
+          this.selectedAttempt = detailedAttempt
         } else {
           this.selectedAttempt = attempt // 如果无法获取详情，使用基本信息
         }
@@ -279,6 +329,81 @@ export default {
     // 关闭模态框
     closeModal() {
       this.selectedAttempt = null
+      this.expandedQuestions.clear() // 清空展开状态
+    },
+
+    // 切换问题展开状态
+    toggleQuestionExpansion(index) {
+      if (this.expandedQuestions.has(index)) {
+        this.expandedQuestions.delete(index)
+      } else {
+        this.expandedQuestions.add(index)
+      }
+    },
+
+    // 检查问题是否已展开
+    isQuestionExpanded(index) {
+      return this.expandedQuestions.has(index)
+    },
+
+    // 获取用户答案的文本
+    getUserAnswerText(qa) {
+      if (!qa.chosen_answer) return 'No answer provided'
+
+      if (qa.question && qa.question.options) {
+        const selectedOption = qa.question.options.find(opt => opt.identifier === qa.chosen_answer)
+        if (selectedOption) {
+          return `${qa.chosen_answer}. ${selectedOption.text}`
+        }
+      }
+
+      return `Option ${qa.chosen_answer}`
+    },
+
+    // 获取正确答案的文本
+    getCorrectAnswerText(qa) {
+      if (qa.question && qa.question.options) {
+        const correctOption = qa.question.options.find(opt => opt.is_answer)
+        if (correctOption) {
+          return `${correctOption.identifier}. ${correctOption.text}`
+        }
+      }
+
+      return 'Correct answer not available'
+    },
+
+    // 获取解释文本
+    getExplanationText(qa) {
+      // 首先检查question对象中是否有explanation
+      if (qa.question && qa.question.explanation) {
+        return qa.question.explanation
+      }
+
+      // 如果question对象中没有，检查qa对象本身是否有explanation
+      if (qa.explanation) {
+        return qa.explanation
+      }
+
+      // 返回null表示没有解释
+      return null
+    },
+
+    // 获取正确答案的索引
+    getCorrectAnswerIndex(qa) {
+      // 如果API响应中有正确答案信息，使用它
+      if (qa.correct_answer_index !== undefined) {
+        return qa.correct_answer_index
+      }
+
+      // 如果API响应中有正确答案的identifier，尝试找到对应的索引
+      if (qa.correct_answer_identifier) {
+        // 这里需要根据实际的题目数据结构来查找
+        // 暂时返回一个占位符
+        return 'A' // 显示为Option A
+      }
+
+      // 默认返回A选项
+      return 0
     },
 
     // 格式化日期
@@ -524,10 +649,10 @@ export default {
 .modal-content {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 15px;
-  padding: 25px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
+  padding: 30px;
+  max-width: 1200px;
+  width: 100;
+  max-height: 90vh;
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -617,20 +742,13 @@ export default {
   border: 1px solid var(--forest-sage);
 }
 
-.question-header {
+.answer-info {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
   align-items: center;
-}
-
-.question-number {
-  font-weight: bold;
-  background: var(--forest-medium);
-  color: var(--forest-light);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
+  margin-bottom: 4px;
+  padding: 2px 0;
+  gap: 20px;
 }
 
 .answer-result.correct {
@@ -647,6 +765,19 @@ export default {
   background: rgba(220, 53, 69, 0.1);
   padding: 4px 8px;
   border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.answer-result.incorrect:hover {
+  background: rgba(220, 53, 69, 0.2);
+  transform: translateY(-1px);
+}
+
+.expand-hint {
+  font-size: 10px;
+  font-weight: normal;
+  opacity: 0.8;
+  margin-left: 5px;
 }
 
 .user-answer {
@@ -654,6 +785,126 @@ export default {
   font-size: 13px;
   color: var(--forest-deep);
   font-weight: 500;
+}
+
+/* 题目内容样式 */
+.question-content {
+  margin-bottom: 20px;
+  padding: 20px;
+}
+
+.question-text {
+  font-size: 16px;
+  color: var(--forest-dark);
+  margin-bottom: 18px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  position: relative;
+}
+
+
+.option-identifier {
+  font-weight: bold;
+  color: var(--forest-dark);
+  margin-right: 10px;
+  min-width: 20px;
+}
+
+.option-text {
+  flex: 1;
+  color: var(--forest-deep);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.correct-mark {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 16px;
+  margin-left: 10px;
+}
+
+/* 正确答案样式 */
+.option-item.correct-option .option-text {
+  color: #28a745;
+  font-weight: 600;
+}
+
+/* 用户选择的答案样式 */
+.option-item.user-selected .option-text {
+  color: #007bff;
+  font-weight: 600;
+}
+
+/* 用户选择错误答案的样式 */
+.option-item.wrong-selected .option-text {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* 展开的解释部分样式 */
+.explanation-section {
+  margin-top: 15px;
+  padding: 15px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.explanation-content h5 {
+  margin: 0 0 12px 0;
+  color: var(--forest-dark);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.correct-answer {
+  margin: 8px 0;
+  padding: 8px 12px;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 6px;
+  font-size: 13px;
+  color: #155724;
+  font-weight: 500;
+}
+
+.explanation-text {
+  margin: 8px 0 0 0;
+  padding: 18px 0;
+  font-size: 15px;
+  color: var(--forest-deep);
+  line-height: 1.7;
+}
+
+.explanation-text.no-explanation {
+  color: #856404;
+  font-style: italic;
+}
+
+.explanation-text strong {
+  color: var(--forest-dark);
+  font-weight: 600;
 }
 
 /* 分页控件样式 */
@@ -724,13 +975,14 @@ export default {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .page-numbers {
     order: 2;
   }
-  
+
   .page-btn {
     order: 1;
   }
 }
 </style>
+

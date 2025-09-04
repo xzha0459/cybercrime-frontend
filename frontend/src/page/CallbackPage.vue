@@ -2,7 +2,6 @@
   <div class="callback-container">
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
-      <p>{{ debugMessage }}</p>
     </div>
     <div v-else-if="error" class="error">
       <h2>Authentication Error</h2>

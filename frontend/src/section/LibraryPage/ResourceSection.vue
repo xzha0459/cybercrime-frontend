@@ -61,7 +61,7 @@
       </div>
 
       <!-- Featured Article Carousel -->
-      <div class="featured-article" v-if="selectedContentType === 'all' || selectedContentType === 'articles'">
+      <!-- <div class="featured-article" v-if="selectedContentType === 'all' || selectedContentType === 'articles'">
         <div class="article-content">
           <div class="content-info">
             <h3 class="article-title">Social Media Privacy Guide</h3>
@@ -77,10 +77,10 @@
               <div class="cover-icon">📱</div>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Navigation Arrows - Updated Style -->
-        <button class="nav-arrow nav-prev">
+        <!-- <button class="nav-arrow nav-prev">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -90,7 +90,7 @@
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-      </div>
+      </div> -->
 
       <!-- Featured Video Carousel (Single Visible Video with Arrows) -->
       <div class="featured-video" v-if="videos.length && (selectedContentType === 'all' || selectedContentType === 'videos')">

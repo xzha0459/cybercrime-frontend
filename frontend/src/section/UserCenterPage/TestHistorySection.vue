@@ -149,8 +149,8 @@
                   class="option-item"
                   :class="{
                     'correct-option': option.is_answer,
-                    'user-selected': qa.chosen_answer === option.identifier,
-                    'wrong-selected': qa.chosen_answer === option.identifier && !option.is_answer
+                    'user-selected': isUserSelectedOption(qa, option),
+                    'wrong-selected': isUserSelectedOption(qa, option) && !option.is_answer
                   }"
                 >
                   <span class="option-identifier">{{ option.identifier }}.</span>
@@ -346,14 +346,24 @@ export default {
       return this.expandedQuestions.has(index)
     },
 
+    // 检查选项是否被用户选中
+    isUserSelectedOption(qa, option) {
+      if (!qa.chosen_answer) return false
+
+      // 直接匹配identifier（现在所有答案都存储为字母标识符）
+      return qa.chosen_answer === option.identifier
+    },
+
     // 获取用户答案的文本
     getUserAnswerText(qa) {
       if (!qa.chosen_answer) return 'No answer provided'
 
       if (qa.question && qa.question.options) {
+        // 直接匹配identifier（现在所有答案都存储为字母标识符）
         const selectedOption = qa.question.options.find(opt => opt.identifier === qa.chosen_answer)
+
         if (selectedOption) {
-          return `${qa.chosen_answer}. ${selectedOption.text}`
+          return `${selectedOption.identifier}. ${selectedOption.text}`
         }
       }
 

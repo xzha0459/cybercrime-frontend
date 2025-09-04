@@ -387,8 +387,10 @@ export default {
             const correctOption = question.options.find(opt => opt.is_answer === true)
             isCorrect = userAnswer !== null && correctOption && userAnswer === correctOption.identifier
           } else if (i === currentStep.value - 1) {
-            // 当前题目
-            userAnswer = selectedAnswer.value
+            // 当前题目 - 获取选项的identifier而不是索引
+            if (selectedAnswer.value !== null && question.options[selectedAnswer.value]) {
+              userAnswer = question.options[selectedAnswer.value].identifier
+            }
             // 找到正确答案的identifier
             const correctOption = question.options.find(opt => opt.is_answer === true)
             isCorrect = userAnswer !== null && correctOption && userAnswer === correctOption.identifier

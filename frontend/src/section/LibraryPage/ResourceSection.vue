@@ -10,26 +10,58 @@
     <div class="section-content">
       <!-- Filter Controls -->
       <div class="filter-controls">
+        <!-- Content Type Filter -->
         <div class="filter-group">
           <label class="filter-label">Content Type:</label>
           <div class="filter-buttons">
-            <button class="filter-btn active">All</button>
-            <button class="filter-btn">Videos</button>
-            <button class="filter-btn">Articles</button>
+            <button
+              class="filter-btn"
+              :class="{ active: selectedContentType === 'all' }"
+              @click="applyContentTypeFilter('all')"
+            >All</button>
+            <button
+              class="filter-btn"
+              :class="{ active: selectedContentType === 'videos' }"
+              @click="applyContentTypeFilter('videos')"
+            >Videos</button>
+            <button
+              class="filter-btn"
+              :class="{ active: selectedContentType === 'articles' }"
+              @click="applyContentTypeFilter('articles')"
+            >Articles</button>
           </div>
         </div>
+
+        <!-- Duration Filter -->
         <div class="filter-group">
           <label class="filter-label">Duration:</label>
           <div class="filter-buttons">
-            <button class="filter-btn active">All</button>
-            <button class="filter-btn">Under 3 min</button>
-            <button class="filter-btn">3-5 min</button>
+            <button
+              class="filter-btn"
+              :class="{ active: selectedDuration === 'all' }"
+              @click="applyDurationFilter('all')"
+            >All</button>
+            <button
+              class="filter-btn"
+              :class="{ active: selectedDuration === 'under3' }"
+              @click="applyDurationFilter('under3')"
+            >Under 3 min</button>
+            <button
+              class="filter-btn"
+              :class="{ active: selectedDuration === '3to5' }"
+              @click="applyDurationFilter('3to5')"
+            >3–5 min</button>
+            <button
+              class="filter-btn"
+              :class="{ active: selectedDuration === 'over10' }"
+              @click="applyDurationFilter('over10')"
+            >10+ min</button>
           </div>
         </div>
       </div>
 
       <!-- Featured Article Carousel -->
-      <div class="featured-article">
+      <div class="featured-article" v-if="selectedContentType === 'all' || selectedContentType === 'articles'">
         <div class="article-content">
           <div class="content-info">
             <h3 class="article-title">Social Media Privacy Guide</h3>
@@ -60,49 +92,238 @@
         </button>
       </div>
 
-      <!-- Featured Video Carousel -->
-      <div class="featured-video">
+      <!-- Featured Video Carousel (Single Visible Video with Arrows) -->
+      <div class="featured-video" v-if="videos.length && (selectedContentType === 'all' || selectedContentType === 'videos')">
         <div class="video-content">
           <div class="content-info">
-            <h3 class="video-title">Phishing Email Detection</h3>
-            <p class="video-description">Learn to identify common phishing email red flags in just 3 minutes. This comprehensive guide will help you spot suspicious emails and protect yourself from cyber threats. Perfect for quick learning during breaks.</p>
+            <h3 class="video-title">{{ videos[currentIndex].title }}</h3>
+            <div class="video-description">
+              <span>Video by: {{ videos[currentIndex].author }}</span><br />
+              <span>Published date: {{ videos[currentIndex].publish_date }}</span>
+            </div>
             <div class="video-meta">
               <span class="video-type">Video</span>
-              <span class="video-duration">3:45 min</span>
+              <span class="video-duration">{{ videos[currentIndex].suggested_reading_time }} min</span>
             </div>
-            <button class="play-btn">Play</button>
           </div>
+
           <div class="video-preview">
-            <div class="preview-image">
-              <div class="play-icon">▶</div>
-              <div class="duration-badge">3:45</div>
-            </div>
+            <YoutubePlayer
+              v-if="videos.length"
+              :key="videos[currentIndex].id"
+              :videoId="extractYouTubeId(videos[currentIndex].link)"
+              :videoKey="videos[currentIndex].id"
+              @save-progress="handleSaveProgress"
+              @video-ended="handleVideoEnded"
+            />
           </div>
         </div>
 
-        <!-- Navigation Arrows - Updated Style -->
-        <button class="nav-arrow nav-prev">
+        <!-- Navigation Arrows -->
+        <button class="nav-arrow nav-prev absolute left-[-30px] top-1/2 transform -translate-y-1/2 z-10" @click="prevVideo">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
-        <button class="nav-arrow nav-next">
+        <button class="nav-arrow nav-next absolute right-[-30px] top-1/2 transform -translate-y-1/2 z-10" @click="nextVideo">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
+
+        <!-- Related Suggestions -->
+        <div v-if="showRecommendations" class="related-content">
+          <h2 class="related-content__heading">Recommended for You</h2>
+
+          <div v-if="relatedVideos.length" class="related-content__videos">
+            <h3 class="related-content__section-title">Related Videos</h3>
+            <ul class="related-content__video-list">
+              <li v-for="video in relatedVideos" :key="video.id" class="related-content__video-item">
+                <button class="related-content__video-link" @click="loadVideoFromRecommendation(video)">
+                  {{ video.title }}
+                </button>
+                <span class="related-content__video-time">— {{ video.suggested_reading_time }} min</span>
+              </li>
+            </ul>
+          </div>
+
+          <div v-if="relatedQuiz" class="related-content__quiz">
+            <h3 class="related-content__section-title">Quick Quiz: {{ relatedQuiz.question_text }}</h3>
+            <ul class="related-content__quiz-options">
+              <li v-for="option in relatedQuiz.options" :key="option.identifier" class="related-content__quiz-option">
+                <label class="related-content__quiz-label">
+                  <input
+                    type="radio"
+                    :name="relatedQuiz.id"
+                    :value="option.identifier"
+                    class="related-content__quiz-input"
+                  />
+                  {{ option.identifier }}. {{ option.text }}
+                </label>
+              </li>
+            </ul>
+            <details class="related-content__explanation">
+              <summary class="related-content__explanation-toggle">Show Explanation</summary>
+              <p class="related-content__explanation-text">{{ relatedQuiz.explanation }}</p>
+            </details>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </template>
 
-<script>
-export default {
-  name: 'ResourceSection'
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import YoutubePlayer from '@/components/YoutubePlayer.vue'
+
+const videos = ref([])
+const currentIndex = ref(0)
+const playVideo = ref(false)
+const handleSaveProgress = ({ id, time }) => {
 }
+
+const relatedItems = ref([])
+const showRelated = ref(false)
+
+const relatedVideos = ref([])
+const relatedQuiz = ref(null)
+const showRecommendations = ref(false)
+
+
+const currentVideo = computed(() => videos.value[currentIndex.value] || {})
+
+const selectedContentType = ref('all')
+const selectedDuration = ref('all')
+
+const applyDurationFilter = async (duration) => {
+  selectedDuration.value = duration
+  await fetchFilteredVideos()
+}
+
+const applyContentTypeFilter = async (type) => {
+  selectedContentType.value = type
+  await fetchFilteredVideos()
+}
+
+const fetchFilteredVideos = async () => {
+  let url = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/'
+  const params = new URLSearchParams()
+
+  if (selectedDuration.value === 'under3') {
+    params.append('min_time', 0)
+    params.append('max_time', 2)
+  } else if (selectedDuration.value === '3to5') {
+    params.append('min_time', 3)
+    params.append('max_time', 5)
+  } else if (selectedDuration.value === 'over10') {
+    params.append('min_time', 10)
+  }
+
+  if (selectedDuration.value !== 'all') {
+    url = `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/filter/?${params.toString()}`
+  }
+
+  try {
+    const res = await fetch(url)
+    const data = await res.json()
+    videos.value = data
+    currentIndex.value = 0
+    showRecommendations.value = false
+  } catch (err) {
+    console.error('Error fetching videos:', err)
+  }
+}
+
+const fetchVideos = async () => {
+  try {
+    const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/')
+    const data = await res.json()
+    videos.value = data
+  } catch (err) {
+    console.error('Error fetching videos:', err)
+  }
+}
+
+
+const extractYouTubeId = (url) => {
+  const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/
+  const match = url.match(regex)
+  return match ? match[1] : null
+}
+
+const getYouTubeThumbnail = (url) => {
+  const id = extractYouTubeId(url)
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : ''
+}
+
+const loadVideo = (id) => {
+  const index = videos.value.findIndex(v => v.id === id)
+  if (index !== -1) {
+    currentIndex.value = index
+    showRecommendations.value = false
+    showRecommendations.value = false
+    relatedVideos.value = []
+    relatedQuiz.value = null
+  }
+}
+
+
+const loadVideoFromRecommendation = (video) => {
+  const index = videos.value.findIndex(v => v.id === video.id)
+
+  if (index !== -1) {
+    currentIndex.value = index
+  } else {
+    
+    videos.value.push(video)
+    currentIndex.value = videos.value.length - 1
+  }
+
+  showRecommendations.value = false
+}
+
+
+const nextVideo = () => {
+  showRecommendations.value = false
+  relatedVideos.value = []
+  relatedQuiz.value = null
+  currentIndex.value = (currentIndex.value + 1) % videos.value.length
+  playVideo.value = false
+}
+
+
+const prevVideo = () => {
+  showRecommendations.value = false
+  relatedVideos.value = []
+  relatedQuiz.value = null
+  currentIndex.value = (currentIndex.value - 1 + videos.value.length) % videos.value.length
+  playVideo.value = false
+}
+
+
+const fetchRelatedItems = async (videoId) => {
+  try {
+    const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${videoId}/related/`)
+    const data = await res.json()
+    relatedItems.value = data
+    showRelated.value = true
+  } catch (err) {
+    console.error("Failed to load related content:", err)
+  }
+}
+
+const handleVideoEnded = (payload) => {
+  relatedVideos.value = payload.relatedVideos
+  relatedQuiz.value = payload.relatedQuiz
+  showRecommendations.value = true
+}
+
+onMounted(fetchVideos)
 </script>
 
 <style scoped>
+
 .resource-section {
   padding: 3rem 0;
   margin-bottom: 3rem;
@@ -296,7 +517,8 @@ export default {
 
 .video-content {
   display: flex;
-  min-height: 400px;
+  height: 420px;
+  overflow: hidden;
 }
 
 .video-title {
@@ -357,10 +579,16 @@ export default {
 
 .video-preview {
   flex: 1;
-  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible; 
+  width: 100%;
+  height: auto;    
+  aspect-ratio: unset; 
   position: relative;
 }
 
@@ -433,6 +661,34 @@ export default {
   right: -25px;
 }
 
+.youtube-embed-wrapper {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0e0;
+}
+
+
 /* Active state for arrows */
 .nav-arrow:active {
   transform: translateY(-50%) scale(0.95);
@@ -442,6 +698,69 @@ export default {
 .nav-arrow:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(139, 154, 139, 0.3);
+}
+
+/* Related Contents */
+
+.related-content {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.related-content__heading {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.related-content__section-title {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.related-content__video-list {
+  list-style: none;
+  padding: 0;
+}
+
+.related-content__video-item {
+  margin-bottom: 0.5rem;
+}
+
+.related-content__video-link {
+  color: #0056b3;
+  text-decoration: none;
+}
+
+.related-content__video-time {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.related-content__quiz-options {
+  list-style: none;
+  padding: 0;
+}
+
+.related-content__quiz-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.related-content__explanation {
+  margin-top: 1rem;
+}
+
+.related-content__explanation-toggle {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.related-content__explanation-text {
+  margin-top: 0.5rem;
+  color: #444;
 }
 
 /* Responsive Design */
@@ -475,17 +794,64 @@ export default {
     text-align: center;
   }
 
-  .article-content,
-  .video-content {
+  .article-content {
     flex-direction: column;
+    min-height: unset;
   }
 
-  .content-info {
-    padding: 2rem;
-  }
+  .video-content {
+  display: flex;
+  flex-direction: column; 
+  height: auto; 
+  overflow: visible;
+}
 
-  .article-cover,
   .video-preview {
+  height: auto;
+  aspect-ratio: unset; 
+}
+  .video-meta,
+  .video-description {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .video-title {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .video-preview {
+    margin-top: 1rem;
+  }
+
+  .iframe-container {
+    width: 100%;
+    height: auto;
+    padding-bottom: 56.25%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .iframe-container iframe,
+  .iframe-container .youtube-embed-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    border: none;
+  }
+
+  
+  .content-info {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .article-cover {
     min-height: 250px;
   }
 
@@ -507,13 +873,6 @@ export default {
 
   .nav-next {
     right: -20px;
-  }
-}
-
-/* Very small screens - hide arrows completely */
-@media (max-width: 480px) {
-  .nav-arrow {
-    display: none;
   }
 }
 </style>

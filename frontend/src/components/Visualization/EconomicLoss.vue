@@ -148,7 +148,7 @@ export default {
       if (!this.chartData.length) return {}
 
       const sortedData = this.getSortedData()
-      const categories = sortedData.map(d => d.shortName)
+      const categories = sortedData.map(d => d.name)
       const lossData = sortedData.map(d => d.loss)
       const rateData = sortedData.map(d => d.victimRate)
 
@@ -188,7 +188,7 @@ export default {
           yAxisIndex: this.displayMode === 'combo' ? 1 : 0,
           data: rateData,
           lineStyle: {
-            width: 3,
+            width: 5,
             color: '#8b5cf6'
           },
           itemStyle: {
@@ -284,8 +284,8 @@ export default {
           data: categories,
           axisLabel: {
             interval: 0,
-            rotate: 15,
-            fontSize: 11
+            rotate: 0,
+            fontSize: 10
           }
         },
         yAxis,
@@ -502,11 +502,7 @@ export default {
     },
 
     getSortedData() {
-      return [...this.chartData].sort((a, b) => {
-        const aVal = a[this.sortBy] || 0
-        const bVal = b[this.sortBy] || 0
-        return this.sortDirection === 'desc' ? bVal - aVal : aVal - bVal
-      })
+      return [...this.chartData].sort((a, b) => b.loss - a.loss)
     },
 
     getChartTitle() {
@@ -534,8 +530,7 @@ export default {
 .economic-loss-section {
   background: var(--bg-primary);
   border-radius: 12px;
-
-
+  padding: 2rem;
   font-family: inherit;
 }
 
@@ -591,8 +586,6 @@ export default {
 
 .download-btn:hover:not(:disabled) {
   background: var(--forest-medium);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .download-btn:disabled {
@@ -645,7 +638,6 @@ export default {
 
 .retry-btn:hover {
   background: var(--forest-deep);
-  transform: translateY(-1px);
 }
 
 .filter-controls {
@@ -720,10 +712,6 @@ export default {
   text-align: center;
 }
 
-.summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px var(--shadow-medium);
-}
 
 .summary-card.high-impact {
   background: linear-gradient(135deg, var(--forest-light) 0%, var(--forest-sage) 100%);
@@ -737,8 +725,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .card-icon svg {
@@ -818,13 +804,6 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .header h3 {
-    font-size: 1.3rem;
-  }
-
-  .header p {
-    font-size: 0.85rem;
-  }
 
   .summary-grid {
     grid-template-columns: 1fr;

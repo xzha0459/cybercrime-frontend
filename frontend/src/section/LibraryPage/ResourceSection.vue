@@ -382,12 +382,6 @@ onMounted(fetchVideos)
 </script>
 
 <style scoped>
-
-.resource-section {
-  padding: 3rem 0;
-  margin-bottom: 3rem;
-}
-
 .section-header {
   text-align: center;
   margin-bottom: 3rem;

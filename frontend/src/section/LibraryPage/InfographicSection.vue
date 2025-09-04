@@ -2,7 +2,7 @@
   <section class="infographic-section">
     <!-- 修改header结构 -->
     <div class="section-header">
-      <h2 class="section-title">Cybersecurity Overview</h2>
+      <h2 class="section-title">Data Insights</h2>
       <!-- <p class="section-description">
         Here's what happened in the past 28 days - Real-time data insights and threat analysis
       </p> -->
@@ -43,7 +43,6 @@ export default {
 
 .section-header {
   text-align: center;
-  margin-bottom: 3rem;
   position: relative;
 }
 
@@ -51,7 +50,7 @@ export default {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  /* margin-bottom: 0.25rem; */
 }
 
 .section-description {

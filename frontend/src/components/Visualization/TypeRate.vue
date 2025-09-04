@@ -418,7 +418,6 @@ export default {
   background: var(--bg-primary);
   border-radius: 12px;
   padding: 2rem;
-  margin: 2rem 0;
   font-family: inherit;
 }
 
@@ -475,8 +474,6 @@ export default {
 
 .download-btn:hover:not(:disabled) {
   background: var(--forest-medium);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .download-btn:disabled {
@@ -591,10 +588,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-.crime-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px var(--shadow-medium);
-}
 
 .card-header {
   padding: 1.5rem 1.5rem 1rem 1.5rem;

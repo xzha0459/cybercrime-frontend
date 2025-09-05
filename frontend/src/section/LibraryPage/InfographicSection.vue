@@ -14,6 +14,15 @@
 
       <!-- Cybercrime Type Analysis Combo Chart -->
       <EconomicLoss />
+
+      <!-- Financial Loss Comparison Radar Chart -->
+      <RadarChart />
+
+      <!-- Financial Loss Waterfall Analysis -->
+      <WaterfallChart />
+
+      <!-- Financial Impact Comparison Grouped Bar Chart -->
+      <GroupedBarChart />
     </div>
   </section>
 </template>
@@ -21,12 +30,18 @@
 <script>
 import TypeRate from '@/components/Visualization/TypeRate.vue'
 import EconomicLoss from '@/components/Visualization/EconomicLoss.vue'
+import RadarChart from '@/components/Visualization/Radarchart.vue'
+import WaterfallChart from '@/components/Visualization/Waterfall.vue'
+import GroupedBarChart from '@/components/Visualization/GroupedBarChart.vue'
 
 export default {
   name: 'InfographicSection',
   components: {
     TypeRate,
-    'EconomicLoss': EconomicLoss
+    'EconomicLoss': EconomicLoss,
+    RadarChart,
+    WaterfallChart,
+    GroupedBarChart
   },
   data() {
     return {

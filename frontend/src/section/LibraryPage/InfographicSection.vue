@@ -2,7 +2,7 @@
   <section class="infographic-section">
     <!-- 修改header结构 -->
     <div class="section-header">
-      <h2 class="section-title">Data Insights</h2>
+      <h2 class="section-title">Cybercrime Infographic</h2>
       <!-- <p class="section-description">
         Here's what happened in the past 28 days - Real-time data insights and threat analysis
       </p> -->
@@ -10,7 +10,7 @@
 
     <div class="section-content">
       <!-- Financial Loss Comparison Radar Chart -->
-      <RadarChart />
+      <!-- <RadarChart /> -->
 
 
       <!-- Financial Impact Comparison Grouped Bar Chart -->
@@ -23,14 +23,15 @@
 </template>
 
 <script>
-import RadarChart from '@/components/Visualization/Radarchart.vue'
+
+// import RadarChart from '@/components/Visualization/Radarchart.vue'
 import GroupedBarChart from '@/components/Visualization/GroupedBarChart.vue'
 import HeatmapChart from '@/components/Visualization/Heatmap.vue'
 
 export default {
   name: 'InfographicSection',
   components: {
-    RadarChart,
+    // RadarChart,
     GroupedBarChart,
     HeatmapChart
   },
@@ -44,9 +45,6 @@ export default {
 </script>
 
 <style scoped>
-/* 基础样式结构 */
-
-
 .section-header {
   text-align: center;
   position: relative;
@@ -66,7 +64,6 @@ export default {
   margin: 0 auto 2rem;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .infographic-section {
     padding: 2rem 1.5rem;

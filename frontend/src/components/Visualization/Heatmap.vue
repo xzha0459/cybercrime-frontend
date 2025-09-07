@@ -33,6 +33,9 @@
       <!-- Main ECharts Visualization -->
       <div class="chart-container">
         <div ref="chartRef" class="main-chart"></div>
+        <div class="data-source">
+          <p>Sourced from: © Commonwealth of Australia, Australian Institute of Criminology (AIC)</p>
+        </div>
       </div>
 
       <!-- Insights Panel -->
@@ -743,7 +746,6 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
 
 .chart-container {
@@ -760,6 +762,20 @@ export default {
   min-height: 400px;
   position: relative;
   overflow: hidden;
+}
+
+.data-source {
+  text-align: center;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-light);
+  margin-top: 0.5rem;
+}
+
+.data-source p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 .insights-panel {
@@ -779,7 +795,7 @@ export default {
 }
 
 .insight-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   padding: 1.5rem;
   background: var(--bg-secondary);
   border-radius: 8px;

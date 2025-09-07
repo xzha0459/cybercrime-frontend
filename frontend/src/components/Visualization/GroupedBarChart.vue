@@ -1,35 +1,149 @@
 <template>
-  <div class="grouped-bar-chart-container">
+  <div class="grouped-bar-section">
+    <div class="header">
+      <div class="header-content">
+        <div class="title-section">
+          <h3>Cybercrime Financial Impact Analysis</h3>
+          <p>Comprehensive comparison of financial losses across different cybercrime types</p>
+        </div>
+        <div class="download-section">
+          <button @click="exportChart" class="download-btn" :disabled="loading || error">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            Download Chart
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
       <p>Loading financial loss data...</p>
     </div>
 
-    <div v-else-if="error" class="error">
-      <p>Error loading data: {{ error }}</p>
+    <div v-else-if="error" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h4>Data Loading Failed</h4>
+      <p>Unable to fetch data, please try again later</p>
       <button @click="fetchData" class="retry-btn">Retry</button>
     </div>
 
-    <div v-else class="chart-wrapper">
-      <div class="chart-header">
-        <div class="chart-controls">
-          <div class="sort-controls">
-            <label for="sort-select" class="sort-label">Sort by:</label>
-            <select
-              id="sort-select"
-              v-model="sortBy"
-              class="sort-select"
-            >
-              <option value="none">Original Order</option>
-              <option value="direct_loss">Direct Loss (High to Low)</option>
-              <option value="additional_costs">Additional Costs (High to Low)</option>
-              <option value="amount_recovered">Amount Recovered (High to Low)</option>
-              <option value="net_loss">Net Loss (High to Low)</option>
-            </select>
+    <div v-else class="content">
+      <!-- Chart Controls -->
+      <div class="chart-controls">
+        <div class="sort-controls">
+          <label for="sort-select" class="sort-label">Sort by:</label>
+          <select
+            id="sort-select"
+            v-model="sortBy"
+            class="sort-select"
+          >
+            <option value="none">Original Order</option>
+            <option value="direct_loss">Direct Loss (High to Low)</option>
+            <option value="additional_costs">Additional Costs (High to Low)</option>
+            <option value="amount_recovered">Amount Recovered (High to Low)</option>
+            <option value="net_loss">Net Loss (High to Low)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Main ECharts Visualization -->
+      <div class="chart-container">
+        <div ref="chartRef" class="main-chart"></div>
+        <div class="data-source">
+          <p>Sourced from: © Commonwealth of Australia, Australian Institute of Criminology (AIC)</p>
+        </div>
+      </div>
+
+      <!-- Insights Panel -->
+      <div v-if="insights" class="insights-panel">
+        <h4>Financial Impact Analysis</h4>
+
+        <!-- Key Statistics -->
+        <div class="insight-section">
+          <h5 class="section-title">Key Financial Figures</h5>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">${{ getMalwareDirectLoss() }}M</div>
+              <div class="stat-label">Malware direct loss amount (highest)</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${{ getOnlineAbuseDirectLoss() }}M</div>
+              <div class="stat-label">Online abuse median direct loss</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${{ getOnlineAbuseNetLoss() }}M</div>
+              <div class="stat-label">Online abuse victims' net loss amount</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">$100M-$350M</div>
+              <div class="stat-label">Median loss range across cybercrime types</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Findings -->
+        <div class="insight-section">
+          <h5 class="section-title">Key Findings</h5>
+          <div class="key-findings">
+            <div class="finding-item">
+              <strong>"Financial impact varies significantly across cybercrime types"</strong>
+            </div>
+            <div class="finding-item">
+              "Identity theft and fraud show the highest financial losses"
+            </div>
+            <div class="finding-item">
+              "Recovery rates are generally low, with most victims unable to recover their losses"
+            </div>
+          </div>
+        </div>
+
+        <!-- Crime Type Analysis -->
+        <div class="insight-section">
+          <h5 class="section-title">Crime Type Characteristics</h5>
+          <div class="crime-analysis">
+            <div class="crime-group">
+              <h6 class="crime-title">High Financial Impact</h6>
+              <ul>
+                <li>Identity theft and fraud typically cause the highest direct losses</li>
+                <li>Additional costs often exceed direct losses due to recovery efforts</li>
+                <li>Low recovery rates compound the financial burden</li>
+              </ul>
+            </div>
+            <div class="crime-group">
+              <h6 class="crime-title">Medium Financial Impact</h6>
+              <ul>
+                <li>Malware and phishing attacks show moderate financial impact</li>
+                <li>Recovery efforts may be more successful for these types</li>
+              </ul>
+            </div>
+            <div class="crime-group">
+              <h6 class="crime-title">Lower Financial Impact</h6>
+              <ul>
+                <li>Some cybercrimes have lower direct financial costs</li>
+                <li>May still incur significant indirect costs</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Recommendations -->
+        <div class="insight-section">
+          <h5 class="section-title">Financial Protection Recommendations</h5>
+          <div class="recommendations">
+            <div class="recommendation-item">
+              <strong>Prevention:</strong> Invest in comprehensive cybersecurity measures to prevent initial losses
+            </div>
+            <div class="recommendation-item">
+              <strong>Insurance:</strong> Consider cyber insurance to mitigate financial impact
+            </div>
+            <div class="recommendation-item">
+              <strong>Recovery:</strong> Act quickly to report incidents and begin recovery processes
+            </div>
           </div>
         </div>
       </div>
-      <div ref="chartRef" class="chart"></div>
     </div>
   </div>
 </template>
@@ -47,6 +161,7 @@ export default {
     const error = ref(null)
     const chartData = ref(null)
     const sortBy = ref('none')
+    const insights = ref(null)
 
     // API base URL - using AWS API Gateway
     const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
@@ -147,15 +262,6 @@ export default {
       }
 
       return {
-        title: {
-          text: 'Cybercrime Financial Impact Comparison',
-          left: 'center',
-          textStyle: {
-            fontSize: 18,
-            fontWeight: 'bold',
-            color: '#2c3e50'
-          }
-        },
         tooltip: {
           trigger: 'axis',
           axisPointer: {
@@ -192,9 +298,9 @@ export default {
           }
         },
         grid: {
-          left: '20%',
+          left: '10%',
           right: '10%',
-          top: '15%',
+          top: '10%',
           bottom: '20%',
           containLabel: false
         },
@@ -352,6 +458,88 @@ export default {
 
         const option = createHorizontalGroupedBarOption(processedData)
         chartInstance.value.setOption(option, true)
+
+        // Generate insights
+        insights.value = generateFinancialInsights(processedData)
+      }
+    }
+
+    // Generate insights
+    const generateFinancialInsights = (processedData) => {
+      const { crimeTypes, dataMap } = processedData
+
+      if (!crimeTypes || crimeTypes.length === 0) {
+        return null
+      }
+
+      return {
+        highestDirectLoss: Math.max(...crimeTypes.map(crime => dataMap[crime]['Median amount directly lost'] || 0)),
+        highestNetLoss: Math.max(...crimeTypes.map(crime => dataMap[crime]['Median amount lost after recoveries'] || 0)),
+        totalRecovered: crimeTypes.reduce((sum, crime) => sum + (dataMap[crime]['Median amount recovered'] || 0), 0),
+        averageRecoveryRate: calculateAverageRecoveryRate(processedData)
+      }
+    }
+
+    // Calculate average recovery rate
+    const calculateAverageRecoveryRate = (processedData) => {
+      const { crimeTypes, dataMap } = processedData
+      let totalRate = 0
+      let validCount = 0
+
+      crimeTypes.forEach(crime => {
+        const directLoss = dataMap[crime]['Median amount directly lost'] || 0
+        const recovered = dataMap[crime]['Median amount recovered'] || 0
+
+        if (directLoss > 0) {
+          totalRate += (recovered / directLoss) * 100
+          validCount++
+        }
+      })
+
+      return validCount > 0 ? (totalRate / validCount).toFixed(1) : '0.0'
+    }
+
+    // Statistics functions
+    const getMalwareDirectLoss = () => {
+      if (!chartData.value || !Array.isArray(chartData.value)) return '0'
+      const malwareData = chartData.value.find(item =>
+        item.cybercrime === 'Malware' &&
+        item.median_type === 'Median amount directly lost'
+      )
+      return malwareData ? malwareData.value.toLocaleString() : '0'
+    }
+
+    const getOnlineAbuseDirectLoss = () => {
+      if (!chartData.value || !Array.isArray(chartData.value)) return '0'
+      const onlineAbuseData = chartData.value.find(item =>
+        item.cybercrime === 'Online abuse and harassment' &&
+        item.median_type === 'Median amount directly lost'
+      )
+      return onlineAbuseData ? onlineAbuseData.value.toLocaleString() : '0'
+    }
+
+    const getOnlineAbuseNetLoss = () => {
+      if (!chartData.value || !Array.isArray(chartData.value)) return '0'
+      const onlineAbuseData = chartData.value.find(item =>
+        item.cybercrime === 'Online abuse and harassment' &&
+        item.median_type === 'Median amount lost after recoveries'
+      )
+      return onlineAbuseData ? onlineAbuseData.value.toLocaleString() : '0'
+    }
+
+    // Export chart
+    const exportChart = () => {
+      if (chartInstance.value) {
+        const url = chartInstance.value.getDataURL({
+          type: 'png',
+          pixelRatio: 2,
+          backgroundColor: '#fff'
+        })
+
+        const link = document.createElement('a')
+        link.download = 'financial-impact-chart.png'
+        link.href = url
+        link.click()
       }
     }
 
@@ -377,56 +565,102 @@ export default {
       loading,
       error,
       sortBy,
-      fetchData
+      insights,
+      fetchData,
+      exportChart,
+      getMalwareDirectLoss,
+      getOnlineAbuseDirectLoss,
+      getOnlineAbuseNetLoss
     }
   }
 }
 </script>
 
 <style scoped>
-.grouped-bar-chart-container {
-  width: 100%;
-  height: 600px;
-  padding: 24px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
+.grouped-bar-section {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 2rem;
+  font-family: inherit;
 }
 
-.grouped-bar-chart-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12, #e74c3c);
-  border-radius: 16px 16px 0 0;
+.header {
+  margin-bottom: 2rem;
 }
 
-.loading {
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.title-section {
+  flex: 1;
+  text-align: left;
+}
+
+.title-section h3 {
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.title-section p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.download-section {
+  flex-shrink: 0;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--forest-dark);
+  color: var(--forest-light);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.download-btn:hover:not(:disabled) {
+  background: var(--forest-medium);
+}
+
+.download-btn:disabled {
+  background: var(--forest-sage);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.loading, .error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #7f8c8d;
-  position: relative;
-  z-index: 1;
+  padding: 4rem 3rem;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(52, 152, 219, 0.1);
-  border-top: 4px solid #3498db;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-light);
+  border-top: 3px solid var(--forest-medium);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+  margin-bottom: 1rem;
 }
 
 @keyframes spin {
@@ -434,84 +668,68 @@ export default {
   100% { transform: rotate(360deg); }
 }
 
-.error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #e74c3c;
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  padding: 20px;
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
-.error p {
-  margin-bottom: 20px;
-  font-size: 16px;
-  font-weight: 500;
+.error-state h4 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .retry-btn {
-  margin-top: 16px;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--forest-dark);
+  color: var(--forest-light);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 2px 8px var(--shadow-light);
 }
 
 .retry-btn:hover {
-  background: linear-gradient(135deg, #2980b9, #1f618d);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+  background: var(--forest-medium);
 }
 
-.chart-wrapper {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-.chart-header {
+.content {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 20px;
+  flex-direction: column;
 }
 
 .chart-controls {
   display: flex;
-  gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .sort-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .sort-label {
-  color: #34495e;
-  font-size: 14px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .sort-select {
-  padding: 8px 12px;
-  border: 2px solid #bdc3c7;
-  border-radius: 8px;
-  background: white;
-  color: #2c3e50;
-  font-size: 12px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  background: var(--text-light);
+  color: var(--text-primary);
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -520,74 +738,224 @@ export default {
 
 .sort-select:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: var(--forest-medium);
+  box-shadow: 0 0 0 2px var(--forest-light);
 }
 
 .sort-select:hover {
-  border-color: #3498db;
+  border-color: var(--forest-medium);
 }
 
-.chart {
+.chart-container {
+  background: var(--text-light);
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 12px var(--shadow-light);
+  border: 1px solid var(--border-light);
+}
+
+.main-chart {
   width: 100%;
   height: 500px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
 }
 
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .grouped-bar-chart-container {
-    height: 550px;
-    padding: 20px;
-  }
+.data-source {
+  text-align: center;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-light);
+  margin-top: 0.5rem;
+}
 
-  .chart {
-    height: 450px;
-  }
+.data-source p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.insights-panel {
+  background: transparent;
+  border-radius: 0;
+  padding: 2rem 0;
+  box-shadow: none;
+  border: none;
+}
+
+.insights-panel h4 {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.insight-section {
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.section-title {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.key-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.finding-item {
+  padding: 1rem;
+  background: var(--forest-light);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--forest-medium) 0%, var(--forest-deep) 100%);
+  color: var(--forest-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--shadow-light);
+  border: 1px solid var(--forest-deep);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  line-height: 1.3;
+}
+
+.crime-analysis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.crime-group {
+  padding: 1.5rem;
+  background: var(--forest-light);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.crime-title {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.crime-group ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.crime-group li {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.recommendation-item {
+  padding: 1rem;
+  background: var(--forest-light);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
 }
 
 @media (max-width: 768px) {
-  .grouped-bar-chart-container {
-    height: 500px;
-    padding: 16px;
-    border-radius: 12px;
+  .grouped-bar-section {
+    padding: 1rem;
   }
 
-  .chart {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .title-section {
+    text-align: center;
+  }
+
+  .main-chart {
     height: 400px;
+    min-height: 350px;
   }
 
-  .chart-header {
-    margin-bottom: 16px;
+  .insights-panel {
+    padding: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crime-analysis {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-controls {
+    justify-content: center;
   }
 
   .sort-controls {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .sort-select {
     min-width: 100%;
-    font-size: 11px;
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
-  .grouped-bar-chart-container {
-    height: 450px;
-    padding: 12px;
-  }
-
-  .chart {
+  .main-chart {
     height: 350px;
+    min-height: 300px;
   }
 
-  .chart-header {
-    margin-bottom: 12px;
+  .chart-container {
+    padding: 1rem;
   }
 }
 </style>

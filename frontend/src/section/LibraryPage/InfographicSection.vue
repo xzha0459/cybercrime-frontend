@@ -9,39 +9,30 @@
     </div>
 
     <div class="section-content">
-      <!-- Multi-dimensional Cybercrime Victimization Rate Analysis Heatmap -->
-      <TypeRate />
-
-      <!-- Cybercrime Type Analysis Combo Chart -->
-      <EconomicLoss />
-
       <!-- Financial Loss Comparison Radar Chart -->
       <RadarChart />
 
-      <!-- Financial Loss Waterfall Analysis -->
-      <WaterfallChart />
 
       <!-- Financial Impact Comparison Grouped Bar Chart -->
       <GroupedBarChart />
+
+      <!-- Cybercrime Victimization Rate Heatmap by Age Group -->
+      <HeatmapChart />
     </div>
   </section>
 </template>
 
 <script>
-import TypeRate from '@/components/Visualization/TypeRate.vue'
-import EconomicLoss from '@/components/Visualization/EconomicLoss.vue'
 import RadarChart from '@/components/Visualization/Radarchart.vue'
-import WaterfallChart from '@/components/Visualization/Waterfall.vue'
 import GroupedBarChart from '@/components/Visualization/GroupedBarChart.vue'
+import HeatmapChart from '@/components/Visualization/Heatmap.vue'
 
 export default {
   name: 'InfographicSection',
   components: {
-    TypeRate,
-    'EconomicLoss': EconomicLoss,
     RadarChart,
-    WaterfallChart,
-    GroupedBarChart
+    GroupedBarChart,
+    HeatmapChart
   },
   data() {
     return {

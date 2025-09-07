@@ -220,14 +220,6 @@ export default {
 
       // Set chart option
       chartInstance.value.setOption(option)
-
-      // Handle window resize
-      const handleResize = () => {
-        if (chartInstance.value) {
-          chartInstance.value.resize()
-        }
-      }
-      window.addEventListener('resize', handleResize)
     }
 
     // 辅助函数
@@ -250,16 +242,26 @@ export default {
       return colors[index % colors.length] || '#95A5A6'
     }
 
+    // 窗口大小变化处理函数
+    const handleResize = () => {
+      if (chartInstance.value) {
+        chartInstance.value.resize()
+      }
+    }
+
     // Lifecycle hooks
     onMounted(() => {
       fetchData()
+      // 监听窗口大小变化
+      window.addEventListener('resize', handleResize)
     })
 
     onUnmounted(() => {
       if (chartInstance.value) {
         chartInstance.value.dispose()
       }
-      window.removeEventListener('resize', () => {})
+      // 正确移除resize监听器
+      window.removeEventListener('resize', handleResize)
     })
 
     return {

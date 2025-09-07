@@ -67,7 +67,7 @@
           <h5 class="section-title">Key Findings</h5>
           <div class="key-findings">
             <div class="finding-item">
-              <strong>"Young people face the highest cybercrime risk"</strong>
+              <strong>"Age is a significant factor in cybercrime vulnerability"</strong>
             </div>
             <div class="finding-item">
               "18-34 age group has the highest victimization rates across all crime types"
@@ -160,135 +160,72 @@ export default {
     const chartData = ref(null)
     const insights = ref(null)
 
-    // 热力图数据处理逻辑 - 适配victimisation API数据结构
+    // 数据处理函数
     const processHeatmapData = (rawData) => {
-      if (!rawData || rawData.length === 0) {
-        return {
-          ageGroups: [],
-          crimeTypes: [],
-          dataMatrix: [],
-          maxValue: 0
-        }
+      if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
+        return { ageGroups: [], crimeTypes: [], dataMatrix: [], maxValue: 0 }
       }
 
-      // 提取年龄组并进行逻辑排序，排除"All respondents"
-      const ageGroups = [...new Set(rawData.map(item => item.age))]
-        .filter(age => age !== 'All respondents') // 排除"All respondents"
-        .sort((a, b) => {
-          // 自定义排序：确保年龄组按逻辑顺序排列
-          const ageOrder = {
-            'All ages': 0,
-            '18 – 34': 1,
-            '35 – 64': 2,
-            '65+': 3
-          }
-          return (ageOrder[a] || 999) - (ageOrder[b] || 999)
-        })
+      const ageGroups = ['18 – 34', '35 – 64', '65+', 'All ages']
+      const crimeTypes = [
+        'Malware',
+        'Identity crime and misuse',
+        'Fraud and scams',
+        'Online abuse and harassment',
+        'Any cybercrime (all)'
+      ]
 
-      // 提取犯罪类型并进行逻辑排序
-      const crimeTypes = [...new Set(rawData.map(item => item.main_type))].sort((a, b) => {
-        // 自定义排序：确保犯罪类型按逻辑顺序排列
-        const crimeOrder = {
-          'Online abuse and harassment': 0,
-          'Malware': 1,
-          'Identity crime and misuse': 2,
-          'Fraud and scams': 3,
-          'Any cybercrime victimization': 4
-        }
-        return (crimeOrder[a] || 999) - (crimeOrder[b] || 999)
-      })
-
-      // 创建数据矩阵
       const dataMatrix = []
 
-      // 遍历每个年龄组和犯罪类型的组合
       ageGroups.forEach((age, ageIndex) => {
         crimeTypes.forEach((crime, crimeIndex) => {
-          // 查找对应的受害率数据
           const dataPoint = rawData.find(item =>
+            item &&
             item.age === age &&
-            item.main_type === crime
+            item.main_type === crime &&
+            item.prevalence_2024 !== undefined &&
+            item.prevalence_2024 !== null
           )
 
-          // 获取受害率值（prevalence_2024字段）
-          const prevalenceValue = dataPoint ? (dataPoint.prevalence_2024 || 0) : 0
+          const value = dataPoint ? parseFloat(dataPoint.prevalence_2024) : 0
+          const validValue = isNaN(value) ? 0 : Math.max(0, value)
 
-          // 热力图需要的数据格式：[x, y, value]
-          // 调整坐标：X轴为犯罪类型，Y轴为年龄组（从下到上）
-          dataMatrix.push([
-            crimeIndex,  // X轴索引（犯罪类型）
-            ageGroups.length - 1 - ageIndex,  // Y轴索引（年龄组，倒序排列）
-            prevalenceValue  // 受害率值
-          ])
+          dataMatrix.push([crimeIndex, ageIndex, validValue])
         })
       })
 
-      return {
-        ageGroups: ageGroups.reverse(), // 反转年龄组顺序以匹配Y轴倒序
-        crimeTypes,
-        dataMatrix,
-        maxValue: dataMatrix.length > 0 ? Math.max(...dataMatrix.map(item => item[2])) : 0
-      }
+      const maxValue = Math.max(...dataMatrix.map(item => item[2]), 0)
+      return { ageGroups, crimeTypes, dataMatrix, maxValue }
     }
 
-
-    // ECharts热力图配置
+    // ECharts配置生成
     const createHeatmapOption = (processedData) => {
       const { ageGroups, crimeTypes, dataMatrix, maxValue } = processedData
 
       return {
         tooltip: {
-          position: 'top',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          borderColor: 'transparent',
-          textStyle: {
-            color: '#fff',
-            fontSize: 12
-          },
-          formatter: function(params) {
-            const [crimeIndex, ageIndex, value] = params.value
-            const crime = crimeTypes[crimeIndex]
-            const age = ageGroups[ageIndex]
-
-            return `
-              <div style="padding: 8px;">
-                <div style="font-weight: bold; margin-bottom: 6px; color: #3498db;">
-                  ${crime}
-                </div>
-                <div style="margin-bottom: 4px;">
-                  <span style="color: #ecf0f1;">Age Group:</span>
-                  <span style="color: #f39c12; font-weight: bold;"> ${age}</span>
-                </div>
-                <div>
-                  <span style="color: #ecf0f1;">Victimization Rate:</span>
-                  <span style="color: #e74c3c; font-weight: bold;"> ${value.toFixed(1)}%</span>
-                </div>
-              </div>
-            `
-          }
+          show: false
         },
+
         grid: {
-          left: '15%',
-          right: '20%',
+          left: '5%',
+          right: '10%',
           top: '15%',
-          bottom: '20%',
+          bottom: '10%',
           containLabel: true
         },
+
         xAxis: {
           type: 'category',
-          data: crimeTypes,
-          splitArea: {
-            show: true
-          },
+          data: crimeTypes.slice(),
           axisLabel: {
             fontSize: 11,
-            rotate: 0,
-            margin: 15,
             color: '#34495e',
             interval: 0,
+            rotate: 0,
             formatter: function(value) {
-              // 处理长标签，智能换行显示
-              if (value && value.length > 12) {
+              if (!value) return ''
+              if (value.length > 12) {
                 const words = value.split(' ')
                 if (words.length > 1) {
                   const mid = Math.ceil(words.length / 2)
@@ -298,87 +235,42 @@ export default {
               return value
             }
           },
-          axisLine: {
-            show: true,
-            lineStyle: {
-              color: '#bdc3c7'
-            }
-          },
-          axisTick: {
-            show: true,
-            lineStyle: {
-              color: '#bdc3c7'
-            }
-          }
+          splitArea: { show: true },
+          axisLine: { lineStyle: { color: '#bdc3c7' } },
+          axisTick: { lineStyle: { color: '#bdc3c7' } }
         },
+
         yAxis: {
           type: 'category',
-          data: ageGroups,
-          splitArea: {
-            show: true
-          },
+          data: ageGroups.slice(),
           axisLabel: {
             fontSize: 12,
-            margin: 20,
             color: '#34495e',
-            fontWeight: 'bold',
-            formatter: function(value) {
-              // 确保年龄组标签完整显示
-              return value || ''
-            }
+            fontWeight: 'bold'
           },
-          axisLine: {
-            show: true,
-            lineStyle: {
-              color: '#bdc3c7'
-            }
-          },
-          axisTick: {
-            show: true,
-            lineStyle: {
-              color: '#bdc3c7'
-            }
-          }
+          splitArea: { show: true },
+          axisLine: { lineStyle: { color: '#bdc3c7' } },
+          axisTick: { lineStyle: { color: '#bdc3c7' } }
         },
+
         visualMap: {
           min: 0,
-          max: maxValue,
+          max: Math.max(maxValue, 1),
           calculable: true,
           orient: 'vertical',
           left: 'right',
           top: 'center',
-          itemWidth: 25,
-          itemHeight: 180,
-          textStyle: {
-            color: '#34495e',
-            fontSize: 11,
-            fontWeight: 'bold'
-          },
-          textGap: 10,
+          itemWidth: 20,
+          itemHeight: 140,
+          textStyle: { color: '#34495e', fontSize: 11 },
           inRange: {
             color: [
-              '#ffffff',  // 白色（0%）
-              '#f0f8ff',  // 极浅蓝色
-              '#e1f0ff',  // 浅蓝色
-              '#cce7ff',  // 中浅蓝色
-              '#99d6ff',  // 中蓝色
-              '#66c2ff',  // 中深蓝色
-              '#3399ff',  // 深蓝色
-              '#0066cc',  // 更深蓝色
-              '#003d7a'   // 极深蓝色（最高风险）
+              '#ffffff', '#f5f8f5', '#e8f0e8', '#d4e7d4',
+              '#a8d6a8', '#7dc27d', '#529952', '#2d662d', '#1a3d1a'
             ]
-          },
-          formatter: function(value) {
-            return value.toFixed(1) + '%'
-          },
-          // 添加分段标签
-          pieces: [
-            { min: 0, max: 10, label: 'Low Risk' },
-            { min: 10, max: 30, label: 'Medium Risk' },
-            { min: 30, max: 50, label: 'High Risk' },
-            { min: 50, max: 100, label: 'Very High Risk' }
-          ]
+          }
         },
+
         series: [{
           name: 'Victimization Rate',
           type: 'heatmap',
@@ -387,43 +279,79 @@ export default {
             show: true,
             fontSize: 10,
             fontWeight: 'bold',
-            color: '#000000',  // 统一使用黑色文字
+            color: '#000000',
             formatter: function(params) {
-              const value = params.value[2]
-              if (value === 0) {
-                return '0.0%'
+              if (!params || !params.value || !Array.isArray(params.value) || params.value.length < 3) {
+                return '0%'
               }
-              return value.toFixed(1) + '%'
+              const value = params.value[2]
+              return value > 0 ? `${value.toFixed(1)}%` : '0%'
             }
           },
           itemStyle: {
-            borderColor: 'transparent',  // 移除白色边框
-            borderWidth: 0,
-            borderRadius: 0
+            borderColor: 'transparent',
+            borderWidth: 0
           },
           emphasis: {
             itemStyle: {
-              shadowBlur: 15,
-              shadowColor: 'rgba(0, 0, 0, 0.3)',
-              borderColor: 'transparent',  // 悬停时也移除边框
-              borderWidth: 0
-            },
-            label: {
-              fontSize: 12,
-              fontWeight: 'bold',
-              color: '#000000'  // 悬停时也保持黑色文字
+              shadowBlur: 10,
+              shadowColor: 'rgba(0,0,0,0.3)',
+              borderColor: 'transparent'
             }
-          },
-          // 添加动画效果
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'cubicOut'
+          }
         }]
-
       }
     }
 
-    // 可选：添加数据洞察功能
+    // 图表初始化
+    const initHeatmapChart = async (rawData) => {
+      if (!chartRef.value || !rawData) {
+        return
+      }
+
+      try {
+        const processedData = processHeatmapData(rawData)
+
+        if (!processedData || !processedData.dataMatrix || !processedData.dataMatrix.length) {
+          return
+        }
+
+        const container = chartRef.value
+        if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+          setTimeout(() => initHeatmapChart(rawData), 100)
+          return
+        }
+
+        if (chartInstance.value) {
+          chartInstance.value.dispose()
+          chartInstance.value = null
+        }
+
+        await nextTick()
+
+        chartInstance.value = echarts.init(container, null, {
+          renderer: 'canvas',
+          useDirtyRect: false,
+          width: container.offsetWidth,
+          height: container.offsetHeight
+        })
+
+        const option = createHeatmapOption(processedData)
+        chartInstance.value.setOption(option, {
+          notMerge: true,
+          replaceMerge: ['series'],
+          silent: true
+        })
+
+        insights.value = generateHeatmapInsights(processedData)
+
+      } catch (error) {
+        console.error('Error initializing chart:', error)
+        error.value = 'Chart initialization failed: ' + error.message
+      }
+    }
+
+    // 生成洞察
     const generateHeatmapInsights = (processedData) => {
       const { ageGroups, crimeTypes, dataMatrix } = processedData
 
@@ -431,29 +359,13 @@ export default {
         return null
       }
 
-      // 找出最高风险组合
       const maxRiskPoint = dataMatrix.reduce((max, current) =>
         current[2] > max[2] ? current : max
       )
 
-      // 找出最低风险组合
       const minRiskPoint = dataMatrix.reduce((min, current) =>
         current[2] < min[2] ? current : min
       )
-
-      // 计算每个年龄组的平均风险
-      const ageRiskAverage = ageGroups.map((age, ageIndex) => {
-        const ageData = dataMatrix.filter(item => item[1] === ageIndex)
-        const avgRisk = ageData.reduce((sum, item) => sum + item[2], 0) / ageData.length
-        return { age, avgRisk }
-      })
-
-      // 计算每种犯罪的平均风险
-      const crimeRiskAverage = crimeTypes.map((crime, crimeIndex) => {
-        const crimeData = dataMatrix.filter(item => item[0] === crimeIndex)
-        const avgRisk = crimeData.reduce((sum, item) => sum + item[2], 0) / crimeData.length
-        return { crime, avgRisk }
-      })
 
       return {
         highestRisk: {
@@ -465,56 +377,13 @@ export default {
           crime: crimeTypes[minRiskPoint[0]],
           age: ageGroups[minRiskPoint[1]],
           rate: minRiskPoint[2]
-        },
-        ageRankings: ageRiskAverage.sort((a, b) => b.avgRisk - a.avgRisk),
-        crimeRankings: crimeRiskAverage.sort((a, b) => b.avgRisk - a.avgRisk)
-      }
-    }
-
-    // 初始化热力图
-    const initHeatmapChart = (rawData) => {
-      if (!chartRef.value || !rawData) return
-
-      const processedData = processHeatmapData(rawData)
-      const option = createHeatmapOption(processedData)
-
-      if (chartInstance.value) {
-        chartInstance.value.dispose()
-      }
-
-      chartInstance.value = echarts.init(chartRef.value)
-      chartInstance.value.setOption(option)
-
-      // 生成洞察（可选）
-      insights.value = generateHeatmapInsights(processedData)
-
-      // 添加交互功能
-      addHeatmapInteractions(processedData)
-    }
-
-    // 可选：添加交互功能
-    const addHeatmapInteractions = (processedData) => {
-      if (!chartInstance.value) return
-
-      const { ageGroups, crimeTypes } = processedData
-
-      // 点击事件
-      chartInstance.value.on('click', function(params) {
-        if (params.componentType === 'series') {
-          const [crimeIndex, ageIndex, value] = params.value
-          const crime = crimeTypes[crimeIndex]
-          const age = ageGroups[ageIndex]
-
-          console.log(`Clicked: ${crime} - ${age} (${value.toFixed(1)}%)`)
-          // 可以在这里添加更多交互逻辑，比如显示详细信息
         }
-      })
+      }
     }
 
-    // API base URL - using AWS API Gateway
+    // API数据获取
     const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
 
-    // 从API获取数据
     const fetchData = async () => {
       try {
         loading.value = true
@@ -538,13 +407,10 @@ export default {
           throw new Error('No data received from API')
         }
 
-        // 保存原始数据
         chartData.value = rawData
 
-        // 确保DOM更新后再初始化图表
         await nextTick()
 
-        // 添加小延迟确保DOM完全渲染
         setTimeout(() => {
           initHeatmapChart(rawData)
         }, 100)
@@ -557,45 +423,21 @@ export default {
       }
     }
 
-
-    // 计算关键统计数据 - 直接从原始数据计算
+    // 统计函数
     const getHighestRate = () => {
       if (!chartData.value || chartData.value.length === 0) {
-        console.log('No chart data available for highest rate')
         return '0.0'
       }
 
-      // 找到所有数据中的最高受害率
-      const maxRate = Math.max(...chartData.value.map(item => item.prevalence_2024 || 0))
-      console.log('Highest rate calculated:', maxRate)
-      return maxRate.toFixed(1)
-    }
-
-    const getAnyCrimeRate = () => {
-      if (!chartData.value || chartData.value.length === 0) {
-        console.log('No chart data available for any crime rate')
-        return '0.0'
-      }
-
-      console.log('Chart data sample:', chartData.value.slice(0, 3))
-
-      // 查找年轻人的任意网络犯罪受害率
       const youngAnyCrime = chartData.value.find(item =>
-        item.age === '18 – 34' && item.main_type === 'Any cybercrime victimization'
+        item.age === '18 – 34' &&
+        item.main_type === 'Any cybercrime (all)' &&
+        item.prevalence_2024 !== undefined &&
+        item.prevalence_2024 !== null
       )
-
-      console.log('Young any crime data:', youngAnyCrime)
 
       if (youngAnyCrime) {
         return youngAnyCrime.prevalence_2024.toFixed(1)
-      }
-
-      // 如果没有找到"Any cybercrime victimization"，计算年轻人所有犯罪类型的平均受害率
-      const youngCrimes = chartData.value.filter(item => item.age === '18 – 34')
-      if (youngCrimes.length > 0) {
-        const avgRate = youngCrimes.reduce((sum, item) => sum + (item.prevalence_2024 || 0), 0) / youngCrimes.length
-        console.log('Young people average rate:', avgRate)
-        return avgRate.toFixed(1)
       }
 
       return '0.0'
@@ -603,16 +445,12 @@ export default {
 
     const getOnlineHarassmentRate = () => {
       if (!chartData.value || chartData.value.length === 0) {
-        console.log('No chart data available for online harassment rate')
         return '0.0'
       }
 
-      // 查找年轻人的网络骚扰受害率
       const youngHarassment = chartData.value.find(item =>
         item.age === '18 – 34' && item.main_type === 'Online abuse and harassment'
       )
-
-      console.log('Young harassment data:', youngHarassment)
 
       if (youngHarassment) {
         return youngHarassment.prevalence_2024.toFixed(1)
@@ -623,16 +461,12 @@ export default {
 
     const getFraudScamsRate = () => {
       if (!chartData.value || chartData.value.length === 0) {
-        console.log('No chart data available for fraud and scams rate')
         return '0.0'
       }
 
-      // 查找65+年龄组的诈骗受害率
       const elderlyFraud = chartData.value.find(item =>
         item.age === '65+' && item.main_type === 'Fraud and scams'
       )
-
-      console.log('Elderly fraud data:', elderlyFraud)
 
       if (elderlyFraud) {
         return elderlyFraud.prevalence_2024.toFixed(1)
@@ -641,31 +475,16 @@ export default {
       return '0.0'
     }
 
-    const getLowestRate = () => {
-      if (!chartData.value || chartData.value.length === 0) {
-        console.log('No chart data available for lowest rate')
-        return '0.0'
-      }
-
-      // 找到所有数据中的最低受害率
-      const minRate = Math.min(...chartData.value.map(item => item.prevalence_2024 || 0))
-      console.log('Lowest rate calculated:', minRate)
-      return minRate.toFixed(1)
-    }
-
     const getRiskRatio = () => {
       if (!chartData.value || chartData.value.length === 0) {
-        console.log('No chart data available for risk ratio')
         return '0.0'
       }
 
-      // 计算年轻人的平均受害率
       const youngCrimes = chartData.value.filter(item => item.age === '18 – 34')
       const youngAvgRate = youngCrimes.length > 0
         ? youngCrimes.reduce((sum, item) => sum + (item.prevalence_2024 || 0), 0) / youngCrimes.length
         : 0
 
-      // 计算老年人的平均受害率
       const oldCrimes = chartData.value.filter(item =>
         item.age === '65+' || item.age === '65 +' || item.age === '65+ years'
       )
@@ -673,13 +492,8 @@ export default {
         ? oldCrimes.reduce((sum, item) => sum + (item.prevalence_2024 || 0), 0) / oldCrimes.length
         : 0
 
-      console.log('Young average rate:', youngAvgRate)
-      console.log('Old average rate:', oldAvgRate)
-
       if (oldAvgRate > 0) {
-        const ratio = (youngAvgRate / oldAvgRate).toFixed(1)
-        console.log('Risk ratio calculated:', ratio)
-        return ratio
+        return (youngAvgRate / oldAvgRate).toFixed(1)
       }
 
       return '0.0'
@@ -701,49 +515,91 @@ export default {
       }
     }
 
-    // 监听数据变化
+    // 数据监听
     watch(() => props.data, (newData) => {
       if (newData && newData.length > 0) {
         chartData.value = newData
         nextTick(() => {
-          initHeatmapChart(newData)
+          setTimeout(() => {
+            initHeatmapChart(newData)
+          }, 50)
         })
       }
     }, { immediate: true })
 
-    // 监听图表数据变化
-    watch(chartData, (newData) => {
-      if (newData && newData.length > 0) {
-        nextTick(() => {
-          initHeatmapChart(newData)
-        })
-      }
-    })
-
-    // 窗口大小变化处理函数
+    // 窗口大小调整处理
     const handleResize = () => {
-      if (chartInstance.value) {
-        chartInstance.value.resize()
+      if (!chartInstance.value || loading.value || error.value || !chartRef.value || !chartData.value) {
+        return
+      }
+
+      try {
+        if (chartInstance.value.isDisposed && chartInstance.value.isDisposed()) {
+          return
+        }
+
+        const container = chartRef.value
+        if (!container || container.offsetWidth === 0 || container.offsetHeight === 0) {
+          return
+        }
+
+        chartInstance.value.resize({
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+          silent: true
+        })
+
+      } catch (error) {
+        console.error('Chart resize error:', error)
+        if (chartData.value && chartData.value.length > 0) {
+          setTimeout(() => {
+            try {
+              initHeatmapChart(chartData.value)
+            } catch (reinitError) {
+              console.error('Failed to reinitialize chart:', reinitError)
+            }
+          }, 100)
+        }
       }
     }
 
-    // 组件挂载
+    let resizeTimer = null
+
+    const debouncedResize = () => {
+      if (resizeTimer) {
+        clearTimeout(resizeTimer)
+      }
+
+      resizeTimer = setTimeout(() => {
+        handleResize()
+      }, 200)
+    }
+
+    // 组件生命周期
     onMounted(async () => {
       if (props.autoFetch) {
         await fetchData()
       }
-
-      // 监听窗口大小变化
-      window.addEventListener('resize', handleResize)
+      window.addEventListener('resize', debouncedResize)
     })
 
-    // 组件卸载
     onUnmounted(() => {
+      if (resizeTimer) {
+        clearTimeout(resizeTimer)
+        resizeTimer = null
+      }
+
       if (chartInstance.value) {
-        chartInstance.value.dispose()
+        try {
+          chartInstance.value.off()
+          chartInstance.value.dispose()
+        } catch (e) {
+          console.warn('Error disposing chart on unmount:', e)
+        }
         chartInstance.value = null
       }
-      window.removeEventListener('resize', handleResize)
+
+      window.removeEventListener('resize', debouncedResize)
     })
 
     return {
@@ -754,10 +610,8 @@ export default {
       fetchData,
       exportChart,
       getHighestRate,
-      getAnyCrimeRate,
       getOnlineHarassmentRate,
       getFraudScamsRate,
-      getLowestRate,
       getRiskRatio
     }
   }
@@ -765,7 +619,6 @@ export default {
 </script>
 
 <style scoped>
-/* 基础布局 */
 .heatmap-section {
   background: var(--bg-primary);
   border-radius: 12px;
@@ -773,7 +626,6 @@ export default {
   font-family: inherit;
 }
 
-/* 头部样式 */
 .header {
   margin-bottom: 2rem;
 }
@@ -834,7 +686,6 @@ export default {
   opacity: 0.6;
 }
 
-/* 加载和错误状态 */
 .loading, .error-state {
   display: flex;
   flex-direction: column;
@@ -889,7 +740,6 @@ export default {
   background: var(--forest-medium);
 }
 
-/* 内容区域 */
 .content {
   display: flex;
   flex-direction: column;
@@ -899,7 +749,7 @@ export default {
 .chart-container {
   background: var(--text-light);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0.5rem;
   box-shadow: 0 4px 12px var(--shadow-light);
   border: 1px solid var(--border-light);
 }
@@ -907,6 +757,9 @@ export default {
 .main-chart {
   width: 100%;
   height: 500px;
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
 }
 
 .insights-panel {
@@ -1055,7 +908,6 @@ export default {
   line-height: 1.5;
 }
 
-/* 基础响应式设计 */
 @media (max-width: 768px) {
   .heatmap-section {
     padding: 1rem;
@@ -1072,6 +924,7 @@ export default {
 
   .main-chart {
     height: 400px;
+    min-height: 350px;
   }
 
   .insights-panel {
@@ -1084,6 +937,17 @@ export default {
 
   .age-analysis {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-chart {
+    height: 350px;
+    min-height: 300px;
+  }
+
+  .chart-container {
+    padding: 1rem;
   }
 }
 </style>

@@ -42,7 +42,7 @@ export default {
 }
 
 .page-header {
-  background: linear-gradient(135deg, var(--forest-medium) 0%, var(--forest-deep) 100%);
+  background: var(--violet-dark);
   color: var(--text-light);
   padding: 4rem 0;
   text-align: center;

@@ -76,8 +76,8 @@ export default {
 
 <style scoped>
 .footer-section {
-  background-color: var(--forest-dark);
-  color: var(--forest-light);
+  background-color: var(--violet-ultra-dark);
+  color: white;
   padding: 3rem 0 1rem 0;
   margin-top: auto;
 }

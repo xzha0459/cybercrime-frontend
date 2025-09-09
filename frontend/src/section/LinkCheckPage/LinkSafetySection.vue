@@ -172,26 +172,26 @@ export default {
 }
 
 .background-pattern {
-  height: 40vh;
-  background: var(--forest-deep);
+  height: 50vh;
+  background: var(--violet-dark);
   border-radius: 24px;
   z-index: 1;
   margin: 6vh auto 2rem auto;
   width: 100%;
-  max-width: 1600px;
+  max-width: 1200px;
 }
 
 .main-card {
   position: relative;
   z-index: 2;
-  background: var(--forest-light);
+  background: var(--violet-light);
   border-radius: 24px;
   padding: 3rem;
-  max-width: 1200px;
+  max-width: 900px;
   width: 100%;
   box-shadow: 0 12px 40px var(--shadow-dark);
   text-align: center;
-  margin-top: -35vh;
+  margin-top: -45vh;
 }
 
 .card-content {
@@ -208,7 +208,7 @@ export default {
 }
 
 .main-title {
-  font-size: 3rem;
+  font-size: 2.75rem;
   font-weight: 700;
   color: var(--forest-deep);
   margin: 0;

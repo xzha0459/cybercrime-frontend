@@ -56,7 +56,6 @@ export default {
   color: var(--text-primary);
   margin: 0;
   padding: 0;
-  /* min-height: 100vh; */
 }
 
 .hero-container {

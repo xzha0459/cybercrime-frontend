@@ -49,7 +49,7 @@ export default {
 <style scoped>
 .content-section {
   padding: 60px 20px;
-  background: var(--forest-light);
+  background: var(--violet-light);
 }
 
 .content-container {
@@ -61,7 +61,7 @@ export default {
   text-align: center;
   font-size: 3rem;
   font-weight: 700;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   margin-bottom: 60px;
 }
 

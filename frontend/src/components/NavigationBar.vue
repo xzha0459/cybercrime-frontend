@@ -177,7 +177,7 @@ export default {
 
 <style scoped>
 .navbar {
-  background: var(--forest-light);
+  background: var(--violet-ultra-dark);
   box-shadow: 0 2px 8px var(--shadow-light);
   position: sticky;
   top: 0;
@@ -202,7 +202,7 @@ export default {
 
 .nav-link {
   text-decoration: none;
-  color: var(--forest-dark);
+  color: white;
   font-weight: 500;
   font-size: 1rem;
   padding: 0.5rem 1rem;
@@ -211,19 +211,19 @@ export default {
 }
 
 .nav-link:hover {
-  background: var(--forest-sage);
-  color: var(--forest-dark);
+  background: var(--purple-sage);
+  color: white;
 }
 
 .nav-link.router-link-active {
-  background: var(--forest-medium);
-  color: var(--text-light);
+  background: var(--purple-medium);
+  color: white;
 }
 
 .nav-brand {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--forest-dark);
+  color: white;
   letter-spacing: 2px;
   display: flex;
   align-items: center;
@@ -248,10 +248,10 @@ export default {
 }
 
 .user-email {
-  color: var(--forest-dark);
+  color: white;
   font-weight: 500;
   font-size: 1rem;
-  background: var(--forest-sage);
+  background: var(--purple-sage);
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   border: 1px solid var(--border-light);
@@ -267,8 +267,8 @@ export default {
 }
 
 .user-email.clickable:hover {
-  background: var(--forest-medium);
-  color: var(--text-light);
+  background: var(--purple-medium);
+  color: white;
   transform: translateY(-1px);
 }
 
@@ -289,26 +289,26 @@ export default {
 }
 
 .btn-login {
-  background: var(--forest-dark);
-  color: var(--text-light);
+  background: var(--purple-dark);
+  color: white;
   box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .btn-login:hover:not(:disabled) {
-  background: var(--forest-deep);
+  background: var(--purple-deep);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px var(--shadow-dark);
 }
 
 .btn-logout {
   background: transparent;
-  color: var(--forest-dark);
-  border: 2px solid var(--forest-medium);
+  color: white;
+  border: 2px solid var(--purple-medium);
 }
 
 .btn-logout:hover {
-  background: var(--forest-medium);
-  color: var(--text-light);
+  background: var(--purple-medium);
+  color: white;
   transform: translateY(-1px);
 }
 
@@ -329,7 +329,7 @@ export default {
 .hamburger-line {
   width: 100%;
   height: 3px;
-  background: var(--forest-dark);
+  background: white;
   border-radius: 2px;
   transition: all 0.3s ease;
   transform-origin: center;
@@ -367,7 +367,7 @@ export default {
 .hamburger-line {
   width: 100%;
   height: 2px;
-  background: var(--forest-dark);
+  background: white;
   border-radius: 1px;
   transition: all 0.3s ease;
   position: absolute;
@@ -403,11 +403,11 @@ export default {
 
 /* 悬停效果 */
 .mobile-menu-btn:hover .hamburger-line {
-  background: var(--forest-medium);
+  background: var(--purple-medium);
 }
 
 .mobile-menu-btn.active:hover .hamburger-line {
-  background: var(--forest-deep);
+  background: var(--purple-deep);
 }
 
 /* Mobile Menu */
@@ -416,7 +416,7 @@ export default {
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--forest-light);
+  background: var(--violet-ultra-dark);
   border-top: 1px solid var(--border-light);
   box-shadow: 0 4px 12px var(--shadow-medium);
   transform: translateY(-100%);
@@ -449,7 +449,7 @@ export default {
 
 .mobile-nav-link {
   text-decoration: none;
-  color: var(--forest-dark);
+  color: white;
   font-weight: 500;
   font-size: 1.1rem;
   padding: 0.8rem 1rem;
@@ -461,15 +461,15 @@ export default {
 }
 
 .mobile-nav-link:hover {
-  background: var(--forest-sage);
+  background: var(--purple-sage);
   border-color: var(--border-light);
   transform: translateY(-1px);
 }
 
 .mobile-nav-link.router-link-active {
-  background: var(--forest-medium);
-  color: var(--text-light);
-  border-color: var(--forest-dark);
+  background: var(--purple-medium);
+  color: white;
+  border-color: var(--purple-dark);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 

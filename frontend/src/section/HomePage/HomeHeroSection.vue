@@ -52,21 +52,8 @@ export default {
 
 <style scoped>
 .hero-section {
-  /* Gradient overlay + background image */
-  background-image:
-    linear-gradient(
-      135deg,
-      rgba(245, 245, 240, 0.85) 0%,
-      /* --forest-light */ rgba(212, 212, 196, 0.85) 25%,
-      /* --forest-sage */ rgba(139, 154, 139, 0.85) 50%,
-      /* --forest-medium */ rgba(90, 107, 90, 0.85) 75%,
-      /* --forest-deep */ rgba(45, 58, 45, 0.85) 100% /* --forest-dark */
-    ),
-    url('./../../assets/background.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: var(--text-light);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   margin: 0;
   padding: 0;
   /* min-height: 100vh; */
@@ -129,7 +116,7 @@ export default {
 .welcome-message {
   font-size: 1.3rem;
   margin-bottom: 1.5rem;
-  color: var(--forest-light);
+  color: var(--violet-light);
   font-weight: 500;
 }
 
@@ -160,14 +147,14 @@ export default {
 }
 
 .btn-primary {
-  background: var(--forest-dark);
+  background: var(--violet-dark);
   color: var(--text-light);
   box-shadow: 0 4px 15px var(--shadow-medium);
   transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--forest-medium);
+  background: var(--violet-medium);
 }
 
 

@@ -1,49 +1,50 @@
 :root {
-  --forest-light: #f5f5f0;
-  --forest-sage: #d4d4c4;
-  --forest-medium: #8b9a8b;
-  --forest-deep: #5a6b5a;
-  --forest-dark: #2d3a2d;
+  --violet-light: #f4effa;
+  --violet-sage: #c8b1e4;
+  --violet-medium: #9b72cf;
+  --violet-deep: #532b88;
+  --violet-dark: #2f184b;
+  --violet-ultra-dark: #10002b;
 
-  --forest-accent: #7a8b7a;
-  --forest-muted: #a8b8a8;
+  --violet-accent: var(--violet-deep);
+  --violet-muted: var(--violet-dark);
 
-  --text-primary: var(--forest-dark);
-  --text-secondary: var(--forest-deep);
-  --text-light: var(--forest-light);
+  --text-primary: var(--violet-ultra-dark);
+  --text-secondary: var(--violet-deep);
+  --text-light: var(--violet-light);
 
-  --bg-primary: var(--forest-light);
-  --bg-secondary: var(--forest-sage);
-  --bg-accent: var(--forest-medium);
+  --bg-primary: var(--violet-light);
+  --bg-secondary: var(--violet-sage);
+  --bg-accent: var(--violet-medium);
 
-  --border-light: var(--forest-sage);
-  --border-medium: var(--forest-medium);
-  --border-dark: var(--forest-deep);
+  --border-light: var(--violet-sage);
+  --border-medium: var(--violet-medium);
+  --border-dark: var(--violet-deep);
 
-  --shadow-light: rgba(45, 58, 45, 0.1);
-  --shadow-medium: rgba(45, 58, 45, 0.2);
-  --shadow-dark: rgba(45, 58, 45, 0.3);
+  --shadow-light: rgba(16, 0, 43, 0.1);
+  --shadow-medium: rgba(16, 0, 43, 0.2);
+  --shadow-dark: rgba(16, 0, 43, 0.3);
 }
 
 :root {
-  --vt-c-white: var(--forest-light);
-  --vt-c-white-soft: var(--forest-sage);
-  --vt-c-white-mute: var(--forest-muted);
+  --vt-c-white: var(--violet-light);
+  --vt-c-white-soft: var(--violet-sage);
+  --vt-c-white-mute: var(--violet-muted);
 
-  --vt-c-black: var(--forest-dark);
-  --vt-c-black-soft: var(--forest-deep);
-  --vt-c-black-mute: var(--forest-medium);
+  --vt-c-black: var(--violet-ultra-dark);
+  --vt-c-black-soft: var(--violet-dark);
+  --vt-c-black-mute: var(--violet-medium);
 
-  --vt-c-indigo: var(--forest-deep);
+  --vt-c-indigo: var(--violet-deep);
 
   --vt-c-divider-light-1: var(--border-light);
   --vt-c-divider-light-2: var(--border-medium);
   --vt-c-divider-dark-1: var(--border-dark);
-  --vt-c-divider-dark-2: var(--forest-medium);
+  --vt-c-divider-dark-2: var(--violet-medium);
 
   --color-background: var(--bg-primary);
   --color-background-soft: var(--bg-secondary);
-  --color-background-mute: var(--forest-muted);
+  --color-background-mute: var(--violet-muted);
 
   --color-border: var(--border-light);
   --color-border-hover: var(--border-medium);
@@ -256,7 +257,7 @@ body {
   .d-mobile {
     display: none;
   }
-  
+
   .d-desktop {
     display: block;
   }
@@ -269,7 +270,7 @@ body {
   h4 { font-size: 1.125rem; }
   h5 { font-size: 1rem; }
   h6 { font-size: 0.875rem; }
-  
+
   .lead { font-size: 1rem; }
   .small { font-size: 0.875rem; }
 }
@@ -281,7 +282,7 @@ body {
   h4 { font-size: 1.5rem; }
   h5 { font-size: 1.25rem; }
   h6 { font-size: 1rem; }
-  
+
   .lead { font-size: 1.25rem; }
   .small { font-size: 0.875rem; }
 }

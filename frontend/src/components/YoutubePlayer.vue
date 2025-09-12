@@ -26,7 +26,8 @@ const getAccessToken = () => {
 
 const props = defineProps({
   videoId: String,
-  videoKey: [String, Number]
+  videoKey: [String, Number],
+  initialProgress: Object
 })
 
 const emit = defineEmits([
@@ -153,9 +154,15 @@ const fetchBackendProgress = async () => {
 }
 
 onMounted(() => {
-  fetchBackendProgress().then(() => {
+  // 如果有初始进度，使用它；否则从后端获取
+  if (props.initialProgress && props.initialProgress.currentTime) {
+    backendStartTime.value = Math.floor(props.initialProgress.currentTime)
     initYouTubeAPI()
-  })
+  } else {
+    fetchBackendProgress().then(() => {
+      initYouTubeAPI()
+    })
+  }
 })
 
 onBeforeUnmount(() => {

@@ -20,6 +20,6 @@ export default {
 
 <style scoped>
 .user-center {
-  min-height: 100vh;
+  min-height: 90vh;
 }
 </style>

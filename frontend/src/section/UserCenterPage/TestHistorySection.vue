@@ -161,9 +161,9 @@
             </div>
 
             <div class="answer-info">
-              <span class="user-answer">
+              <div class="question-text">
                 Your answer: {{ getUserAnswerText(qa) }}
-              </span>
+              </div>
               <span
                 class="answer-result"
                 :class="qa.is_correct ? 'correct' : 'incorrect'"
@@ -483,6 +483,8 @@ export default {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .section-header {
@@ -491,12 +493,12 @@ export default {
   align-items: center;
   margin-bottom: 25px;
   padding-bottom: 20px;
-  border-bottom: 2px solid var(--forest-sage);
+  border-bottom: 2px solid var(--violet-sage);
 }
 
 .section-header h2 {
   margin: 0;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   font-size: 1.8rem;
   font-weight: 600;
 }
@@ -511,20 +513,20 @@ export default {
   background: var(--violet-light);
   padding: 15px 20px;
   border-radius: 12px;
-  border: 1px solid var(--forest-sage);
+  border: 1px solid var(--violet-sage);
 }
 
 .stat-number {
   display: block;
   font-size: 28px;
   font-weight: bold;
-  color: var(--forest-medium);
+  color: var(--violet-medium);
   margin-bottom: 5px;
 }
 
 .stat-label {
   font-size: 13px;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   font-weight: 500;
 }
 
@@ -552,14 +554,14 @@ export default {
 
 .test-info h3 {
   margin: 0 0 8px 0;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   font-size: 18px;
   font-weight: 600;
 }
 
 .test-date {
   margin: 0;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   font-size: 13px;
   font-weight: 500;
 }
@@ -662,8 +664,8 @@ export default {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 15px;
   padding: 30px;
-  max-width: 1200px;
-  width: 100;
+  max-width: 1000px;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -676,11 +678,11 @@ export default {
   align-items: center;
   margin-bottom: 25px;
   padding-bottom: 15px;
-  border-bottom: 2px solid var(--forest-sage);
+  border-bottom: 2px solid var(--violet-sage);
 }
 
 .modal-header h3 {
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
@@ -691,7 +693,7 @@ export default {
   border: none;
   font-size: 28px;
   cursor: pointer;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -701,16 +703,16 @@ export default {
 }
 
 .close-btn:hover {
-  color: var(--forest-dark);
-  background: var(--forest-light);
+  color: var(--violet-dark);
+  background: var(--violet-light);
 }
 
 .test-summary {
   margin-bottom: 25px;
-  background: var(--forest-light);
+  background: var(--violet-light);
   padding: 20px;
   border-radius: 12px;
-  border: 1px solid var(--forest-sage);
+  border: 1px solid var(--violet-sage);
 }
 
 .summary-row {
@@ -729,21 +731,21 @@ export default {
 
 .summary-row span:first-child {
   font-weight: 600;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
 }
 
 .summary-row span:last-child {
   font-weight: 600;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
 }
 
 .questions-detail h4 {
   margin: 25px 0 15px 0;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   font-size: 1.3rem;
   font-weight: 600;
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--forest-sage);
+  border-bottom: 2px solid var(--violet-sage);
 }
 
 .question-item {
@@ -751,7 +753,7 @@ export default {
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
-  border: 1px solid var(--forest-sage);
+  border: 1px solid var(--violet-sage);
 }
 
 .answer-info {
@@ -763,6 +765,7 @@ export default {
   gap: 20px;
 }
 
+/* 答案结果样式 */
 .answer-result.correct {
   color: #28a745;
   font-weight: bold;
@@ -792,12 +795,6 @@ export default {
   margin-left: 5px;
 }
 
-.user-answer {
-  margin: 0;
-  font-size: 13px;
-  color: var(--forest-deep);
-  font-weight: 500;
-}
 
 /* 题目内容样式 */
 .question-content {
@@ -807,7 +804,7 @@ export default {
 
 .question-text {
   font-size: 16px;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   margin-bottom: 18px;
   line-height: 1.6;
   font-weight: 500;
@@ -826,17 +823,16 @@ export default {
   position: relative;
 }
 
-
 .option-identifier {
   font-weight: bold;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   margin-right: 10px;
   min-width: 20px;
 }
 
 .option-text {
   flex: 1;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -848,25 +844,12 @@ export default {
   margin-left: 10px;
 }
 
-/* 正确答案样式 */
-.option-item.correct-option .option-text {
-  color: #28a745;
-  font-weight: 600;
-}
+/* 选项状态样式 */
+.option-item.correct-option .option-text { color: #28a745; font-weight: 600; }
+.option-item.user-selected .option-text { color: #007bff; font-weight: 600; }
+.option-item.wrong-selected .option-text { color: #dc3545; font-weight: 600; }
 
-/* 用户选择的答案样式 */
-.option-item.user-selected .option-text {
-  color: #007bff;
-  font-weight: 600;
-}
-
-/* 用户选择错误答案的样式 */
-.option-item.wrong-selected .option-text {
-  color: #dc3545;
-  font-weight: 600;
-}
-
-/* 展开的解释部分样式 */
+/* 解释部分样式 */
 .explanation-section {
   margin-top: 15px;
   padding: 15px;
@@ -874,19 +857,13 @@ export default {
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .explanation-content h5 {
   margin: 0 0 12px 0;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   font-size: 14px;
   font-weight: 600;
 }
@@ -905,19 +882,12 @@ export default {
   margin: 8px 0 0 0;
   padding: 18px 0;
   font-size: 15px;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   line-height: 1.7;
 }
 
-.explanation-text.no-explanation {
-  color: #856404;
-  font-style: italic;
-}
-
-.explanation-text strong {
-  color: var(--forest-dark);
-  font-weight: 600;
-}
+.explanation-text.no-explanation { color: #856404; font-style: italic; }
+.explanation-text strong { color: var(--violet-dark); font-weight: 600; }
 
 /* 分页控件样式 */
 .pagination {
@@ -931,9 +901,9 @@ export default {
 
 .page-btn {
   padding: 10px 20px;
-  border: 2px solid var(--forest-medium);
+  border: 2px solid var(--violet-medium);
   background: white;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
@@ -941,7 +911,7 @@ export default {
 }
 
 .page-btn:hover:not(:disabled) {
-  background: var(--forest-medium);
+  background: var(--violet-medium);
   color: white;
 }
 
@@ -961,24 +931,24 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--forest-sage);
+  border: 2px solid var(--violet-sage);
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
   background: white;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
 }
 
 .page-number:hover {
-  border-color: var(--forest-medium);
-  background: var(--forest-light);
+  border-color: var(--violet-medium);
+  background: var(--violet-light);
 }
 
 .page-number.active {
-  background: var(--forest-dark);
+  background: var(--violet-dark);
   color: white;
-  border-color: var(--forest-dark);
+  border-color: var(--violet-dark);
 }
 
 /* 响应式设计 */

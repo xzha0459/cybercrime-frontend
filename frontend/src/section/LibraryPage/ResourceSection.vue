@@ -92,80 +92,34 @@
         </button>
       </div> -->
 
-      <!-- Featured Video Carousel (Single Visible Video with Arrows) -->
-      <div class="featured-video" v-if="videos.length && (selectedContentType === 'all' || selectedContentType === 'videos')">
-        <div class="video-content">
-          <div class="content-info">
-            <h3 class="video-title">{{ videos[currentIndex].title }}</h3>
+      <!-- Featured Videos Grid (Nine Videos in 3x3 Grid) -->
+      <div class="featured-videos-grid" v-if="videos.length && (selectedContentType === 'all' || selectedContentType === 'videos')">
+        <div
+          v-for="video in videos.slice(0, 9)"
+          :key="video.id"
+          class="video-card"
+          @click="loadVideo(video.id)"
+        >
+          <div class="video-thumbnail">
+            <img :src="getYouTubeThumbnail(video.link)" :alt="video.title" class="thumbnail-image" />
+            <div class="play-overlay">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="duration-badge">{{ video.suggested_reading_time }} min</div>
+          </div>
+
+          <div class="video-info">
+            <h3 class="video-title">{{ video.title }}</h3>
             <div class="video-description">
-              <span>Video by: {{ videos[currentIndex].author }}</span><br />
-              <span>Published date: {{ videos[currentIndex].publish_date }}</span>
+              <span>Video by: {{ video.author }}</span><br />
+              <span>Published date: {{ video.publish_date }}</span>
             </div>
             <div class="video-meta">
               <span class="video-type">Video</span>
-              <span class="video-duration">{{ videos[currentIndex].suggested_reading_time }} min</span>
+              <span class="video-duration">{{ video.suggested_reading_time }} min</span>
             </div>
-          </div>
-
-          <div class="video-preview">
-            <YoutubePlayer
-              v-if="videos.length"
-              :key="videos[currentIndex].id"
-              :videoId="extractYouTubeId(videos[currentIndex].link)"
-              :videoKey="videos[currentIndex].id"
-              @save-progress="handleSaveProgress"
-              @video-ended="handleVideoEnded"
-            />
-          </div>
-        </div>
-
-        <!-- Navigation Arrows -->
-        <button class="nav-arrow nav-prev absolute left-[-30px] top-1/2 transform -translate-y-1/2 z-10" @click="prevVideo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-        <button class="nav-arrow nav-next absolute right-[-30px] top-1/2 transform -translate-y-1/2 z-10" @click="nextVideo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-
-        <!-- Related Suggestions -->
-        <div v-if="showRecommendations" class="related-content">
-          <h2 class="related-content__heading">Recommended for You</h2>
-
-          <div v-if="relatedVideos.length" class="related-content__videos">
-            <h3 class="related-content__section-title">Related Videos</h3>
-            <ul class="related-content__video-list">
-              <li v-for="video in relatedVideos" :key="video.id" class="related-content__video-item">
-                <button class="related-content__video-link" @click="loadVideoFromRecommendation(video)">
-                  {{ video.title }}
-                </button>
-                <span class="related-content__video-time">— {{ video.suggested_reading_time }} min</span>
-              </li>
-            </ul>
-          </div>
-
-          <div v-if="relatedQuiz" class="related-content__quiz">
-            <h3 class="related-content__section-title">Quick Quiz: {{ relatedQuiz.question_text }}</h3>
-            <ul class="related-content__quiz-options">
-              <li v-for="option in relatedQuiz.options" :key="option.identifier" class="related-content__quiz-option">
-                <label class="related-content__quiz-label">
-                  <input
-                    type="radio"
-                    :name="relatedQuiz.id"
-                    :value="option.identifier"
-                    class="related-content__quiz-input"
-                  />
-                  {{ option.identifier }}. {{ option.text }}
-                </label>
-              </li>
-            </ul>
-            <details class="related-content__explanation">
-              <summary class="related-content__explanation-toggle">Show Explanation</summary>
-              <p class="related-content__explanation-text">{{ relatedQuiz.explanation }}</p>
-            </details>
           </div>
         </div>
       </div>
@@ -178,6 +132,82 @@
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
+      </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div v-if="currentIndex >= 0 && videos[currentIndex]" class="modal-overlay" @click="currentIndex = -1">
+      <div class="modal-content video-player-modal" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">{{ videos[currentIndex].title }}</h2>
+          <button class="modal-close" @click="currentIndex = -1">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="video-player-container">
+            <YoutubePlayer
+              :key="videos[currentIndex].id"
+              :videoId="extractYouTubeId(videos[currentIndex].link)"
+              :videoKey="videos[currentIndex].id"
+              :initialProgress="getVideoProgress(videos[currentIndex].id)"
+              @save-progress="handleSaveProgress"
+              @video-ended="handleVideoEnded"
+            />
+          </div>
+
+          <div class="video-info-section">
+            <div class="video-meta">
+              <span class="video-type">Video</span>
+              <span class="video-duration">{{ videos[currentIndex].suggested_reading_time }} min</span>
+            </div>
+            <div class="video-description">
+              <span>Video by: {{ videos[currentIndex].author }}</span><br />
+              <span>Published date: {{ videos[currentIndex].publish_date }}</span>
+            </div>
+          </div>
+
+          <!-- Related Suggestions -->
+          <div v-if="showRecommendations" class="related-content">
+            <h2 class="related-content__heading">Recommended for You</h2>
+
+            <div v-if="relatedVideos.length" class="related-content__videos">
+              <h3 class="related-content__section-title">Related Videos</h3>
+              <ul class="related-content__video-list">
+                <li v-for="video in relatedVideos" :key="video.id" class="related-content__video-item">
+                  <button class="related-content__video-link" @click="loadVideo(video.id)">
+                    {{ video.title }}
+                  </button>
+                  <span class="related-content__video-time">— {{ video.suggested_reading_time }} min</span>
+                </li>
+              </ul>
+            </div>
+
+            <div v-if="relatedQuiz" class="related-content__quiz">
+              <h3 class="related-content__section-title">Quick Quiz: {{ relatedQuiz.question_text }}</h3>
+              <ul class="related-content__quiz-options">
+                <li v-for="option in relatedQuiz.options" :key="option.identifier" class="related-content__quiz-option">
+                  <label class="related-content__quiz-label">
+                    <input
+                      type="radio"
+                      :name="relatedQuiz.id"
+                      :value="option.identifier"
+                      class="related-content__quiz-input"
+                    />
+                    {{ option.identifier }}. {{ option.text }}
+                  </label>
+                </li>
+              </ul>
+              <details class="related-content__explanation">
+                <summary class="related-content__explanation-toggle">Show Explanation</summary>
+                <p class="related-content__explanation-text">{{ relatedQuiz.explanation }}</p>
+              </details>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -225,18 +255,49 @@ import YoutubePlayer from '@/components/YoutubePlayer.vue'
 const videos = ref([])
 const allVideos = ref([])
 const currentIndex = ref(0)
-const playVideo = ref(false)
 const showAllContent = ref(false)
-const handleSaveProgress = () => {
-  // Handle save progress functionality
-}
+const handleSaveProgress = async (progressData) => {
+  try {
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+      console.log('User not authenticated, progress not saved')
+      return
+    }
 
-// const relatedItems = ref([])
-// const showRelated = ref(false)
+    const { videoId, currentTime, duration } = progressData
+
+    // 保存到本地状态
+    videoProgress.value[videoId] = {
+      currentTime,
+      duration,
+      lastWatched: new Date().toISOString()
+    }
+
+    // 发送到后端保存
+    const response = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${videoId}/progress/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        current_time: currentTime,
+        duration: duration
+      })
+    })
+
+    if (!response.ok) {
+      console.error('Failed to save progress to backend')
+    }
+  } catch (error) {
+    console.error('Error saving video progress:', error)
+  }
+}
 
 const relatedVideos = ref([])
 const relatedQuiz = ref(null)
 const showRecommendations = ref(false)
+const videoProgress = ref({}) // 存储每个视频的观看进度
 
 
 // const currentVideo = computed(() => videos.value[currentIndex.value] || {})
@@ -276,7 +337,7 @@ const fetchFilteredVideos = async () => {
     const res = await fetch(url)
     const data = await res.json()
     videos.value = data
-    currentIndex.value = 0
+    currentIndex.value = -1
     showRecommendations.value = false
   } catch (err) {
     console.error('Error fetching videos:', err)
@@ -289,6 +350,7 @@ const fetchVideos = async () => {
     const data = await res.json()
     videos.value = data
     allVideos.value = data // Store all videos for the modal
+    currentIndex.value = -1
   } catch (err) {
     console.error('Error fetching videos:', err)
   }
@@ -327,37 +389,48 @@ const loadVideo = (id) => {
   }
 }
 
+const handleVideoEnded = (payload) => {
+  relatedVideos.value = payload.relatedVideos
+  relatedQuiz.value = payload.relatedQuiz
+  showRecommendations.value = true
+}
 
-const loadVideoFromRecommendation = (video) => {
-  const index = videos.value.findIndex(v => v.id === video.id)
+// 获取用户的视频观看进度
+const fetchUserProgress = async () => {
+  try {
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+      console.log('User not authenticated, no progress to fetch')
+      return
+    }
 
-  if (index !== -1) {
-    currentIndex.value = index
-  } else {
+    const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/progress/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
 
-    videos.value.push(video)
-    currentIndex.value = videos.value.length - 1
+    if (response.ok) {
+      const progressData = await response.json()
+      // 将后端返回的进度数据转换为本地格式
+      videoProgress.value = {}
+      progressData.forEach(progress => {
+        videoProgress.value[progress.video_id] = {
+          currentTime: progress.current_time,
+          duration: progress.duration,
+          lastWatched: progress.last_watched
+        }
+      })
+    }
+  } catch (error) {
+    console.error('Error fetching user progress:', error)
   }
-
-  showRecommendations.value = false
 }
 
-
-const nextVideo = () => {
-  showRecommendations.value = false
-  relatedVideos.value = []
-  relatedQuiz.value = null
-  currentIndex.value = (currentIndex.value + 1) % videos.value.length
-  playVideo.value = false
-}
-
-
-const prevVideo = () => {
-  showRecommendations.value = false
-  relatedVideos.value = []
-  relatedQuiz.value = null
-  currentIndex.value = (currentIndex.value - 1 + videos.value.length) % videos.value.length
-  playVideo.value = false
+// 获取特定视频的观看进度
+const getVideoProgress = (videoId) => {
+  return videoProgress.value[videoId] || null
 }
 
 
@@ -372,13 +445,11 @@ const prevVideo = () => {
 //   }
 // }
 
-const handleVideoEnded = (payload) => {
-  relatedVideos.value = payload.relatedVideos
-  relatedQuiz.value = payload.relatedQuiz
-  showRecommendations.value = true
-}
 
-onMounted(fetchVideos)
+onMounted(async () => {
+  await fetchVideos()
+  await fetchUserProgress()
+})
 </script>
 
 <style scoped>
@@ -476,149 +547,125 @@ onMounted(fetchVideos)
   border-color: var(--violet-dark);
 }
 
-/* Featured Article Carousel */
-.featured-article {
-  position: relative;
-  max-width: 1000px;
+
+/* Featured Videos Grid */
+.featured-videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
   margin: 0 auto 3rem auto;
+}
+
+.video-card {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px var(--shadow-light);
-  overflow: visible;
-}
-
-.article-content {
-  display: flex;
-  min-height: 400px;
-}
-
-.content-info {
-  flex: 0.4;
-  padding: 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.article-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-  line-height: 1.3;
-}
-
-.article-description {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
-}
-
-.article-meta {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.article-type {
-  background: var(--violet-dark);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.article-duration {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-}
-
-.view-btn {
-  align-self: flex-start;
-  padding: 0.75rem 2rem;
-  background: var(--violet-ultra-dark);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  overflow: hidden;
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 8px var(--shadow-medium);
+  border: 1px solid var(--border-light);
 }
 
-.view-btn:hover {
-  background: var(--violet-deep);
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.article-cover {
-  flex: 1;
-  background: var(--bg-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.video-thumbnail {
   position: relative;
-}
-
-.cover-image {
-  width: 80%;
-  height: 80%;
-  background: var(--violet-dark);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.cover-icon {
-  font-size: 4rem;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Featured Video Carousel */
-.featured-video {
-  position: relative;
-  max-width: 1000px;
-  margin: 0 auto 3rem auto;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px var(--shadow-light);
-  overflow: visible;
-}
-
-.video-content {
-  display: flex;
-  height: 420px;
+  width: 100%;
+  height: 200px;
   overflow: hidden;
 }
 
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.video-card:hover .play-overlay {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.duration-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.video-info {
+  padding: 1.5rem;
+}
+
 .video-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 1rem;
-  line-height: 1.3;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .video-description {
-  font-size: 1.125rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+  margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .video-meta {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 0.75rem;
+  align-items: center;
 }
+
+.video-type {
+  background: var(--violet-deep);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.video-duration {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+
+
+
 
 .video-type {
   background: var(--violet-deep);
@@ -629,124 +676,10 @@ onMounted(fetchVideos)
   font-weight: 600;
 }
 
-.video-duration {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-}
 
-.play-btn {
-  align-self: flex-start;
-  padding: 0.75rem 2rem;
-  background: var(--violet-ultra-dark);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 8px var(--shadow-medium);
-}
 
-.play-btn:hover {
-  background: var(--violet-deep);
-}
 
-.video-preview {
-  flex: 0.6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-  overflow: visible;
-  width: 100%;
-  height: auto;
-  aspect-ratio: unset;
-  position: relative;
-}
 
-.preview-image {
-  width: 80%;
-  height: 80%;
-  background: var(--violet-dark);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.play-icon {
-  font-size: 4rem;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.duration-badge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* Navigation Arrows - Updated Modern Style */
-.nav-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 50px;
-  height: 50px;
-  background: white;
-  border: 2px solid var(--violet-dark);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: var(--violet-dark);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
-.nav-arrow:hover {
-  background: var(--violet-dark);
-  color: white;
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.nav-arrow svg {
-  width: 24px;
-  height: 24px;
-}
-
-.nav-prev {
-  left: -25px;
-}
-
-.nav-next {
-  right: -25px;
-}
-
-.youtube-embed-wrapper {
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
 
 .thumbnail-image {
   width: 100%;
@@ -754,92 +687,9 @@ onMounted(fetchVideos)
   object-fit: cover;
 }
 
-.preview-image {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #e0e0e0;
-}
 
 
-/* Active state for arrows */
-.nav-arrow:active {
-  transform: translateY(-50%) scale(0.95);
-}
 
-/* Focus state for accessibility */
-.nav-arrow:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(139, 154, 139, 0.3);
-}
-
-/* Related Contents */
-
-.related-content {
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-}
-
-.related-content__heading {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.related-content__section-title {
-  font-size: 1.2rem;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.related-content__video-list {
-  list-style: none;
-  padding: 0;
-}
-
-.related-content__video-item {
-  margin-bottom: 0.5rem;
-}
-
-.related-content__video-link {
-  color: #0056b3;
-  text-decoration: none;
-}
-
-.related-content__video-time {
-  color: #555;
-  font-size: 0.9rem;
-}
-
-.related-content__quiz-options {
-  list-style: none;
-  padding: 0;
-}
-
-.related-content__quiz-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.related-content__explanation {
-  margin-top: 1rem;
-}
-
-.related-content__explanation-toggle {
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.related-content__explanation-text {
-  margin-top: 0.5rem;
-  color: #444;
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -872,22 +722,22 @@ onMounted(fetchVideos)
     text-align: center;
   }
 
-  .article-content {
-    flex-direction: column;
-    min-height: unset;
+
+  /* Featured Videos Grid Responsive */
+  .featured-videos-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 0 auto 2rem auto;
   }
 
-  .video-content {
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  overflow: visible;
-}
+  .video-thumbnail {
+    height: 180px;
+  }
 
-  .video-preview {
-  height: auto;
-  aspect-ratio: unset;
-}
+  .video-info {
+    padding: 1.25rem;
+  }
+
   .video-meta,
   .video-description {
     font-size: 0.85rem;
@@ -895,63 +745,14 @@ onMounted(fetchVideos)
   }
 
   .video-title {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     line-height: 1.3;
     word-break: break-word;
     hyphens: auto;
   }
 
-  .video-preview {
-    margin-top: 1rem;
-  }
-
-  .iframe-container {
-    width: 100%;
-    height: auto;
-    padding-bottom: 56.25%;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .iframe-container iframe,
-  .iframe-container .youtube-embed-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    border: none;
-  }
 
 
-  .content-info {
-    padding: 1rem;
-    font-size: 0.9rem;
-  }
-
-  .article-cover {
-    min-height: 250px;
-  }
-
-  /* Mobile arrows positioning */
-  .nav-arrow {
-    width: 40px;
-    height: 40px;
-    border-width: 1px;
-  }
-
-  .nav-arrow svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .nav-prev {
-    left: -20px;
-  }
-
-  .nav-next {
-    right: -20px;
-  }
 }
 
 /* Modal Styles */
@@ -967,6 +768,51 @@ onMounted(fetchVideos)
   justify-content: center;
   z-index: 1000;
   padding: 2rem;
+}
+
+/* Video Player Modal */
+.video-player-modal {
+  max-width: 1000px;
+  width: 100%;
+}
+
+.video-player-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 1.5rem;
+}
+
+.video-info-section {
+  margin-bottom: 2rem;
+}
+
+.video-info-section .video-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.video-info-section .video-type {
+  background: var(--violet-deep);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.video-info-section .video-duration {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.video-info-section .video-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .modal-content {

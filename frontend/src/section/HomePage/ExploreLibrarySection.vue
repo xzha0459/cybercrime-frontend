@@ -99,7 +99,7 @@ export default {
       // Handle save progress functionality
     }
 
-    const handleVideoEnded = (payload) => {
+    const handleVideoEnded = () => {
       // Handle video ended event
     }
 

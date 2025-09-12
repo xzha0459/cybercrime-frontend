@@ -541,7 +541,7 @@ export default {
 
 <style scoped>
 .test-page {
-  min-height: 60vh;
+  min-height: vh;
   background: var(--violet-light);
   padding: 0;
 }

@@ -99,7 +99,7 @@ export default {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  color: var(--forest-light);
+  color: white;
   font-family: 'Inter', sans-serif;
 }
 
@@ -108,7 +108,7 @@ export default {
   font-weight: 600;
   letter-spacing: 0.1em;
   margin-bottom: 1.5rem;
-  color: var(--forest-sage);
+  color: var(--violet-sage);
   text-transform: uppercase;
 }
 
@@ -123,9 +123,9 @@ export default {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background-color: var(--forest-deep);
+  background-color: var(--violet-deep);
   border-radius: 50%;
-  color: var(--forest-light);
+  color: white;
   transition: all 0.3s ease;
 }
 
@@ -139,7 +139,7 @@ export default {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: var(--forest-light);
+  color: white;
   font-family: 'Georgia', serif;
 }
 
@@ -160,14 +160,14 @@ export default {
 .link-text {
   display: flex;
   align-items: center;
-  color: var(--forest-sage);
+  color: var(--violet-sage);
   font-size: 0.95rem;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .link-text:hover {
-  color: var(--forest-light);
+  color: white;
 }
 
 .arrow-icon {
@@ -181,7 +181,7 @@ export default {
 /* 分隔线和版权 */
 .footer-divider {
   height: 1px;
-  background-color: var(--forest-deep);
+  background-color: var(--violet-deep);
   margin: 2rem 0 1rem 0;
 }
 
@@ -190,7 +190,7 @@ export default {
 }
 
 .copyright p {
-  color: var(--forest-sage);
+  color: var(--violet-sage);
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.1em;

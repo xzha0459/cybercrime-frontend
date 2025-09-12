@@ -1,11 +1,11 @@
 <template>
   <div class="test-page">
-    <!-- 未认证时显示登录提示 -->
+    <!-- 未认证时显示注册提示 -->
     <div v-if="!isAuthenticated" class="auth-required">
       <div class="auth-card">
-        <h2>Login Required</h2>
-        <p>Please log in to take the cybersecurity test</p>
-        <button @click="redirectToLogin" class="login-btn">Login</button>
+        <h2>Sign Up Required</h2>
+        <p>Please sign up to take the cybersecurity test</p>
+        <button @click="redirectToSignUp" class="signup-btn">Sign Up</button>
       </div>
     </div>
 
@@ -183,7 +183,6 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getCurrentUser, fetchAuthSession, signInWithRedirect } from 'aws-amplify/auth'
 
 export default {
   name: 'TestSection',
@@ -196,28 +195,30 @@ export default {
     const currentUser = ref(null)
 
     // Check user authentication status
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = () => {
       try {
-        const user = await getCurrentUser()
-        isAuthenticated.value = true
-        currentUser.value = user
-        console.log('User authenticated:', user)
-      } catch (authError) {
+        const accessToken = localStorage.getItem('access_token')
+        const userInfoStr = localStorage.getItem('user_info')
+
+        if (accessToken && userInfoStr) {
+          isAuthenticated.value = true
+          currentUser.value = JSON.parse(userInfoStr)
+          console.log('User authenticated:', currentUser.value)
+        } else {
+          isAuthenticated.value = false
+          currentUser.value = null
+          console.log('User not authenticated: No token found')
+        }
+      } catch (error) {
         isAuthenticated.value = false
         currentUser.value = null
-        console.log('User not authenticated:', authError)
+        console.log('User not authenticated:', error)
       }
     }
 
-    // Redirect to login function
-    const redirectToLogin = async () => {
-      try {
-        await signInWithRedirect({ provider: 'COGNITO' })
-      } catch (error) {
-        console.error('Sign in redirect error:', error)
-        // Fallback to home page if redirect fails
-        router.push('/')
-      }
+    // Redirect to sign up function
+    const redirectToSignUp = () => {
+      router.push('/signup')
     }
 
     // 状态变量
@@ -269,13 +270,16 @@ export default {
     // API configuration
     const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
 
-    // 获取ID Token
-    const getIdToken = async () => {
+    // 获取Access Token
+    const getAccessToken = () => {
       try {
-        const session = await fetchAuthSession()
-        return session.tokens?.idToken?.toString()
+        const token = localStorage.getItem('access_token')
+        if (!token) {
+          throw new Error('No access token found')
+        }
+        return token
       } catch (error) {
-        console.error('Error getting ID token:', error)
+        console.error('Error getting access token:', error)
         throw error
       }
     }
@@ -306,7 +310,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await getIdToken()}`
+            'Authorization': `Bearer ${getAccessToken()}`
           }
           // 移除 body，因为参数现在在 URL 中
         })
@@ -409,7 +413,7 @@ export default {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await getIdToken()}`
+            'Authorization': `Bearer ${getAccessToken()}`
           },
           body: JSON.stringify({
             is_final: true,
@@ -499,8 +503,8 @@ export default {
     }
 
     // Check authentication on mount
-    onMounted(async () => {
-      await checkAuthStatus()
+    onMounted(() => {
+      checkAuthStatus()
     })
 
     return {
@@ -508,7 +512,7 @@ export default {
       isAuthenticated,
       currentUser,
       checkAuthStatus,
-      redirectToLogin,
+      redirectToSignUp,
 
       // 状态
       currentStep,
@@ -538,7 +542,7 @@ export default {
 <style scoped>
 .test-page {
   min-height: 60vh;
-  background: var(--forest-light);
+  background: var(--violet-light);
   padding: 0;
 }
 
@@ -554,7 +558,7 @@ export default {
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 10px;
@@ -562,13 +566,13 @@ export default {
 
 .progress-fill {
   height: 100%;
-  background: var(--forest-medium);
+  background: var(--violet-ultra-dark);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   text-align: center;
-  color: var(--forest-light);
+  color: var(--violet-ultra-dark);
   font-weight: 500;
   margin: 0;
 }
@@ -593,7 +597,7 @@ export default {
 }
 
 .category-selection h3 {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   margin-bottom: 20px;
   font-size: 1.4rem;
   text-align: center;
@@ -610,7 +614,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 20px;
-  border: 2px solid var(--forest-sage);
+  border: 2px solid var(--violet-sage);
   border-radius: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -618,8 +622,8 @@ export default {
 }
 
 .category-option.selected {
-  border-color: var(--forest-medium);
-  background: var(--forest-light);
+  border-color: var(--violet-dark);
+  background: var(--violet-light);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -628,30 +632,30 @@ export default {
   height: 60px;
   margin-right: 15px;
   min-width: 60px;
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--forest-light);
+  color: white;
 }
 
 .category-info h4 {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   margin: 0 0 5px 0;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
 .category-info p {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   margin: 0 0 8px 0;
   font-size: 0.9rem;
   line-height: 1.4;
 }
 
 .question-count {
-  color: var(--forest-medium);
+  color: var(--violet-dark);
   font-size: 0.85rem;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.8);
@@ -662,7 +666,7 @@ export default {
 
 
 .test-info {
-  background: var(--forest-light);
+  background: var(--violet-light);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 30px;
@@ -679,18 +683,18 @@ export default {
 }
 
 .info-label {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   font-weight: 500;
 }
 
 .info-value {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   font-weight: 600;
 }
 
 .start-btn {
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
   border: none;
   padding: 15px 40px;
   border-radius: 12px;
@@ -702,11 +706,11 @@ export default {
 }
 
 .start-btn:hover {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
 }
 
 .start-btn:disabled {
-  background: var(--forest-sage);
+  background: var(--violet-sage);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -720,8 +724,8 @@ export default {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid var(--forest-sage);
-  border-top: 4px solid var(--forest-medium);
+  border: 4px solid var(--violet-sage);
+  border-top: 4px solid var(--violet-dark);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 15px;
@@ -733,7 +737,7 @@ export default {
 }
 
 .loading-section p {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   margin: 0;
 }
 
@@ -741,9 +745,9 @@ export default {
   text-align: center;
   margin: 20px 0;
   padding: 20px;
-  background: var(--forest-light);
+  background: var(--violet-light);
   border-radius: 12px;
-  border: 1px solid var(--forest-sage);
+  border: 1px solid var(--violet-sage);
 }
 
 .error-icon {
@@ -752,14 +756,14 @@ export default {
 }
 
 .error-message {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   margin: 0 0 15px 0;
   font-weight: 500;
 }
 
 .retry-btn {
-  background: var(--forest-deep);
-  color: var(--forest-light);
+  background: var(--violet-deep);
+  color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
@@ -769,7 +773,7 @@ export default {
 }
 
 .retry-btn:hover {
-  background: var(--forest-dark);
+  background: var(--violet-dark);
 }
 
 .question-section {
@@ -785,7 +789,7 @@ export default {
 }
 
 .question-title {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0 0 10px 0;
@@ -793,7 +797,7 @@ export default {
 }
 
 .question-description {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   margin: 0;
   font-size: 0.95rem;
 }
@@ -806,22 +810,22 @@ export default {
   display: flex;
   align-items: center;
   padding: 15px 20px;
-  border: 2px solid var(--forest-sage);
+  border: 2px solid var(--violet-sage);
   border-radius: 12px;
   margin-bottom: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .option-item:hover {
-  border-color: var(--forest-medium);
-  background: var(--forest-light);
+  border-color: var(--violet-dark);
+  background: var(--violet-light);
 }
 
 .option-item.selected {
-  border-color: var(--forest-medium);
-  background: var(--forest-light);
+  border-color: var(--violet-ultra-dark);
+  background: var(--violet-light);
 }
 
 .option-radio {
@@ -831,15 +835,15 @@ export default {
 .radio-circle {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--forest-sage);
+  border: 2px solid var(--violet-sage);
   border-radius: 50%;
   position: relative;
   transition: all 0.3s ease;
 }
 
 .radio-circle.checked {
-  border-color: var(--forest-medium);
-  background: var(--forest-medium);
+  border-color: var(--violet-ultra-dark);
+  background: var(--violet-ultra-dark);
 }
 
 .radio-circle.checked::after {
@@ -861,14 +865,14 @@ export default {
 }
 
 .option-label {
-  color: var(--forest-medium);
+  color: var(--violet-dark);
   font-weight: 600;
   margin-right: 10px;
   min-width: 20px;
 }
 
 .option-content {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   line-height: 1.5;
 }
 
@@ -888,26 +892,32 @@ export default {
 }
 
 .prev-btn {
-  background: var(--forest-light);
-  color: var(--forest-deep);
+  background: var(--violet-light);
+  color: var(--violet-deep);
+  border: 2px solid var(--violet-sage);
 }
 
 .prev-btn:hover {
-  background: var(--forest-sage);
+  background: var(--violet-sage);
+  border-color: var(--violet-dark);
 }
 
 .next-btn {
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
 }
 
 .next-btn:hover:not(:disabled) {
-  background: var(--forest-deep);
+  background: var(--violet-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .next-btn:disabled {
-  background: var(--forest-sage);
+  background: var(--violet-sage);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .results-section {
@@ -929,13 +939,13 @@ export default {
 }
 
 .results-header h2 {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   margin-bottom: 10px;
   font-size: 2rem;
 }
 
 .results-header p {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   font-size: 1.1rem;
 }
 
@@ -952,13 +962,14 @@ export default {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background: var(--forest-medium);
+  background: linear-gradient(135deg, var(--violet-dark) 0%, var(--violet-ultra-dark) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
-  color: var(--forest-light);
+  color: white;
   position: relative;
+  box-shadow: 0 8px 25px var(--shadow-medium);
 }
 
 .score-number {
@@ -973,7 +984,7 @@ export default {
 }
 
 .score-label {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
@@ -983,17 +994,17 @@ export default {
 /* 移除复杂的类别分数分析样式 */
 
 .feedback-content {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 16px;
   padding: 25px;
-  border-left: 4px solid var(--forest-medium);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid var(--violet-dark);
+  box-shadow: 0 4px 15px var(--shadow-light);
   backdrop-filter: blur(10px);
   margin-bottom: 30px;
 }
 
 .feedback-content p {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   margin: 0 0 20px 0;
   font-weight: 500;
   font-size: 1.5rem;
@@ -1001,7 +1012,7 @@ export default {
 }
 
 .feedback-list {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   margin: 0;
   padding-left: 0;
   list-style: none;
@@ -1017,7 +1028,7 @@ export default {
 
 .feedback-list li::before {
   content: '✓';
-  color: var(--forest-medium);
+  color: var(--violet-dark);
   font-weight: bold;
   font-size: 1rem;
   position: absolute;
@@ -1041,12 +1052,14 @@ export default {
 }
 
 .retake-btn {
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
 }
 
 .retake-btn:hover {
-  background: var(--forest-deep);
+  background: var(--violet-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--shadow-medium);
 }
 
 
@@ -1123,9 +1136,9 @@ export default {
   max-width: 400px;
 }
 
-.login-btn {
-  background: var(--forest-dark);
-  color: var(--forest-light);
+.signup-btn {
+  background: var(--violet-ultra-dark);
+  color: white;
   border: none;
   padding: 15px 40px;
   border-radius: 12px;
@@ -1136,7 +1149,7 @@ export default {
   margin-top: 20px;
 }
 
-.login-btn:hover {
+.signup-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--shadow-dark);
 }

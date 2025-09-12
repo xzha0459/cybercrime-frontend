@@ -12,12 +12,15 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
-import { fetchAuthSession } from 'aws-amplify/auth'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
-const getIdToken = async () => {
-  const session = await fetchAuthSession()
-  return session.tokens?.idToken?.toString()
+
+const getAccessToken = () => {
+  const token = localStorage.getItem('access_token')
+  if (!token) {
+    throw new Error('No access token found')
+  }
+  return token
 }
 
 
@@ -44,7 +47,7 @@ const computedSrc = computed(() => {
 
 const handleVideoEnd = async () => {
   try {
-    const token = await getIdToken()
+    const token = getAccessToken()
     const res = await fetch(
       `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/related/`,
       {
@@ -77,7 +80,7 @@ const setupPlayerPolling = () => {
         localStorage.setItem(`video-progress-${props.videoKey}`, Math.floor(time))
 
         try {
-          const token = await getIdToken()
+          const token = getAccessToken()
           await fetch(
             `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/progress/`,
             {
@@ -111,20 +114,15 @@ const initYouTubeAPI = () => {
   }
 }
 
-const onPlayerStateChange = (event) => {
-  if (event.data === YT.PlayerState.ENDED) {
-    emit('video-ended', props.videoKey)
-  }
-}
 
 const createPlayer = () => {
-  player = new YT.Player(youtubeIframe.value, {
+  player = new window.YT.Player(youtubeIframe.value, {
     events: {
       onReady: () => {
         setupPlayerPolling()
       },
       onStateChange: (event) => {
-        if (event.data === YT.PlayerState.ENDED) {
+        if (event.data === window.YT.PlayerState.ENDED) {
           handleVideoEnd()
         }
       }
@@ -134,7 +132,7 @@ const createPlayer = () => {
 
 const fetchBackendProgress = async () => {
   try {
-    const token = await getIdToken()
+    const token = getAccessToken()
     const res = await fetch(
       `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${props.videoKey}/progress/`,
       {
@@ -184,7 +182,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 480px) {
   .iframe-container {
-    padding-top: 65%; 
+    padding-top: 65%;
   }
 }
 </style>

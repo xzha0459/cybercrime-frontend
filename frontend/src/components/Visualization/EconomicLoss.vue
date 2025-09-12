@@ -572,8 +572,8 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -585,11 +585,11 @@ export default {
 }
 
 .download-btn:hover:not(:disabled) {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
 }
 
 .download-btn:disabled {
-  background: var(--forest-sage);
+  background: var(--violet-sage);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -606,7 +606,7 @@ export default {
   width: 40px;
   height: 40px;
   border: 3px solid var(--border-light);
-  border-top: 3px solid var(--forest-medium);
+  border-top: 3px solid var(--violet-dark);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -626,7 +626,7 @@ export default {
 }
 
 .retry-btn {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   color: var(--text-light);
   border: none;
   padding: 0.75rem 1.5rem;
@@ -637,7 +637,7 @@ export default {
 }
 
 .retry-btn:hover {
-  background: var(--forest-deep);
+  background: var(--violet-deep);
 }
 
 .filter-controls {
@@ -673,12 +673,12 @@ export default {
 
 .filter-group select:focus {
   outline: none;
-  border-color: var(--forest-medium);
+  border-color: var(--violet-dark);
   box-shadow: 0 0 0 3px var(--shadow-light);
 }
 
 .filter-group select:hover {
-  border-color: var(--forest-medium);
+  border-color: var(--violet-dark);
 }
 
 .chart-container {
@@ -714,14 +714,14 @@ export default {
 
 
 .summary-card.high-impact {
-  background: linear-gradient(135deg, var(--forest-light) 0%, var(--forest-sage) 100%);
-  border-color: var(--forest-medium);
+  background: linear-gradient(135deg, white 0%, var(--violet-sage) 100%);
+  border-color: var(--violet-dark);
 }
 
 .card-icon {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: var(--forest-medium);
+  color: var(--violet-dark);
   display: flex;
   align-items: center;
   justify-content: center;

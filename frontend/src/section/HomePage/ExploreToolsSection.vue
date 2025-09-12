@@ -88,16 +88,16 @@ export default {
   width: 80px;
   height: 80px;
   margin: 0 auto 25px;
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--forest-light);
+  color: white;
 }
 
 .tool-card h3 {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   font-size: 1.6rem;
   font-weight: 700;
   margin-bottom: 18px;
@@ -105,7 +105,7 @@ export default {
 }
 
 .tool-card p {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   line-height: 1.7;
   margin-bottom: 30px;
   font-size: 1.05rem;
@@ -113,8 +113,8 @@ export default {
 
 .tool-btn {
   display: inline-block;
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
   text-decoration: none;
   padding: 15px 35px;
   border-radius: 8px;
@@ -125,7 +125,7 @@ export default {
 }
 
 .tool-btn:hover {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
 }
 
 @media (max-width: 768px) {

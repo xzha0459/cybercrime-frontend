@@ -21,7 +21,6 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { getCurrentUser } from 'aws-amplify/auth'
 import TestSection from '../section/TestPage/TestSection.vue'
 import FooterSection from '../section/HomePage/FooterSection.vue'
 
@@ -35,11 +34,18 @@ export default {
     const isAuthenticated = ref(false)
     const isTestActive = ref(false)
 
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = () => {
       try {
-        await getCurrentUser()
-        isAuthenticated.value = true
-      } catch {
+        const accessToken = localStorage.getItem('access_token')
+        const userInfoStr = localStorage.getItem('user_info')
+
+        if (accessToken && userInfoStr) {
+          isAuthenticated.value = true
+        } else {
+          isAuthenticated.value = false
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error)
         isAuthenticated.value = false
       }
     }

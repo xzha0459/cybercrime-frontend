@@ -198,7 +198,6 @@
 </template>
 
 <script>
-import { fetchAuthSession } from 'aws-amplify/auth'
 
 export default {
   name: 'TestHistorySection',
@@ -260,13 +259,16 @@ export default {
     await this.loadTestHistory()
   },
   methods: {
-    // 获取ID Token
-    async getIdToken() {
+    // 获取Access Token
+    async getAccessToken() {
       try {
-        const session = await fetchAuthSession()
-        return session.tokens?.idToken?.toString()
+        const token = localStorage.getItem('access_token')
+        if (!token) {
+          throw new Error('No access token found')
+        }
+        return token
       } catch (error) {
-        console.error('Error getting ID token:', error)
+        console.error('Error getting access token:', error)
         throw error
       }
     },
@@ -280,7 +282,7 @@ export default {
         const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/quizzes/attempts/', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${await this.getIdToken()}`,
+            'Authorization': `Bearer ${await this.getAccessToken()}`,
             'Content-Type': 'application/json'
           }
         })
@@ -309,7 +311,7 @@ export default {
         const response = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/quizzes/attempts/${attempt.id}`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${await this.getIdToken()}`,
+            'Authorization': `Bearer ${await this.getAccessToken()}`,
             'Content-Type': 'application/json'
           }
         })
@@ -506,7 +508,7 @@ export default {
 
 .stat-item {
   text-align: center;
-  background: var(--forest-light);
+  background: var(--violet-light);
   padding: 15px 20px;
   border-radius: 12px;
   border: 1px solid var(--forest-sage);
@@ -528,7 +530,7 @@ export default {
 
 .test-card {
   background: rgba(255, 255, 255, 0.9);
-  border: 2px solid var(--forest-sage);
+  border: 2px solid var(--violet-sage);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -537,8 +539,8 @@ export default {
 }
 
 .test-card:hover {
-  background: var(--forest-light);
-  border-color: var(--forest-medium);
+  background: var(--violet-light);
+  border-color: var(--violet-dark);
 }
 
 .test-header {
@@ -570,16 +572,16 @@ export default {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.test-score.excellent { background: #d4edda; color: #155724; }
-.test-score.good { background: #cce5ff; color: #004085; }
-.test-score.fair { background: #fff3cd; color: #856404; }
-.test-score.poor { background: #f8d7da; color: #721c24; }
+.test-score.excellent { background: var(--violet-light); color: var(--violet-ultra-dark); }
+.test-score.good { background: var(--violet-sage); color: var(--violet-dark); }
+.test-score.fair { background: var(--violet-light); color: var(--violet-deep); }
+.test-score.poor { background: var(--violet-sage); color: var(--violet-deep); }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   margin-bottom: 12px;
   font-weight: 500;
 }
@@ -587,7 +589,7 @@ export default {
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: var(--forest-sage);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   overflow: hidden;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -595,14 +597,14 @@ export default {
 
 .progress-fill {
   height: 100%;
-  background: var(--forest-medium);
+  background: var(--violet-ultra-dark);
   border-radius: 4px;
 }
 
 .loading, .error, .no-tests {
   text-align: center;
   padding: 40px 20px;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   background: rgba(255, 255, 255, 0.8);
   border-radius: 15px;
   margin: 20px 0;
@@ -611,8 +613,8 @@ export default {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid var(--forest-sage);
-  border-top: 4px solid var(--forest-medium);
+  border: 4px solid var(--violet-sage);
+  border-top: 4px solid var(--violet-dark);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;
@@ -624,8 +626,8 @@ export default {
 }
 
 .retry-btn, .take-test-btn {
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
   border: none;
   padding: 12px 24px;
   border-radius: 10px;
@@ -638,7 +640,7 @@ export default {
 }
 
 .retry-btn:hover, .take-test-btn:hover {
-  background: var(--forest-deep);
+  background: var(--violet-dark);
 }
 
 /* 模态框样式 */

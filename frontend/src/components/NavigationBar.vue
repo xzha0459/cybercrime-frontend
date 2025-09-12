@@ -17,8 +17,11 @@
       <!-- Desktop Right side buttons -->
       <div class="nav-buttons desktop-nav">
         <div v-if="!isAuthenticated">
-          <button @click="signIn" class="btn btn-login" :disabled="loading">
-            {{ loading ? 'Signing in...' : 'Login' }}
+          <button @click="goToSignIn" class="btn btn-signin" :disabled="loading">
+            {{ loading ? 'Loading...' : 'Sign In' }}
+          </button>
+          <button @click="goToSignUp" class="btn btn-signup" :disabled="loading">
+            {{ loading ? 'Loading...' : 'Sign Up' }}
           </button>
         </div>
         <div v-else class="user-menu">
@@ -50,8 +53,11 @@
         <!-- Mobile User Section -->
         <div class="mobile-user-section">
           <div v-if="!isAuthenticated">
-            <button @click="signIn" class="btn btn-login mobile-btn" :disabled="loading">
-              {{ loading ? 'Signing in...' : 'Login' }}
+            <button @click="goToSignIn" class="btn btn-signin mobile-btn" :disabled="loading">
+              {{ loading ? 'Loading...' : 'Sign In' }}
+            </button>
+            <button @click="goToSignUp" class="btn btn-signup mobile-btn" :disabled="loading">
+              {{ loading ? 'Loading...' : 'Sign Up' }}
             </button>
           </div>
           <div v-else class="mobile-user-menu">
@@ -70,12 +76,6 @@
 <script>
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  signInWithRedirect,
-  signOut as amplifySignOut,
-  getCurrentUser,
-  fetchUserAttributes,
-} from 'aws-amplify/auth'
 
 export default {
   name: 'NavigationBar',
@@ -87,18 +87,16 @@ export default {
     const isMobileMenuOpen = ref(false)
 
     const signIn = async () => {
-      try {
-        loading.value = true
-        await signInWithRedirect({ provider: 'COGNITO' })
-      } catch (error) {
-        console.error('Sign in error:', error)
-        loading.value = false
-      }
+      router.push('/signin')
     }
 
     const signOut = async () => {
       try {
-        await amplifySignOut()
+        // Clear localStorage
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('user_info')
+
         isAuthenticated.value = false
         userEmail.value = null
         router.push('/')
@@ -111,6 +109,16 @@ export default {
       router.push('/user-center')
     }
 
+    const goToSignUp = () => {
+      router.push('/signup')
+      closeMobileMenu()
+    }
+
+    const goToSignIn = () => {
+      router.push('/signin')
+      closeMobileMenu()
+    }
+
     const toggleMobileMenu = () => {
       isMobileMenuOpen.value = !isMobileMenuOpen.value
     }
@@ -119,40 +127,39 @@ export default {
       isMobileMenuOpen.value = false
     }
 
-    const getUserEmail = async () => {
+    const getUserEmail = () => {
       try {
-        const attributes = await fetchUserAttributes()
-        userEmail.value = attributes.email || attributes['custom:email'] || 'No email available'
-      } catch {
-        try {
-          const user = await getCurrentUser()
-          if (user.signInDetails?.loginId && user.signInDetails.loginId.includes('@')) {
-            userEmail.value = user.signInDetails.loginId
-          } else if (user.username && user.username.includes('@')) {
-            userEmail.value = user.username
-          } else {
-            userEmail.value = user.username || user.userId || 'User'
-          }
-        } catch {
-          userEmail.value = 'Email unavailable'
+        const userInfoStr = localStorage.getItem('user_info')
+        if (userInfoStr) {
+          const userInfo = JSON.parse(userInfoStr)
+          userEmail.value = userInfo.username || 'User'
+        } else {
+          userEmail.value = 'User'
         }
+      } catch {
+        userEmail.value = 'User'
       }
     }
 
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = () => {
       try {
-        await getCurrentUser()
-        isAuthenticated.value = true
-        await getUserEmail()
+        const accessToken = localStorage.getItem('access_token')
+        if (accessToken) {
+          isAuthenticated.value = true
+          getUserEmail()
+        } else {
+          isAuthenticated.value = false
+          userEmail.value = null
+        }
       } catch {
         isAuthenticated.value = false
         userEmail.value = null
       }
     }
 
-    watch(isAuthenticated, async (newValue) => {
+    watch(isAuthenticated, (newValue) => {
       if (newValue && !userEmail.value) {
-        await getUserEmail()
+        getUserEmail()
       }
     })
 
@@ -168,6 +175,8 @@ export default {
       signIn,
       signOut,
       goToUserCenter,
+      goToSignUp,
+      goToSignIn,
       toggleMobileMenu,
       closeMobileMenu,
     }
@@ -231,7 +240,7 @@ export default {
 }
 
 .nav-logo {
-  height: 2rem;
+  height: 2.8rem;
   width: auto;
   object-fit: contain;
 }
@@ -288,13 +297,25 @@ export default {
   transform: none !important;
 }
 
-.btn-login {
+.btn-signin {
+  background: transparent;
+  color: white;
+  border: 2px solid var(--purple-medium);
+}
+
+.btn-signin:hover:not(:disabled) {
+  background: var(--purple-medium);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-signup {
   background: var(--purple-dark);
   color: white;
   box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
-.btn-login:hover:not(:disabled) {
+.btn-signup:hover:not(:disabled) {
   background: var(--purple-deep);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px var(--shadow-dark);
@@ -490,10 +511,10 @@ export default {
 }
 
 .mobile-user-email {
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   font-weight: 500;
   font-size: 1rem;
-  background: var(--forest-sage);
+  background: var(--violet-sage);
   padding: 0.6rem 1rem;
   border-radius: 8px;
   border: 1px solid var(--border-light);
@@ -510,7 +531,7 @@ export default {
 }
 
 .mobile-user-email.clickable:hover {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   color: var(--text-light);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

@@ -665,9 +665,9 @@ export default {
 }
 
 .rate-cell.rate-low, .risk-cell.risk-low {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: var(--violet-light);
+  color: var(--violet-ultra-dark);
+  border: 1px solid var(--violet-sage);
 }
 
 /* 卡片摘要 */

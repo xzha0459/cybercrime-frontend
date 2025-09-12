@@ -422,7 +422,7 @@ onMounted(fetchVideos)
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 2rem;
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   color: white;
   border: none;
   border-radius: 8px;
@@ -432,7 +432,7 @@ onMounted(fetchVideos)
 }
 
 .view-more-btn:hover {
-  background: var(--forest-dark);
+  background: var(--violet-ultra-dark);
 }
 
 .filter-group {
@@ -466,14 +466,14 @@ onMounted(fetchVideos)
 
 .filter-btn:hover {
   background: var(--bg-secondary);
-  border-color: var(--forest-medium);
-  color: var(--forest-medium);
+  border-color: var(--violet-dark);
+  color: var(--violet-dark);
 }
 
 .filter-btn.active {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   color: white;
-  border-color: var(--forest-medium);
+  border-color: var(--violet-dark);
 }
 
 /* Featured Article Carousel */
@@ -522,7 +522,7 @@ onMounted(fetchVideos)
 }
 
 .article-type {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -541,7 +541,7 @@ onMounted(fetchVideos)
 .view-btn {
   align-self: flex-start;
   padding: 0.75rem 2rem;
-  background: var(--forest-dark);
+  background: var(--violet-ultra-dark);
   color: white;
   border: none;
   border-radius: 8px;
@@ -553,7 +553,7 @@ onMounted(fetchVideos)
 }
 
 .view-btn:hover {
-  background: var(--forest-deep);
+  background: var(--violet-deep);
 }
 
 .article-cover {
@@ -568,7 +568,7 @@ onMounted(fetchVideos)
 .cover-image {
   width: 80%;
   height: 80%;
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -621,7 +621,7 @@ onMounted(fetchVideos)
 }
 
 .video-type {
-  background: var(--forest-deep);
+  background: var(--violet-deep);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -640,7 +640,7 @@ onMounted(fetchVideos)
 .play-btn {
   align-self: flex-start;
   padding: 0.75rem 2rem;
-  background: var(--forest-dark);
+  background: var(--violet-ultra-dark);
   color: white;
   border: none;
   border-radius: 8px;
@@ -652,7 +652,7 @@ onMounted(fetchVideos)
 }
 
 .play-btn:hover {
-  background: var(--forest-deep);
+  background: var(--violet-deep);
 }
 
 .video-preview {
@@ -673,7 +673,7 @@ onMounted(fetchVideos)
 .preview-image {
   width: 80%;
   height: 80%;
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -707,20 +707,20 @@ onMounted(fetchVideos)
   width: 50px;
   height: 50px;
   background: white;
-  border: 2px solid var(--forest-medium);
+  border: 2px solid var(--violet-dark);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: var(--forest-medium);
+  color: var(--violet-dark);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
 
 .nav-arrow:hover {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
   color: white;
   transform: translateY(-50%) scale(1.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);

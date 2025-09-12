@@ -18,8 +18,7 @@
                 {{ getUserInitial() }}
               </div>
               <div class="user-details">
-                <h3 class="username">{{ userInfo.username || userInfo.email || 'User' }}</h3>
-                <p class="email">{{ userInfo.email || 'No email available' }}</p>
+                <h3 class="username">{{ userInfo.username || 'User' }}</h3>
                 <p v-if="userInfo.age" class="age">Age: {{ userInfo.age }}</p>
                 <p v-if="userInfo.createdAt" class="member-since">
                   Member since: {{ formatDate(userInfo.createdAt) }}
@@ -63,10 +62,6 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  getCurrentUser,
-  fetchUserAttributes,
-} from 'aws-amplify/auth'
 
 export default {
   name: 'UserInfoSection',
@@ -82,38 +77,28 @@ export default {
         loading.value = true
         authError.value = null
 
-        const user = await getCurrentUser()
-        isAuthenticated.value = true
+        // Check if user has access token
+        const accessToken = localStorage.getItem('access_token')
+        const userInfoStr = localStorage.getItem('user_info')
 
-        // Get user attributes
-        const attributes = await fetchUserAttributes()
-
-        // Try to get additional user info from localStorage (if available)
-        let localUserInfo = null
-        try {
-          const storedUsers = localStorage.getItem('registeredUsers')
-          if (storedUsers) {
-            const users = JSON.parse(storedUsers)
-            // Find user by email or username
-            localUserInfo = users.find(u =>
-              u.email === attributes.email ||
-              u.email === attributes['custom:email'] ||
-              u.username === user.username
-            )
-          }
-        } catch (localError) {
-          console.warn('Could not load local user info:', localError)
+        if (!accessToken || !userInfoStr) {
+          isAuthenticated.value = false
+          userInfo.value = null
+          return
         }
 
-        // Combine AWS attributes with local user info
+        // Parse user info from localStorage
+        const storedUserInfo = JSON.parse(userInfoStr)
+
+        isAuthenticated.value = true
         userInfo.value = {
-          username: localUserInfo?.username || user.username || 'User',
-          email: attributes.email || attributes['custom:email'] || user.username || 'No email available',
-          age: localUserInfo?.age || null,
-          createdAt: localUserInfo?.createdAt || new Date().toISOString(),
-          testCount: localUserInfo?.testCount || 0,
-          linkChecks: localUserInfo?.linkChecks || 0,
-          libraryVisits: localUserInfo?.libraryVisits || 0,
+          username: storedUserInfo.username || 'User',
+          email: storedUserInfo.email || 'No email available',
+          age: storedUserInfo.age || null,
+          createdAt: storedUserInfo.date_joined || new Date().toISOString(),
+          testCount: 0,
+          linkChecks: 0,
+          libraryVisits: 0,
         }
 
       } catch (error) {
@@ -148,7 +133,7 @@ export default {
 
 
     const goToSignIn = () => {
-      router.push('/')
+      router.push('/signin')
     }
 
     const retryLoad = () => {
@@ -179,7 +164,7 @@ export default {
 }
 
 .user-info-section h2 {
-  color: var(--forest-dark, #2c5530);
+  color: var(--violet-ultra-dark);
   font-weight: 700;
   margin-bottom: 2rem;
 }
@@ -193,8 +178,8 @@ export default {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--forest-dark, #2c5530);
+  border: 4px solid var(--violet-sage);
+  border-top: 4px solid var(--violet-ultra-dark);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -212,16 +197,17 @@ export default {
   gap: 2rem;
   margin-bottom: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--violet-light) 0%, var(--violet-sage) 100%);
   border-radius: 12px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 15px var(--shadow-light);
 }
 
 .user-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: var(--forest-dark, #2c5530);
+  background: var(--violet-ultra-dark);
   color: white;
   display: flex;
   align-items: center;
@@ -229,7 +215,7 @@ export default {
   font-size: 2.5rem;
   font-weight: bold;
   flex-shrink: 0;
-  box-shadow: 0 4px 15px rgba(44, 85, 48, 0.3);
+  box-shadow: 0 4px 15px var(--shadow-medium);
 }
 
 .user-details {
@@ -240,20 +226,13 @@ export default {
   margin: 0 0 0.5rem 0;
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--forest-dark, #2c5530);
-}
-
-.email {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  color: #666;
-  font-weight: 500;
+  color: var(--violet-ultra-dark);
 }
 
 .age, .member-since {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
-  color: #888;
+  color: var(--violet-deep);
 }
 
 
@@ -276,24 +255,31 @@ export default {
 }
 
 .empty-state h3 {
-  color: var(--forest-dark, #2c5530);
+  color: var(--violet-ultra-dark);
   margin-bottom: 1rem;
 }
 
 .empty-state p {
-  color: #666;
+  color: var(--violet-deep);
   margin-bottom: 2rem;
   font-size: 1.1rem;
 }
 
 .btn-signin {
-  background: var(--forest-dark, #2c5530);
+  background: var(--violet-ultra-dark);
   color: white;
   padding: 0.75rem 2rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .btn-signin:hover {
-  background: var(--forest-deep, #1e3a22);
+  background: var(--violet-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 /* Error State */

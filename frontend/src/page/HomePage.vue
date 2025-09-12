@@ -14,7 +14,7 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { signInWithRedirect, getCurrentUser } from 'aws-amplify/auth'
+import { useRouter } from 'vue-router'
 import HomeHeroSection from '@/section/HomePage/HomeHeroSection.vue'
 import ExploreToolsSection from '@/section/HomePage/ExploreToolsSection.vue'
 import FooterSection from '@/section/HomePage/FooterSection.vue'
@@ -27,47 +27,32 @@ export default {
     FooterSection,
   },
   setup() {
+    const router = useRouter()
     const isAuthenticated = ref(false)
     const loading = ref(false)
 
-    const signIn = async () => {
-      try {
-        loading.value = true
-        await signInWithRedirect({ provider: 'COGNITO' })
-      } catch {
-        loading.value = false
-      }
+    const signIn = () => {
+      router.push('/signin')
     }
 
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = () => {
       try {
-        const maxAttempts = 3
+        const accessToken = localStorage.getItem('access_token')
+        const userInfoStr = localStorage.getItem('user_info')
 
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          try {
-            await getCurrentUser()
-            isAuthenticated.value = true
-            return
-          } catch {
-            if (attempt < maxAttempts) {
-              await new Promise((resolve) => setTimeout(resolve, 500))
-            }
-          }
-        }
-
-        isAuthenticated.value = false
-              } catch {
+        if (accessToken && userInfoStr) {
+          isAuthenticated.value = true
+        } else {
           isAuthenticated.value = false
         }
+      } catch (error) {
+        console.error('Error checking auth status:', error)
+        isAuthenticated.value = false
+      }
     }
 
     onMounted(() => {
-      const urlParams = new URLSearchParams(window.location.search)
-      const hasAuthParams = urlParams.get('code') || urlParams.get('error')
-
-      if (!hasAuthParams) {
-        checkAuthStatus()
-      }
+      checkAuthStatus()
     })
 
     return {

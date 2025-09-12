@@ -17,7 +17,7 @@ body {
 a,
 .green {
   text-decoration: none;
-  color: var(--forest-dark);
+  color: var(--violet-ultra-dark);
   transition: 0.4s;
   padding: 3px;
 }

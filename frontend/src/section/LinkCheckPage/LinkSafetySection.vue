@@ -375,8 +375,8 @@ export default {
 }
 
 .result-status.safe {
-  background: #d4edda;
-  color: #155724;
+  background: var(--violet-light);
+  color: var(--violet-ultra-dark);
 }
 
 .result-status.unsafe {
@@ -407,8 +407,8 @@ export default {
 }
 
 .risk-level.safe {
-  background: #d4edda;
-  color: #155724;
+  background: var(--violet-light);
+  color: var(--violet-ultra-dark);
 }
 
 .risk-level.unsafe {
@@ -422,7 +422,7 @@ export default {
 }
 
 .text-success {
-  color: #155724;
+  color: var(--violet-ultra-dark);
   font-weight: 600;
 }
 

@@ -667,8 +667,8 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -680,11 +680,11 @@ export default {
 }
 
 .download-btn:hover:not(:disabled) {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
 }
 
 .download-btn:disabled {
-  background: var(--forest-sage);
+  background: var(--violet-sage);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -702,7 +702,7 @@ export default {
   width: 40px;
   height: 40px;
   border: 3px solid var(--border-light);
-  border-top: 3px solid var(--forest-medium);
+  border-top: 3px solid var(--violet-dark);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -728,8 +728,8 @@ export default {
 .retry-btn {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background: var(--forest-dark);
-  color: var(--forest-light);
+  background: var(--violet-ultra-dark);
+  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -740,7 +740,7 @@ export default {
 }
 
 .retry-btn:hover {
-  background: var(--forest-medium);
+  background: var(--violet-dark);
 }
 
 .content {
@@ -820,7 +820,7 @@ export default {
 
 .finding-item {
   padding: 1rem;
-  background: var(--forest-light);
+  background: var(--violet-light);
   border-radius: 8px;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -836,11 +836,11 @@ export default {
 .stat-item {
   text-align: center;
   padding: 1.5rem;
-  background: linear-gradient(135deg, var(--forest-medium) 0%, var(--forest-deep) 100%);
-  color: var(--forest-light);
+  background: linear-gradient(135deg, var(--violet-dark) 0%, var(--violet-deep) 100%);
+  color: var(--violet-light);
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--shadow-light);
-  border: 1px solid var(--forest-deep);
+  border: 1px solid var(--violet-deep);
 }
 
 .stat-value {
@@ -863,7 +863,7 @@ export default {
 
 .age-group {
   padding: 1.5rem;
-  background: var(--forest-light);
+  background: var(--violet-light);
   border-radius: 8px;
   border: 1px solid var(--border-light);
 }
@@ -895,7 +895,7 @@ export default {
 
 .recommendation-item {
   padding: 1rem;
-  background: var(--forest-light);
+  background: var(--violet-light);
   border-radius: 8px;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -905,7 +905,7 @@ export default {
 
 .trend-analysis {
   padding: 1.5rem;
-  background: var(--forest-light);
+  background: var(--violet-light);
   border-radius: 8px;
   border: 1px solid var(--border-light);
 }

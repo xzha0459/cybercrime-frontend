@@ -1,60 +1,55 @@
 <template>
   <div class="signin-container">
     <div class="signin-card">
-      <div class="signin-header">
-        <h1 class="signin-title">登录到 GuardU</h1>
-        <p class="signin-description">请输入您的用户名和Google Authenticator验证码</p>
-      </div>
+      <div class="step-content">
+        <h2 class="step-title">Sign In</h2>
+        <p class="step-description">Enter your username and Google Authenticator verification code</p>
 
-      <form @submit.prevent="handleSignIn" class="signin-form">
-        <div class="form-group">
-          <label for="username">用户名</label>
-          <input
-            id="username"
-            v-model="signinData.username"
-            type="text"
-            placeholder="请输入用户名"
-            required
-            :disabled="isLoading"
-            class="form-input"
-          />
+        <div class="signin-form">
+          <div class="form-group">
+            <input
+              v-model="signinData.username"
+              type="text"
+              placeholder="Enter username"
+              required
+              :disabled="isLoading"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <input
+              v-model="signinData.code"
+              @input="handleCodeInput"
+              type="text"
+              placeholder="Enter 6-digit code"
+              maxlength="6"
+              required
+              :disabled="isLoading"
+              class="form-input"
+            />
+          </div>
+
+          <div v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
+
+          <button
+            @click="handleSignIn"
+            class="btn-primary"
+            :disabled="!isFormValid || isLoading"
+          >
+            <span v-if="isLoading">Signing In...</span>
+            <span v-else>Sign In</span>
+          </button>
         </div>
 
-        <div class="form-group">
-          <label for="code">验证码</label>
-          <input
-            id="code"
-            v-model="signinData.code"
-            @input="handleCodeInput"
-            type="text"
-            placeholder="000000"
-            maxlength="6"
-            required
-            :disabled="isLoading"
-            class="form-input code-input"
-          />
-          <div class="code-hint">请输入Google Authenticator中的6位验证码</div>
+        <div class="signin-footer">
+          <p class="signup-link">
+            Don't have an account?
+            <router-link to="/signup" class="link">Sign Up</router-link>
+          </p>
         </div>
-
-        <div v-if="errorMessage" class="error-message">
-          {{ errorMessage }}
-        </div>
-
-        <button
-          type="submit"
-          class="btn-primary"
-          :disabled="!isFormValid || isLoading"
-        >
-          <span v-if="isLoading">登录中...</span>
-          <span v-else>登录</span>
-        </button>
-      </form>
-
-      <div class="signin-footer">
-        <p class="signup-link">
-          还没有账户？
-          <router-link to="/signup" class="link">立即注册</router-link>
-        </p>
       </div>
     </div>
   </div>
@@ -155,38 +150,43 @@ export default {
 
 <style scoped>
 .signin-container {
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  background: var(--violet-ultra-dark);
   padding: 20px;
 }
 
 .signin-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   padding: 40px;
-  max-width: 400px;
+  max-width: 600px;
   width: 100%;
 }
 
-.signin-header {
-  text-align: center;
-  margin-bottom: 30px;
+.step-content {
+  animation: fadeIn 0.3s ease;
 }
 
-.signin-title {
-  font-size: 28px;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-title {
+  font-size: 24px;
   font-weight: 700;
   color: #333;
   margin-bottom: 8px;
+  text-align: center;
 }
 
-.signin-description {
+.step-description {
   color: #666;
-  font-size: 16px;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
 .signin-form {
@@ -200,16 +200,9 @@ export default {
   flex-direction: column;
 }
 
-.form-group label {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
 .form-input {
   padding: 12px 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--violet-light);
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease;
@@ -217,27 +210,14 @@ export default {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--violet-medium);
 }
 
 .form-input:disabled {
-  background: #f5f5f5;
+  background: var(--violet-light);
   cursor: not-allowed;
 }
 
-.code-input {
-  text-align: center;
-  letter-spacing: 8px;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.code-hint {
-  color: #666;
-  font-size: 12px;
-  margin-top: 4px;
-  text-align: center;
-}
 
 .btn-primary {
   padding: 12px 24px;
@@ -247,13 +227,12 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
-  background: #667eea;
+  background: var(--violet-dark);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #5a6fd8;
-  transform: translateY(-2px);
+  background: var(--violet-deep);
 }
 
 .btn-primary:disabled {
@@ -263,13 +242,12 @@ export default {
 }
 
 .error-message {
-  color: #e74c3c;
-  background: #fdf2f2;
+  color: var(--violet-dark);
+  background: var(--violet-light);
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--violet-light);
   text-align: center;
-  font-size: 14px;
 }
 
 .signin-footer {
@@ -283,7 +261,7 @@ export default {
 }
 
 .link {
-  color: #667eea;
+  color: var(--violet-dark);
   text-decoration: none;
   font-weight: 600;
 }
@@ -292,25 +270,11 @@ export default {
   text-decoration: underline;
 }
 
-/* 响应式设计 */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .signin-card {
     padding: 20px;
     margin: 10px;
   }
 
-  .signin-title {
-    font-size: 24px;
-  }
-
-  .form-input {
-    padding: 10px 14px;
-    font-size: 14px;
-  }
-
-  .code-input {
-    font-size: 16px;
-    letter-spacing: 6px;
-  }
 }
 </style>

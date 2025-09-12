@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <NavigationBar />
+    <NavigationBar v-if="!isAuthPage" />
 
     <router-view />
   </div>
@@ -14,6 +14,11 @@ export default {
   components: {
     NavigationBar,
   },
+  computed: {
+    isAuthPage() {
+      return this.$route.path === '/signup' || this.$route.path === '/signin'
+    }
+  }
 }
 </script>
 

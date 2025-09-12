@@ -52,17 +52,31 @@ export default {
 
 <style scoped>
 .hero-section {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: url('@/assets/background.jpg') center/cover no-repeat;
+  color: var(--text-light);
   margin: 0;
   padding: 0;
+  position: relative;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(47, 24, 75, 0.4);
+  z-index: 1;
 }
 
 .hero-container {
+  position: relative;
+  z-index: 2;
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  min-height: 90vh;
+  min-height: 95vh;
   padding: 2rem 8rem;
 }
 
@@ -73,7 +87,7 @@ export default {
 }
 
 .hero-title {
-  font-size: 3.5rem;
+  font-size: 3.2rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
   text-shadow: 2px 2px 4px var(--shadow-dark);
@@ -101,7 +115,7 @@ export default {
 }
 
 .hero-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   margin-bottom: 2rem;
   opacity: 0.9;
   line-height: 1.4;
@@ -127,7 +141,7 @@ export default {
 }
 
 .btn {
-  padding: 1rem 2.5rem;
+  padding: 0.8rem 2rem;
   font-size: 1.2rem;
   font-weight: 600;
   border: none;
@@ -136,7 +150,7 @@ export default {
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  min-width: 180px;
+  min-width: 160px;
 }
 
 .btn:disabled {
@@ -146,14 +160,14 @@ export default {
 }
 
 .btn-primary {
-  background: var(--violet-dark);
-  color: var(--text-light);
+  background: var(--violet-light);
+  color: var(--text-primary);
   box-shadow: 0 4px 15px var(--shadow-medium);
   transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--violet-medium);
+  background: var(--violet-sage);
 }
 
 
@@ -165,9 +179,9 @@ export default {
   }
 
   .btn {
-    padding: 0.8rem 2rem;
-    font-size: 1rem;
-    min-width: 160px;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    min-width: 140px;
   }
 }
 </style>

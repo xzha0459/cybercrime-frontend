@@ -186,18 +186,17 @@ export default {
 
 <style scoped>
 .navbar {
-  background: var(--violet-ultra-dark);
+  background: var(--violet-light);
   box-shadow: 0 2px 8px var(--shadow-light);
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom: 1px solid var(--border-light);
 }
 
 .nav-container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 1rem 8rem;
+  padding: 0.8rem 8rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -211,7 +210,7 @@ export default {
 
 .nav-link {
   text-decoration: none;
-  color: white;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 1rem;
   padding: 0.5rem 1rem;
@@ -220,19 +219,19 @@ export default {
 }
 
 .nav-link:hover {
-  background: var(--purple-sage);
-  color: white;
+  background: var(--violet-sage);
+  color: var(--text-primary);
 }
 
 .nav-link.router-link-active {
-  background: var(--purple-medium);
-  color: white;
+  background: var(--violet-dark);
+  color: var(--text-light);
 }
 
 .nav-brand {
   font-size: 1.8rem;
   font-weight: 700;
-  color: white;
+  color: var(--text-primary);
   letter-spacing: 2px;
   display: flex;
   align-items: center;
@@ -257,10 +256,10 @@ export default {
 }
 
 .user-email {
-  color: white;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 1rem;
-  background: var(--purple-sage);
+  background: var(--violet-sage);
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   border: 1px solid var(--border-light);
@@ -276,8 +275,8 @@ export default {
 }
 
 .user-email.clickable:hover {
-  background: var(--purple-medium);
-  color: white;
+  background: var(--violet-medium);
+  color: var(--text-light);
   transform: translateY(-1px);
 }
 
@@ -299,37 +298,37 @@ export default {
 
 .btn-signin {
   background: transparent;
-  color: white;
-  border: 2px solid var(--purple-medium);
+  color: var(--text-primary);
+  border: 2px solid var(--violet-medium);
 }
 
 .btn-signin:hover:not(:disabled) {
-  background: var(--purple-medium);
-  color: white;
+  background: var(--violet-medium);
+  color: var(--text-light);
   transform: translateY(-1px);
 }
 
 .btn-signup {
-  background: var(--purple-dark);
-  color: white;
+  background: var(--violet-dark);
+  color: var(--text-light);
   box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .btn-signup:hover:not(:disabled) {
-  background: var(--purple-deep);
+  background: var(--violet-deep);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px var(--shadow-dark);
 }
 
 .btn-logout {
   background: transparent;
-  color: white;
-  border: 2px solid var(--purple-medium);
+  color: var(--text-primary);
+  border: 2px solid var(--violet-medium);
 }
 
 .btn-logout:hover {
-  background: var(--purple-medium);
-  color: white;
+  background: var(--violet-medium);
+  color: var(--text-light);
   transform: translateY(-1px);
 }
 
@@ -424,11 +423,11 @@ export default {
 
 /* 悬停效果 */
 .mobile-menu-btn:hover .hamburger-line {
-  background: var(--purple-medium);
+  background: var(--violet-medium);
 }
 
 .mobile-menu-btn.active:hover .hamburger-line {
-  background: var(--purple-deep);
+  background: var(--violet-deep);
 }
 
 /* Mobile Menu */
@@ -470,7 +469,7 @@ export default {
 
 .mobile-nav-link {
   text-decoration: none;
-  color: white;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 1.1rem;
   padding: 0.8rem 1rem;
@@ -482,15 +481,15 @@ export default {
 }
 
 .mobile-nav-link:hover {
-  background: var(--purple-sage);
+  background: var(--violet-sage);
   border-color: var(--border-light);
   transform: translateY(-1px);
 }
 
 .mobile-nav-link.router-link-active {
-  background: var(--purple-medium);
-  color: white;
-  border-color: var(--purple-dark);
+  background: var(--violet-dark);
+  color: var(--text-light);
+  border-color: var(--violet-dark);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 

@@ -6,7 +6,9 @@
       @sign-in="signIn"
     />
 
-    <ExploreToolsSection />
+    <LinkCheckSection />
+
+    <ExploreLibrarySection />
 
     <FooterSection />
   </div>
@@ -16,14 +18,16 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomeHeroSection from '@/section/HomePage/HomeHeroSection.vue'
-import ExploreToolsSection from '@/section/HomePage/ExploreToolsSection.vue'
+import LinkCheckSection from '@/section/HomePage/ExploreLinkSection.vue'
+import ExploreLibrarySection from '@/section/HomePage/ExploreLibrarySection.vue'
 import FooterSection from '@/section/HomePage/FooterSection.vue'
 
 export default {
   name: 'HomePage',
   components: {
     HeroSection: HomeHeroSection,
-    ExploreToolsSection,
+    LinkCheckSection,
+    ExploreLibrarySection,
     FooterSection,
   },
   setup() {

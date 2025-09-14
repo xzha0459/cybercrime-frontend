@@ -88,8 +88,8 @@
 
       <!-- Step 3: Recovery Phrase -->
       <div v-if="currentStep === 3" class="step-content">
-        <h2 class="step-title">Your Recovery Phrase</h2>
-        <p class="step-description">⚠️ Please save the recovery phrase in a secure location and do not share it with others.</p>
+        <h2 class="step-title">Registration Complete!</h2>
+        <p class="step-description">✅ Your account has been successfully created. Please save the recovery phrase in a secure location and do not share it with others.</p>
 
         <div class="recovery-phrase-section">
           <div class="phrase-container">
@@ -108,7 +108,7 @@
           <div class="completion-actions">
             <button @click="previousStep" class="btn-secondary">Previous</button>
             <button @click="completeSignup" class="btn-primary">
-              Complete Registration and Auto Login
+              Go to User Center
             </button>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default {
       this.errors.verification = ''
     },
 
-    // Verify TOTP code
+    // Verify TOTP code using the new verify API
     async verifyTOTPCode() {
       if (!this.isValidVerificationCode) return
 
@@ -243,16 +243,37 @@ export default {
       try {
         console.log('Verifying TOTP code:', this.verificationCode)
 
-        // Simulate verification delay for better UX
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Call the new verify API
+        const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/users/verify/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            totp_secret: this.signupResponse.totp_secret,
+            username: this.signupResponse.username,
+            code: this.verificationCode,
+            recovery_phrase: this.signupResponse.recovery_phrase
+          })
+        })
 
-        // Since there's no verification endpoint, proceed directly to recovery phrase step
-        // In a real implementation, this would validate the TOTP code
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Verification failed')
+        }
+
+        // Save the verification response (contains user info and tokens)
+        const verifyResponse = await response.json()
+        this.signupResponse.verifyResponse = verifyResponse
+
+        console.log('TOTP verification successful:', verifyResponse)
+
+        // Proceed to recovery phrase step
         this.currentStep = 3
 
       } catch (error) {
         console.error('TOTP verification failed:', error)
-        this.errors.verification = 'Invalid verification code, please try again'
+        this.errors.verification = error.message || 'Invalid verification code, please try again'
       } finally {
         this.isVerifying = false
       }
@@ -301,67 +322,41 @@ export default {
       }
     },
 
-    // Complete registration and auto login
+    // Complete registration using verify API response
     async completeSignup() {
       console.log('Signup completed successfully')
 
       try {
-        // Auto login user
-        await this.autoLogin()
+        // Use the verify response that was saved during verification
+        const verifyResponse = this.signupResponse.verifyResponse
+
+        if (!verifyResponse) {
+          throw new Error('No verification response available')
+        }
+
+        // Save tokens and user info from verify response
+        if (verifyResponse.access_token) {
+          localStorage.setItem('access_token', verifyResponse.access_token)
+        }
+        if (verifyResponse.refresh_token) {
+          localStorage.setItem('refresh_token', verifyResponse.refresh_token)
+        }
+        if (verifyResponse.user) {
+          localStorage.setItem('user_info', JSON.stringify(verifyResponse.user))
+        }
+
+        console.log('User registration and login completed:', verifyResponse)
+
+        // Redirect to user center
+        this.$router.push('/user-center')
+
       } catch (error) {
-        console.error('Auto login failed:', error)
-        // If auto login fails, redirect to login page
+        console.error('Signup completion failed:', error)
+        // If completion fails, redirect to login page
         this.$router.push('/signin')
       }
     },
 
-    // Auto login
-    async autoLogin() {
-      if (!this.signupResponse?.username) {
-        throw new Error('No username available for auto login')
-      }
-
-      try {
-        // Call login API
-        const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/users/signin/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: this.signupResponse.username,
-            code: this.verificationCode
-          })
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.message || 'Auto login failed')
-        }
-
-        const result = await response.json()
-        console.log('Auto login successful:', result)
-
-
-        if (result.access_token) {
-          localStorage.setItem('access_token', result.access_token)
-        }
-        if (result.refresh_token) {
-          localStorage.setItem('refresh_token', result.refresh_token)
-        }
-
-        if (result.user) {
-          localStorage.setItem('user_info', JSON.stringify(result.user))
-        }
-
-
-        this.$router.push('/user-center')
-
-      } catch (error) {
-        console.error('Auto login error:', error)
-        throw error
-      }
-    },
 
 
     previousStep() {
@@ -374,6 +369,7 @@ export default {
       this.signupResponse = null
       this.verificationCode = ''
       this.currentStep = 1
+      this.isVerifying = false
       this.errors = {
         signup: '',
         verification: ''

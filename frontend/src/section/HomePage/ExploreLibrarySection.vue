@@ -191,6 +191,7 @@ export default {
 /* Featured Video Carousel */
 .featured-video {
   position: relative;
+  width: 100%;
   max-width: 1000px;
   margin: 0 auto 0.4rem auto;
   background: white;

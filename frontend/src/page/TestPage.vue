@@ -2,37 +2,37 @@
   <div class="test-page">
     <div class="page-header">
       <div class="container">
-        <h1 class="page-title">Cybersecurity Knowledge Test</h1>
-        <p class="page-subtitle">Assess your cybersecurity habits and discover areas for improvement</p>
+        <h1 class="page-title">Cybersecurity Learning Challenges</h1>
+        <p class="page-subtitle">Progressive cybersecurity learning system with three contextualized tasks</p>
       </div>
     </div>
 
     <div class="page-content">
       <div class="container">
-        <!-- Test Section -->
-        <TestSection @test-status-changed="handleTestStatusChanged" />
+        <!-- Challenge Section -->
+        <ChallengeSection @challenge-status-changed="handleChallengeStatusChanged" />
       </div>
     </div>
 
-    <!-- Footer only shows when authenticated and test is not active -->
-    <FooterSection v-if="isAuthenticated && !isTestActive" />
+    <!-- Footer only shows when authenticated and challenge is not active -->
+    <FooterSection v-if="isAuthenticated && !isChallengeActive" />
   </div>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue'
-import TestSection from '../section/TestPage/TestSection.vue'
+import ChallengeSection from '../section/TestPage/ChallengeSection.vue'
 import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
   name: 'TestPage',
   components: {
-    TestSection,
+    ChallengeSection,
     FooterSection
   },
   setup() {
     const isAuthenticated = ref(false)
-    const isTestActive = ref(false)
+    const isChallengeActive = ref(false)
 
     const checkAuthStatus = () => {
       try {
@@ -50,8 +50,8 @@ export default {
       }
     }
 
-    const handleTestStatusChanged = (isActive) => {
-      isTestActive.value = isActive
+    const handleChallengeStatusChanged = (isActive) => {
+      isChallengeActive.value = isActive
     }
 
     onMounted(() => {
@@ -60,8 +60,8 @@ export default {
 
     return {
       isAuthenticated,
-      isTestActive,
-      handleTestStatusChanged
+      isChallengeActive,
+      handleChallengeStatusChanged
     }
   }
 }

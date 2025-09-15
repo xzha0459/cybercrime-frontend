@@ -195,11 +195,11 @@ export default {
 }
 
 .card-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--violet-dark);
-  margin: 0;
-  line-height: 1.2;
+  margin: 0 0 1rem 0;
+
 }
 
 .browse-button {

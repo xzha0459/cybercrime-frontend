@@ -1,39 +1,62 @@
 <template>
   <div id="link-check-section" class="link-check-section">
     <div class="section-container">
-      <div class="card-content">
-        <div class="left-column">
-          <h2 class="card-title">Link Security Check</h2>
-          <p class="card-description">
-            Check the security of suspicious links to avoid phishing attacks and protect yourself from malicious websites, identity theft, and financial fraud. Our advanced scanning technology analyzes URLs in real-time to detect potential threats before you click.
-          </p>
+      <div class="content-wrapper">
+        <div class="text-content">
+          <div class="title-section">
+            <h2 class="card-title">Link Security Check</h2>
+            <p class="description">
+              Check the security of suspicious links to avoid phishing attacks and protect yourself from malicious websites, identity theft, and financial fraud. Our advanced scanning technology analyzes URLs in real-time to detect potential threats before you click.
+            </p>
+          </div>
         </div>
-        <div class="right-column">
-          <div class="features">
-            <div class="feature-item">
-              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"></polygon>
-              </svg>
-              <span class="feature-text">Real-time Detection</span>
+
+        <div class="features-section">
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"></polygon>
+                </svg>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Real-time Detection</h3>
+                <p class="feature-desc">Instant analysis of suspicious URLs</p>
+              </div>
             </div>
-            <div class="feature-item">
-              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <circle cx="12" cy="16" r="1"></circle>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <span class="feature-text">Multiple Security Checks</span>
+
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <circle cx="12" cy="16" r="1"></circle>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Multiple Security Checks</h3>
+                <p class="feature-desc">Comprehensive threat analysis</p>
+              </div>
             </div>
-            <div class="feature-item">
-              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              <span class="feature-text">Privacy Protection</span>
+
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Privacy Protection</h3>
+                <p class="feature-desc">Your data stays secure and private</p>
+              </div>
             </div>
           </div>
-          <router-link to="/link-check" class="browse-button" @click="scrollToTop">
-            Check Now
-          </router-link>
+
+          <div class="cta-section">
+            <router-link to="/link-check" class="browse-button" @click="scrollToTop">
+              Check Now
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -53,162 +76,132 @@ export default {
 
 <style scoped>
 .link-check-section {
-  padding: 0;
+  padding: 4rem 0;
   background: var(--bg-primary);
-  display: flex;
-  align-items: center;
 }
 
 .section-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
-.card-content {
-  display: flex;
-  width: 100%;
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
 }
 
-.left-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: center;
-  justify-content: center;
-  padding: 100px;
-}
-
-.right-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: center;
-  justify-content: center;
-  padding: 100px;
+.title-section {
+  margin-bottom: 2rem;
 }
 
 .card-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--violet-dark);
-  margin: 0;
-  line-height: 1.2;
+  margin: 0 0 1rem 0;
 }
 
-.card-description {
+.description {
   font-size: 1.1rem;
-  color: var(--violet-dark);
-  margin: 15px 0 0 0;
-  line-height: 1.4;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
-.features {
+.features-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 2rem;
+  align-items: center;
 }
 
-.feature-item {
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  max-width: 550px;
+  margin: 0 auto;
+}
+
+.feature-card {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 1rem;
+  padding: 1rem;
 }
 
-.feature-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--violet-medium);
+.feature-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: var(--violet-deep);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.feature-text {
-  font-size: 0.95rem;
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.feature-title {
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--violet-dark);
-  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+}
+
+.feature-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cta-section {
+  display: flex;
+  justify-content: center;
 }
 
 .browse-button {
   display: inline-block;
   background: var(--violet-dark);
   color: var(--text-light);
-  text-decoration: none;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 1rem;
-  transition: background 0.3s ease;
+  text-decoration: none;
 }
 
 .browse-button:hover {
   background: var(--violet-deep);
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
-  .link-check-section {
-    min-height: 40vh;
+  .content-wrapper {
+    grid-template-columns: 1fr;
   }
 
-  .section-container {
-    padding: 0 15px;
-  }
-
-  .card-content {
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  .left-column {
-    flex: none;
-    min-height: 80px;
-    padding: 15px;
-  }
-
-  .right-column {
-    flex: none;
-    gap: 15px;
-    padding: 15px;
+  .text-content {
+    padding-right: 0;
+    text-align: center;
   }
 
   .card-title {
-    font-size: 1.6rem;
-  }
-
-  .card-description {
-    font-size: 1rem;
-  }
-
-  .features {
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-
-  .feature-text {
-    font-size: 0.9rem;
+    font-size: 2rem;
   }
 
   .browse-button {
     padding: 10px 20px;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .section-container {
-    padding: 0 10px;
-  }
-
-  .card-title {
-    font-size: 1.4rem;
-  }
-
-  .card-description {
-    font-size: 0.95rem;
   }
 }
 </style>

@@ -105,11 +105,10 @@ export default {
 }
 
 .card-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--violet-dark);
-  margin: 0;
-  line-height: 1.2;
+  margin: 0 0 1rem 0;
 }
 
 .card-subtitle {
@@ -126,6 +125,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
+  margin-top: 1rem;
 }
 
 /* Challenge Card */
@@ -134,8 +134,6 @@ export default {
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 20px var(--shadow-light);
-  transition: all 0.3s ease;
-  border: 1px solid var(--border-light);
   position: relative;
   overflow: hidden;
 }
@@ -211,6 +209,7 @@ export default {
 .browse-section {
   display: flex;
   justify-content: center;
+  margin-top: 2rem;
 }
 
 .browse-button {

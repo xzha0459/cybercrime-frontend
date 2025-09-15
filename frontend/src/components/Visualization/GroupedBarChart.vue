@@ -255,10 +255,10 @@ export default {
 
       // 颜色配置
       const colors = {
-        'Direct Loss': '#E74C3C',           // 红色 - 直接损失
-        'Additional Costs': '#E67E22',      // 橙色 - 额外成本
-        'Amount Recovered': '#27AE60',      // 绿色 - 恢复金额
-        'Net Loss': '#8E44AD'              // 紫色 - 净损失
+        'Direct Loss': '#FF4757',           // 鲜红色 - 直接损失
+        'Additional Costs': '#FFA502',      // 亮橙色 - 额外成本
+        'Amount Recovered': '#2ED573',      // 亮绿色 - 恢复金额
+        'Net Loss': '#3742FA'              // 亮蓝色 - 净损失
       }
 
       return {

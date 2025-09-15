@@ -268,8 +268,8 @@ export default {
           textStyle: { color: '#34495e', fontSize: 11 },
           inRange: {
             color: [
-              '#ffffff', '#f5f8f5', '#e8f0e8', '#d4e7d4',
-              '#a8d6a8', '#7dc27d', '#529952', '#2d662d', '#1a3d1a'
+              '#ffffff', '#f0f4ff', '#e1ecff', '#c7d9ff',
+              '#a8c8ff', '#7db3ff', '#5299ff', '#2d66cc', '#1a3d99'
             ]
           }
         },

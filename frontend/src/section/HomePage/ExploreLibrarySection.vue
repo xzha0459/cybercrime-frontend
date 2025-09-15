@@ -50,7 +50,7 @@
         </div>
 
         <div class="browse-section">
-          <router-link to="/library" class="browse-button">
+          <router-link to="/library" class="browse-button" @click="scrollToTop">
             Browse Content
           </router-link>
         </div>
@@ -103,6 +103,10 @@ export default {
       // Handle video ended event
     }
 
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
     const nextVideo = () => {
       currentIndex.value = (currentIndex.value + 1) % videos.value.length
     }
@@ -121,6 +125,7 @@ export default {
       handleVideoEnded,
       nextVideo,
       prevVideo,
+      scrollToTop,
     }
   },
 }
@@ -128,7 +133,7 @@ export default {
 
 <style scoped>
 .explore-library-section {
-  padding: 2rem 0;
+  padding: 0 0 4rem 0;
   background: var(--violet-light);
   min-height: 40vh;
   display: flex;
@@ -168,24 +173,19 @@ export default {
   line-height: 1.2;
 }
 
-
 .browse-button {
   display: inline-block;
   background: var(--violet-dark);
   color: var(--text-light);
-  text-decoration: none;
   padding: 12px 24px;
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
 }
 
 .browse-button:hover {
-  background: var(--violet-medium);
-  color: var(--text-light);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--violet-deep);
 }
 
 /* Featured Video Carousel */

@@ -39,6 +39,9 @@
       </button>
     </div>
 
+    <!-- Mobile Menu Backdrop -->
+    <div v-if="isMobileMenuOpen" class="mobile-menu-backdrop" @click="closeMobileMenu"></div>
+
     <!-- Mobile Menu Dropdown -->
     <div class="mobile-menu" :class="{ open: isMobileMenuOpen }">
       <div class="mobile-menu-content">
@@ -74,7 +77,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default {
@@ -121,10 +124,17 @@ export default {
 
     const toggleMobileMenu = () => {
       isMobileMenuOpen.value = !isMobileMenuOpen.value
+      // Prevent body scroll when menu is open
+      if (isMobileMenuOpen.value) {
+        document.body.style.overflow = 'hidden'
+      } else {
+        document.body.style.overflow = ''
+      }
     }
 
     const closeMobileMenu = () => {
       isMobileMenuOpen.value = false
+      document.body.style.overflow = ''
     }
 
     const getUserEmail = () => {
@@ -165,6 +175,11 @@ export default {
 
     onMounted(() => {
       checkAuthStatus()
+    })
+
+    onUnmounted(() => {
+      // Restore body scroll when component is unmounted
+      document.body.style.overflow = ''
     })
 
     return {
@@ -336,42 +351,6 @@ export default {
 .mobile-menu-btn {
   display: none;
   flex-direction: column;
-  justify-content: space-around;
-  width: 2rem;
-  height: 2rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 1001;
-}
-
-.hamburger-line {
-  width: 100%;
-  height: 3px;
-  background: white;
-  border-radius: 2px;
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
-
-/* Mobile Menu */
-/* Mobile Menu Button */
-.mobile-menu-btn {
-  display: none;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 2rem;
@@ -387,7 +366,7 @@ export default {
 .hamburger-line {
   width: 100%;
   height: 2px;
-  background: white;
+  background: var(--text-primary);
   border-radius: 1px;
   transition: all 0.3s ease;
   position: absolute;
@@ -406,7 +385,7 @@ export default {
   bottom: 6px;
 }
 
-/* 激活状态 - 形成 × */
+/* Active state - forms X */
 .mobile-menu-btn.active .hamburger-line:nth-child(1) {
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
@@ -421,7 +400,7 @@ export default {
   transform: translateY(50%) rotate(-45deg);
 }
 
-/* 悬停效果 */
+/* Hover effects */
 .mobile-menu-btn:hover .hamburger-line {
   background: var(--violet-medium);
 }
@@ -430,22 +409,35 @@ export default {
   background: var(--violet-deep);
 }
 
-/* Mobile Menu */
-.mobile-menu {
-  position: absolute;
-  top: 100%;
+/* Mobile Menu Backdrop */
+.mobile-menu-backdrop {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
-  background: var(--violet-ultra-dark);
-  border-top: 1px solid var(--border-light);
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--violet-light);
+  border-bottom: 1px solid var(--border-light);
   box-shadow: 0 4px 12px var(--shadow-medium);
   transform: translateY(-100%);
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
   z-index: 1000;
-  max-height: calc(100vh - 100px);
+  max-height: 100vh;
   overflow-y: auto;
+  padding-top: 80px; /* Account for navbar height */
 }
 
 .mobile-menu.open {
@@ -478,19 +470,23 @@ export default {
   border: 1px solid transparent;
   display: block;
   text-align: center;
+  background: var(--violet-sage);
+  margin-bottom: 0.5rem;
 }
 
 .mobile-nav-link:hover {
-  background: var(--violet-sage);
-  border-color: var(--border-light);
+  background: var(--violet-medium);
+  color: var(--text-light);
+  border-color: var(--violet-medium);
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .mobile-nav-link.router-link-active {
   background: var(--violet-dark);
   color: var(--text-light);
   border-color: var(--violet-dark);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .mobile-user-section {
@@ -510,7 +506,7 @@ export default {
 }
 
 .mobile-user-email {
-  color: var(--violet-ultra-dark);
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 1rem;
   background: var(--violet-sage);
@@ -533,7 +529,7 @@ export default {
   background: var(--violet-dark);
   color: var(--text-light);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .mobile-btn {
@@ -566,6 +562,10 @@ export default {
   .nav-brand {
     font-size: 1.5rem;
   }
+
+  .mobile-menu {
+    padding-top: 70px; /* Adjust for smaller navbar */
+  }
 }
 
 @media (max-width: 480px) {
@@ -589,6 +589,10 @@ export default {
   .mobile-btn {
     padding: 0.7rem 1.2rem;
     font-size: 0.95rem;
+  }
+
+  .mobile-menu {
+    padding-top: 60px; /* Adjust for smaller navbar on mobile */
   }
 }
 </style>

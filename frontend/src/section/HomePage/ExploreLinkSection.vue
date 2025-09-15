@@ -1,5 +1,5 @@
 <template>
-  <div class="explore-link-section">
+  <div id="link-check-section" class="link-check-section">
     <div class="section-container">
       <div class="card-content">
         <div class="left-column">
@@ -31,8 +31,8 @@
               <span class="feature-text">Privacy Protection</span>
             </div>
           </div>
-          <router-link to="/link-check" class="check-button">
-            check now
+          <router-link to="/link-check" class="browse-button" @click="scrollToTop">
+            Check Now
           </router-link>
         </div>
       </div>
@@ -43,14 +43,18 @@
 <script>
 export default {
   name: 'ExploreLinkSection',
+  methods: {
+    scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 }
 </script>
 
 <style scoped>
 .link-check-section {
   padding: 0;
-  background: var(--violet-light);
-  min-height: 40vh;
+  background: var(--bg-primary);
   display: flex;
   align-items: center;
 }
@@ -129,24 +133,20 @@ export default {
   font-weight: 500;
 }
 
-.check-button {
+.browse-button {
   display: inline-block;
   background: var(--violet-dark);
   color: var(--text-light);
   text-decoration: none;
   padding: 12px 24px;
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
 }
 
-.check-button:hover {
-  background: var(--violet-medium);
-  color: var(--text-light);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.browse-button:hover {
+  background: var(--violet-deep);
 }
 
 @media (max-width: 768px) {
@@ -192,7 +192,7 @@ export default {
     font-size: 0.9rem;
   }
 
-  .check-button {
+  .browse-button {
     padding: 10px 20px;
     font-size: 0.9rem;
   }

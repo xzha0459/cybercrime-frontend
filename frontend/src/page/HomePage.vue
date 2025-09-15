@@ -10,6 +10,8 @@
 
     <ExploreLibrarySection />
 
+    <ExploreChallengeSection />
+
     <FooterSection />
   </div>
 </template>
@@ -20,6 +22,7 @@ import { useRouter } from 'vue-router'
 import HomeHeroSection from '@/section/HomePage/HomeHeroSection.vue'
 import LinkCheckSection from '@/section/HomePage/ExploreLinkSection.vue'
 import ExploreLibrarySection from '@/section/HomePage/ExploreLibrarySection.vue'
+import ExploreChallengeSection from '@/section/HomePage/ExploreChallengeSection.vue'
 import FooterSection from '@/section/HomePage/FooterSection.vue'
 
 export default {
@@ -28,6 +31,7 @@ export default {
     HeroSection: HomeHeroSection,
     LinkCheckSection,
     ExploreLibrarySection,
+    ExploreChallengeSection,
     FooterSection,
   },
   setup() {

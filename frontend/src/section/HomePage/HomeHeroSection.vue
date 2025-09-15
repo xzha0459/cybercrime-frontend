@@ -8,7 +8,7 @@
 
         <!-- 未登录状态 -->
         <div v-if="!isAuthenticated" class="auth-actions">
-          <button @click="$emit('sign-in')" class="btn btn-primary" :disabled="loading">
+          <button @click="scrollToLinkCheck" class="btn btn-primary" :disabled="loading">
             {{ loading ? 'SIGNING IN...' : 'EXPLORE TOOLS' }}
           </button>
         </div>
@@ -41,9 +41,18 @@ export default {
   emits: ['sign-in'],
   methods: {
     scrollToContent() {
-      const contentElement = document.querySelector('.content-section')
-      if (contentElement) {
-        contentElement.scrollIntoView({ behavior: 'smooth' })
+      this.scrollToSection()
+    },
+    scrollToLinkCheck() {
+      this.scrollToSection()
+    },
+    scrollToSection() {
+      const element = document.querySelector('#link-check-section')
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        })
       }
     },
   },

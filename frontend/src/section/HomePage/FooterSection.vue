@@ -56,6 +56,20 @@
           </div>
         </div>
 
+        <!-- 右侧列 - About -->
+        <div class="footer-column">
+          <div class="about-section">
+            <h3 class="section-title">About</h3>
+            <ul class="links-list">
+              <li class="link-item">
+                <router-link to="/privacy-policy" class="link-text">
+                  <span class="arrow-icon">▶</span>
+                  Privacy Policy
+                </router-link>
+              </li>
+            </ul>
+          </div>
+        </div>
 
       </div>
 

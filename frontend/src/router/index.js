@@ -7,6 +7,7 @@ import UserCenterPage from '../page/UserCenterPage.vue'
 import SignUpPage from '../page/SignUpPage.vue'
 import SignInPage from '../page/SignInPage.vue'
 import VideoPage from '../page/VideoPage.vue'
+import PrivacyPolicyPage from '../page/PrivacyPolicyPage.vue'
 
 const routes = [
   {
@@ -48,6 +49,11 @@ const routes = [
     path: '/video/:id',
     name: 'Video',
     component: VideoPage,
+  },
+  {
+    path: '/privacy-policy',
+    name: 'PrivacyPolicy',
+    component: PrivacyPolicyPage,
   },
 ]
 

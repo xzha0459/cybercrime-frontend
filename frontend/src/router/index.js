@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../page/HomePage.vue'
 import LinkCheckPage from '../page/LinkCheckPage.vue'
 import LibraryPage from '../page/LibraryPage.vue'
-import TestPage from '../page/TestPage.vue'
+import ChallengePage from '../page/ChallengePage.vue'
 import UserCenterPage from '../page/UserCenterPage.vue'
 import SignUpPage from '../page/SignUpPage.vue'
 import SignInPage from '../page/SignInPage.vue'
@@ -24,9 +24,9 @@ const routes = [
     component: LibraryPage,
   },
   {
-    path: '/test',
-    name: 'Test',
-    component: TestPage,
+    path: '/challenge',
+    name: 'Challenge',
+    component: ChallengePage,
   },
   {
     path: '/user-center',

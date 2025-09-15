@@ -95,7 +95,7 @@
     <!-- 无测试记录 -->
     <div v-else class="no-tests">
       <p>No test records found</p>
-      <router-link to="/test" class="take-test-btn">Take Your First Test</router-link>
+      <router-link to="/challenge" class="take-test-btn">Take Your First Challenge</router-link>
     </div>
   </div>
 

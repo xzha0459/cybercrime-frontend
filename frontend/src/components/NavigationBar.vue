@@ -11,7 +11,7 @@
         <router-link to="/" class="nav-link">Home</router-link>
         <router-link to="/link-check" class="nav-link">Link Check</router-link>
         <router-link to="/library" class="nav-link">Library</router-link>
-        <router-link to="/test" class="nav-link">Test</router-link>
+        <router-link to="/challenge" class="nav-link">Challenge</router-link>
       </div>
 
       <!-- Desktop Right side buttons -->
@@ -47,7 +47,7 @@
           <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">Home</router-link>
           <router-link to="/link-check" class="mobile-nav-link" @click="closeMobileMenu">Link Check</router-link>
           <router-link to="/library" class="mobile-nav-link" @click="closeMobileMenu">Library</router-link>
-          <router-link to="/test" class="mobile-nav-link" @click="closeMobileMenu">Test</router-link>
+          <router-link to="/challenge" class="mobile-nav-link" @click="closeMobileMenu">Challenge</router-link>
         </div>
 
         <!-- Mobile User Section -->

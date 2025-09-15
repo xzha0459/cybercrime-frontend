@@ -31,9 +31,9 @@
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h3>Cybersecurity Test</h3>
-          <p>Assess your cybersecurity knowledge level and get personalized recommendations</p>
-          <router-link to="/test" class="tool-btn">Start Test</router-link>
+          <h3>Cybersecurity Challenge</h3>
+          <p>Progressive cybersecurity learning system with three contextualized tasks</p>
+          <router-link to="/challenge" class="tool-btn">Start Challenge</router-link>
         </div>
       </div>
     </div>

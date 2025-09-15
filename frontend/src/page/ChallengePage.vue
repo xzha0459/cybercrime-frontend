@@ -1,5 +1,5 @@
 <template>
-  <div class="test-page">
+  <div class="challenge-page">
     <div class="page-header">
       <div class="container">
         <h1 class="page-title">Cybersecurity Learning Challenges</h1>
@@ -25,7 +25,7 @@ import ChallengeSection from '../section/TestPage/ChallengeSection.vue'
 import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
-  name: 'TestPage',
+  name: 'ChallengePage',
   components: {
     ChallengeSection,
     FooterSection
@@ -68,7 +68,7 @@ export default {
 </script>
 
 <style scoped>
-.test-page {
+.challenge-page {
   background-color: var(--bg-primary);
 }
 

@@ -47,9 +47,9 @@
                 </router-link>
               </li>
               <li class="link-item">
-                <router-link to="/test" class="link-text">
+                <router-link to="/challenge" class="link-text">
                   <span class="arrow-icon">▶</span>
-                  Test
+                  Challenge
                 </router-link>
               </li>
             </ul>

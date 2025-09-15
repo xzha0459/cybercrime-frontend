@@ -25,9 +25,19 @@
           </button>
         </div>
         <div v-else class="user-menu">
-          <span class="user-email clickable" v-if="userEmail" @click="goToUserCenter">{{ userEmail }}</span>
-          <span class="user-email" v-else>Loading...</span>
-          <button @click="signOut" class="btn btn-logout">Sign Out</button>
+          <div class="user-avatar-container" @click="toggleUserDropdown">
+            <div class="user-avatar">
+              {{ getUserInitial() }}
+            </div>
+            <div class="user-dropdown" :class="{ open: isUserDropdownOpen }">
+              <div class="dropdown-item" @click="() => { goToUserCenter(); isUserDropdownOpen = false; }">
+                User Center
+              </div>
+              <div class="dropdown-item" @click="() => { signOut(); isUserDropdownOpen = false; }">
+                Sign Out
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -65,8 +75,12 @@
           </div>
           <div v-else class="mobile-user-menu">
             <div class="mobile-user-info">
-              <span class="mobile-user-email clickable" v-if="userEmail" @click="() => { goToUserCenter(); closeMobileMenu(); }">{{ userEmail }}</span>
-              <span class="mobile-user-email" v-else>Loading...</span>
+              <div class="mobile-user-avatar" @click="() => { goToUserCenter(); closeMobileMenu(); }">
+                <div class="mobile-avatar">
+                  {{ getUserInitial() }}
+                </div>
+                <span class="mobile-username">{{ userEmail }}</span>
+              </div>
             </div>
             <button @click="signOut" class="btn btn-logout mobile-btn">Sign Out</button>
           </div>
@@ -88,6 +102,7 @@ export default {
     const loading = ref(false)
     const userEmail = ref(null)
     const isMobileMenuOpen = ref(false)
+    const isUserDropdownOpen = ref(false)
 
     const signIn = async () => {
       router.push('/signin')
@@ -137,6 +152,15 @@ export default {
       document.body.style.overflow = ''
     }
 
+    const toggleUserDropdown = () => {
+      isUserDropdownOpen.value = !isUserDropdownOpen.value
+    }
+
+    const getUserInitial = () => {
+      if (!userEmail.value) return '?'
+      return userEmail.value.charAt(0).toUpperCase()
+    }
+
     const getUserEmail = () => {
       try {
         const userInfoStr = localStorage.getItem('user_info')
@@ -175,18 +199,32 @@ export default {
 
     onMounted(() => {
       checkAuthStatus()
+
+      // Add click outside listener for dropdown
+      document.addEventListener('click', handleClickOutside)
     })
 
     onUnmounted(() => {
       // Restore body scroll when component is unmounted
       document.body.style.overflow = ''
+
+      // Remove click outside listener
+      document.removeEventListener('click', handleClickOutside)
     })
+
+    const handleClickOutside = (event) => {
+      const avatarContainer = document.querySelector('.user-avatar-container')
+      if (avatarContainer && !avatarContainer.contains(event.target)) {
+        isUserDropdownOpen.value = false
+      }
+    }
 
     return {
       isAuthenticated,
       loading,
       userEmail,
       isMobileMenuOpen,
+      isUserDropdownOpen,
       signIn,
       signOut,
       goToUserCenter,
@@ -194,6 +232,8 @@ export default {
       goToSignIn,
       toggleMobileMenu,
       closeMobileMenu,
+      toggleUserDropdown,
+      getUserInitial,
     }
   },
 }
@@ -268,6 +308,73 @@ export default {
   display: flex;
   gap: 1rem;
   align-items: center;
+}
+
+.user-avatar-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--violet-dark);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.user-avatar:hover {
+  background: var(--violet-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-dark);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px var(--shadow-medium);
+  border: 1px solid var(--border-light);
+  min-width: 160px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.user-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: var(--violet-sage);
+  color: var(--violet-dark);
 }
 
 .user-email {
@@ -503,6 +610,40 @@ export default {
 .mobile-user-info {
   display: flex;
   justify-content: center;
+}
+
+.mobile-user-avatar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.mobile-user-avatar:hover {
+  background: var(--violet-sage);
+}
+
+.mobile-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: var(--violet-dark);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.mobile-username {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 1rem;
 }
 
 .mobile-user-email {

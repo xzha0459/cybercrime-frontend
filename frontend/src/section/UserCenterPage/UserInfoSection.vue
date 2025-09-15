@@ -1,9 +1,7 @@
 <template>
   <div class="user-info-section">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-          <h2 class="text-center mb-4">User Information</h2>
+    <div class="user-info-container">
+      <h2 class="section-title">User Information</h2>
 
           <!-- Loading State -->
           <div v-if="loading" class="loading-state">
@@ -53,8 +51,6 @@
               </button>
             </div>
           </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -163,10 +159,17 @@ export default {
   padding: 2rem 0;
 }
 
-.user-info-section h2 {
+.user-info-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  /* padding: 0 2rem; */
+}
+
+.section-title {
   color: var(--violet-ultra-dark);
   font-weight: 700;
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 /* Loading State */
@@ -197,10 +200,12 @@ export default {
   gap: 2rem;
   margin-bottom: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, var(--violet-light) 0%, var(--violet-sage) 100%);
+  background: white;
   border-radius: 12px;
   border: 1px solid var(--border-light);
   box-shadow: 0 4px 15px var(--shadow-light);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .user-avatar {
@@ -234,10 +239,6 @@ export default {
   font-size: 1rem;
   color: var(--violet-deep);
 }
-
-
-
-
 
 /* Not Authenticated State */
 .not-authenticated {
@@ -317,11 +318,16 @@ export default {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .user-info-container {
+    padding: 0 1rem;
+  }
+
   .user-profile {
     flex-direction: column;
     text-align: center;
     gap: 1.5rem;
     padding: 1.5rem;
+    max-width: 100%;
   }
 
   .user-avatar {
@@ -333,10 +339,6 @@ export default {
   .username {
     font-size: 1.5rem;
   }
-
-
-
-
 }
 
 @media (max-width: 480px) {

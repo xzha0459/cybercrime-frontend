@@ -2,7 +2,7 @@
   <!-- 测试历史区域 -->
   <div class="test-history-section">
     <div class="section-header">
-      <h2>Test History</h2>
+      <h2>Challenge History</h2>
       <div class="stats-summary">
         <div class="stat-item">
           <span class="stat-number">{{ totalTests }}</span>
@@ -477,12 +477,11 @@ export default {
 <style scoped>
 /* 测试历史样式 */
 .test-history-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
   border-radius: 15px;
   padding: 25px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   max-width: 1200px;
   margin: 0 auto;
 }

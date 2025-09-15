@@ -15,78 +15,60 @@
       <div v-if="!selectedModule" class="challenge-content">
         <!-- Task 1 Page -->
         <div v-if="currentTask === 0" class="task-section">
-          <div class="task-card">
-            <!-- Progress Indicator -->
-            <div class="progress-indicator">
-              <div class="progress-steps">
-                <div
-                  v-for="step in 3"
-                  :key="step"
-                  class="progress-step"
-                  :class="{
-                    'active': step === 1,
-                    'completed': step < 1,
-                    'locked': step > 1
-                  }"
-                >
-                  <div class="step-number">{{ step }}</div>
-                  <div class="step-line" v-if="step < 3"></div>
-                </div>
-                <div class="lock-icon">🔒</div>
+          <!-- Progress Indicator -->
+          <div class="progress-indicator">
+            <div class="progress-steps">
+              <div
+                v-for="step in 3"
+                :key="step"
+                class="progress-step"
+                :class="{
+                  'active': step === 1,
+                  'completed': step < 1,
+                  'locked': step > 1
+                }"
+              >
+                <div class="step-number">{{ step }}</div>
+                <div class="step-line" v-if="step < 3"></div>
               </div>
             </div>
+          </div>
 
-            <!-- Task Header -->
-            <div class="task-header">
-              <h1 class="task-title">Task 1: Network Novice Protection</h1>
-              <p class="task-description">
-                Users who are new to the online world need to master the most basic security protection knowledge. Through three core modules, build cybersecurity awareness from scratch.
-              </p>
+          <!-- Task Header -->
+          <div class="task-header">
+            <h1 class="task-title">Task 1: Network Novice Protection</h1>
+            <p class="task-description">
+              Users who are new to the online world need to master the most basic security protection knowledge. Through three core modules, build cybersecurity awareness from scratch.
+            </p>
+          </div>
+
+          <!-- Module Cards -->
+          <div class="module-cards">
+            <!-- Module 1 -->
+            <div class="module-card">
+              <div class="module-info">
+                <h3 class="module-title">Module 1:<br>Understanding Cyberbullying</h3>
+                <p class="module-description">Learn to identify and respond to cyberbullying behavior</p>
+              </div>
+              <button class="start-module-btn" @click="() => selectModule({ id: 1, name: 'Understanding Cyberbullying', description: 'Learn to identify and respond to cyberbullying behavior', questionCount: 15 })">Start Learning →</button>
             </div>
 
-            <!-- Module Cards -->
-            <div class="module-cards">
-              <!-- Module 1 -->
-              <div class="module-card">
-                <div class="module-icon">🛡️</div>
-                <div class="module-info">
-                  <h3 class="module-title">Module 1: Understanding Cyberbullying</h3>
-                  <p class="module-description">Learn to identify and respond to cyberbullying behavior</p>
-                  <div class="module-stats">
-                    <span class="question-count">15 questions</span>
-                    <span class="difficulty">Beginner</span>
-                  </div>
-                </div>
-                <button class="start-module-btn" @click="() => selectModule({ id: 1, name: 'Understanding Cyberbullying', description: 'Learn to identify and respond to cyberbullying behavior', questionCount: 15 })">Start Learning →</button>
+            <!-- Module 2 -->
+            <div class="module-card">
+              <div class="module-info">
+                <h3 class="module-title">Module 2:<br>Identifying Common Scams</h3>
+                <p class="module-description">Master basic scam identification techniques</p>
               </div>
+              <button class="start-module-btn" @click="() => selectModule({ id: 2, name: 'Identifying Common Scams', description: 'Master basic scam identification techniques', questionCount: 17 })">Start Learning →</button>
+            </div>
 
-              <!-- Module 2 -->
-              <div class="module-card">
-                <div class="module-icon">🚨</div>
-                <div class="module-info">
-                  <h3 class="module-title">Module 2: Identifying Common Scams</h3>
-                  <p class="module-description">Master basic scam identification techniques</p>
-                  <div class="module-stats">
-                    <span class="question-count">17 questions</span>
-                    <span class="difficulty">Beginner</span>
-                  </div>
-                </div>
-                <button class="start-module-btn" @click="() => selectModule({ id: 2, name: 'Identifying Common Scams', description: 'Master basic scam identification techniques', questionCount: 17 })">Start Learning →</button>
+            <!-- Module 3 -->
+            <div class="module-card">
+              <div class="module-info">
+                <h3 class="module-title">Module 3:<br>Basic Privacy Protection</h3>
+                <p class="module-description">Understand basic methods of personal information protection</p>
               </div>
-
-              <!-- Module 3 -->
-              <div class="module-card">
-                <div class="module-icon">🔒</div>
-                <div class="module-info">
-                  <h3 class="module-title">Module 3: Basic Privacy Protection</h3>
-                  <p class="module-description">Understand basic methods of personal information protection</p>
-                  <div class="module-stats">
-                    <span class="question-count">13 questions</span>
-                    <span class="difficulty">Beginner</span>
-                  </div>
-                </div>
-                <button class="start-module-btn" @click="() => selectModule({ id: 3, name: 'Basic Privacy Protection', description: 'Understand basic methods of personal information protection', questionCount: 13 })">Start Learning →</button>
-              </div>
+              <button class="start-module-btn" @click="() => selectModule({ id: 3, name: 'Basic Privacy Protection', description: 'Understand basic methods of personal information protection', questionCount: 13 })">Start Learning →</button>
             </div>
           </div>
         </div>
@@ -98,7 +80,6 @@
         <!-- Back Button -->
         <div class="test-header">
           <button @click="goBackToModules" class="back-to-modules-btn">← Back to Module Selection</button>
-          <h2 class="test-title">{{ selectedModule.name }}</h2>
         </div>
 
         <!-- Test Progress Indicator -->
@@ -249,7 +230,7 @@ export default {
             id: 1,
             name: 'Understanding Cyber Bullying',
             description: 'Learn to identify and respond to cyberbullying behavior',
-            icon: '🛡️',
+            icon: 'shield',
             questionCount: 15,
             difficulty: 'Beginner'
           },
@@ -257,7 +238,7 @@ export default {
             id: 2,
             name: 'Identifying Common Scams',
             description: 'Master basic techniques for identifying scams',
-            icon: '🚨',
+            icon: 'warning',
             questionCount: 17,
             difficulty: 'Beginner'
           },
@@ -265,7 +246,7 @@ export default {
             id: 3,
             name: 'Basic Privacy Protection',
             description: 'Learn basic methods for protecting personal information',
-            icon: '🔒',
+            icon: 'lock',
             questionCount: 13,
             difficulty: 'Beginner'
           }
@@ -295,7 +276,7 @@ export default {
             id: 6,
             name: 'Technical Protection Application',
             description: 'Learn to use technical tools for protection',
-            icon: '⚙️',
+            icon: 'settings',
             questionCount: 10,
             difficulty: 'Intermediate'
           }
@@ -598,7 +579,6 @@ export default {
 
 <style scoped>
 .challenge-page {
-  min-height: 100vh;
   background: var(--violet-light);
   padding: 0;
 }
@@ -640,15 +620,6 @@ export default {
   padding: 20px;
 }
 
-.welcome-section {
-  text-align: center;
-}
-
-.welcome-card {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 40px;
-}
 
 /* Progress Indicator */
 .progress-indicator {
@@ -712,20 +683,15 @@ export default {
   background: var(--violet-ultra-dark);
 }
 
-.lock-icon {
-  font-size: 1.5rem;
-  margin-left: 20px;
-  color: var(--violet-sage);
-}
-
 /* Task Section */
 .task-section {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 40px 20px;
 }
 
 .task-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -747,7 +713,7 @@ export default {
   color: var(--violet-deep);
   font-size: 1.2rem;
   line-height: 1.6;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -760,7 +726,7 @@ export default {
 }
 
 .module-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   border-radius: 15px;
   padding: 30px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -774,14 +740,7 @@ export default {
 }
 
 .module-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   border-color: var(--violet-dark);
-}
-
-.module-icon {
-  font-size: 3rem;
-  margin-bottom: 20px;
 }
 
 .module-info {
@@ -837,90 +796,6 @@ export default {
 
 .start-module-btn:hover {
   background: var(--violet-dark);
-  transform: translateY(-2px);
-}
-
-.card-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 10px 0;
-  opacity: 0.8;
-}
-
-.card-subtitle {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 20px 0;
-  line-height: 1.2;
-}
-
-.card-description {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0 0 20px 0;
-  opacity: 0.9;
-}
-
-.modules-preview {
-  margin-bottom: 20px;
-}
-
-.module-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--violet-sage);
-  font-size: 0.9rem;
-}
-
-.module-item:last-child {
-  border-bottom: none;
-}
-
-.module-name {
-  color: var(--violet-ultra-dark);
-  font-weight: 500;
-}
-
-.module-count {
-  color: var(--violet-dark);
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: var(--violet-light);
-  padding: 3px 8px;
-  border-radius: 10px;
-}
-
-.challenge-action-btn {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
-  padding: 0;
-  text-decoration: underline;
-}
-
-.challenge-action-btn:hover:not(:disabled) {
-  opacity: 0.8;
-  transform: translateX(5px);
-}
-
-.challenge-action-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
 }
 
 .card-graphic {
@@ -952,7 +827,7 @@ export default {
   transform: translate(-50%, -50%);
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -963,107 +838,6 @@ export default {
   z-index: 10;
 }
 
-.module-selection {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.module-selection-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.module-selection-card h2 {
-  color: var(--violet-ultra-dark);
-  margin-bottom: 10px;
-  font-size: 2rem;
-  text-align: center;
-}
-
-.module-selection-card .task-description {
-  text-align: center;
-  margin-bottom: 40px;
-  font-size: 1.1rem;
-}
-
-.modules-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
-}
-
-.module-card {
-  background: var(--violet-light);
-  border-radius: 15px;
-  padding: 25px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid var(--violet-sage);
-}
-
-.module-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border-color: var(--violet-dark);
-}
-
-.module-icon {
-  font-size: 3rem;
-  margin-bottom: 15px;
-}
-
-.module-card h3 {
-  color: var(--violet-ultra-dark);
-  margin-bottom: 10px;
-  font-size: 1.2rem;
-}
-
-.module-card p {
-  color: var(--violet-deep);
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.module-stats {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  font-size: 0.9rem;
-}
-
-.question-count {
-  color: var(--violet-dark);
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 4px 8px;
-  border-radius: 12px;
-}
-
-.difficulty {
-  color: var(--violet-deep);
-  font-weight: 500;
-}
-
-.select-module-btn {
-  width: 100%;
-  background: var(--violet-ultra-dark);
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.select-module-btn:hover {
-  background: var(--violet-dark);
-  transform: translateY(-1px);
-}
 
 /* Module Test */
 .module-test {
@@ -1072,57 +846,23 @@ export default {
 }
 
 .test-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
 }
 
 .back-to-modules-btn {
-  background: #6c5ce7;
+  background: var(--violet-ultra-dark);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
 }
 
 .back-to-modules-btn:hover {
-  background: #5a4fcf;
-}
-
-.test-title {
-  color: #2d3436;
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.test-progress-section {
-  padding: 20px 30px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  margin-bottom: 30px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.test-progress-bar {
-  width: 100%;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.test-progress-fill {
-  height: 100%;
-  background: var(--violet-ultra-dark);
-  transition: width 0.3s ease;
+  background: var(--violet-dark);
 }
 
 .test-progress-text {
@@ -1144,7 +884,7 @@ export default {
 }
 
 .question-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -1175,7 +915,7 @@ export default {
   margin-bottom: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
 }
 
 .option-item:hover {
@@ -1288,7 +1028,7 @@ export default {
 }
 
 .results-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -1471,10 +1211,6 @@ export default {
     padding: 20px;
   }
 
-  .modules-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
 
   .progress-steps {
     flex-wrap: wrap;
@@ -1485,8 +1221,5 @@ export default {
     width: 40px;
   }
 
-  .lock-icon {
-    margin-left: 10px;
-  }
 }
 </style>

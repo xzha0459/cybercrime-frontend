@@ -92,10 +92,10 @@
         </button>
       </div> -->
 
-      <!-- Featured Videos Grid (Nine Videos in 3x3 Grid) -->
+      <!-- Featured Videos Grid (Six Videos in 2x3 Grid) -->
       <div class="featured-videos-grid" v-if="videos.length && (selectedContentType === 'all' || selectedContentType === 'videos')">
         <div
-          v-for="video in videos.slice(0, 9)"
+          v-for="video in videos.slice(0, 6)"
           :key="video.id"
           class="video-card"
           @click="loadVideo(video.id)"
@@ -552,6 +552,7 @@ onMounted(async () => {
 .featured-videos-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto 3rem auto;

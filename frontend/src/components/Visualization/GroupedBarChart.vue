@@ -776,12 +776,10 @@ export default {
   font-style: italic;
 }
 
+/* Analysis Panel Container */
 .insights-panel {
   background: transparent;
-  border-radius: 0;
   padding: 2rem 0;
-  box-shadow: none;
-  border: none;
 }
 
 .insights-panel h4 {
@@ -792,17 +790,17 @@ export default {
   text-align: center;
 }
 
+/* Insight Section Container */
 .insight-section {
   margin-bottom: 1rem;
   padding: 1.5rem;
-  background: var(--bg-secondary);
+  background: var(--violet-dark);
   border-radius: 8px;
-  border: 1px solid var(--border-light);
 }
 
 .section-title {
   margin: 0 0 1rem 0;
-  color: var(--text-primary);
+  color: white;
   font-size: 1.1rem;
   font-weight: 600;
   display: flex;
@@ -810,21 +808,7 @@ export default {
   gap: 0.5rem;
 }
 
-.key-findings {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.finding-item {
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-
+/* Key Financial Figures Section */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -834,11 +818,9 @@ export default {
 .stat-item {
   text-align: center;
   padding: 1.5rem;
-  background: linear-gradient(135deg, var(--violet-dark) 0%, var(--violet-deep) 100%);
-  color: white;
+  background: var(--violet-light);
   border-radius: 8px;
-  box-shadow: 0 4px 8px var(--shadow-light);
-  border: 1px solid var(--violet-deep);
+  color: var(--text-primary);
 }
 
 .stat-value {
@@ -853,6 +835,23 @@ export default {
   line-height: 1.3;
 }
 
+/* Key Findings Section */
+.key-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.finding-item {
+  padding: 1rem;
+  background: var(--violet-light);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Crime Type Characteristics Section */
 .crime-analysis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -861,9 +860,8 @@ export default {
 
 .crime-group {
   padding: 1.5rem;
-  background: white;
+  background: var(--violet-light);
   border-radius: 8px;
-  border: 1px solid var(--border-light);
 }
 
 .crime-title {
@@ -885,6 +883,7 @@ export default {
   line-height: 1.4;
 }
 
+/* Financial Protection Recommendations Section */
 .recommendations {
   display: flex;
   flex-direction: column;
@@ -893,12 +892,11 @@ export default {
 
 .recommendation-item {
   padding: 1rem;
-  background: white;
+  background: var(--violet-light);
   border-radius: 8px;
   font-size: 0.95rem;
   line-height: 1.5;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-light);
+  color: var(--text-primary);
 }
 
 @media (max-width: 768px) {

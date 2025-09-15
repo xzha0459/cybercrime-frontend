@@ -6,6 +6,7 @@ import ChallengePage from '../page/ChallengePage.vue'
 import UserCenterPage from '../page/UserCenterPage.vue'
 import SignUpPage from '../page/SignUpPage.vue'
 import SignInPage from '../page/SignInPage.vue'
+import VideoPage from '../page/VideoPage.vue'
 
 const routes = [
   {
@@ -42,6 +43,11 @@ const routes = [
     path: '/signin',
     name: 'SignIn',
     component: SignInPage,
+  },
+  {
+    path: '/video/:id',
+    name: 'Video',
+    component: VideoPage,
   },
 ]
 

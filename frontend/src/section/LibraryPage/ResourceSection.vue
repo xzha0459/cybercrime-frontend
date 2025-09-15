@@ -95,7 +95,7 @@
       <!-- Featured Videos Grid (Six Videos in 2x3 Grid) -->
       <div class="featured-videos-grid" v-if="videos.length && (selectedContentType === 'all' || selectedContentType === 'videos')">
         <div
-          v-for="video in videos.slice(0, 6)"
+          v-for="video in displayedVideos"
           :key="video.id"
           class="video-card"
           @click="loadVideo(video.id)"
@@ -126,178 +126,36 @@
 
       <!-- View More Button -->
       <div class="view-more-section">
-        <button class="view-more-btn" @click="showAllContent = true">
-          <span>View More</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <button class="view-more-btn" @click="showAllContent = !showAllContent">
+          <span>{{ showAllContent ? 'Show Less' : 'View More' }}</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :class="{ 'rotated': showAllContent }">
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
       </div>
+
     </div>
 
-    <!-- Video Player Modal -->
-    <div v-if="currentIndex >= 0 && videos[currentIndex]" class="modal-overlay" @click="currentIndex = -1">
-      <div class="modal-content video-player-modal" @click.stop>
-        <div class="modal-header">
-          <h2 class="modal-title">{{ videos[currentIndex].title }}</h2>
-          <button class="modal-close" @click="currentIndex = -1">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
 
-        <div class="modal-body">
-          <div class="video-player-container">
-            <YoutubePlayer
-              :key="videos[currentIndex].id"
-              :videoId="extractYouTubeId(videos[currentIndex].link)"
-              :videoKey="videos[currentIndex].id"
-              :initialProgress="getVideoProgress(videos[currentIndex].id)"
-              @save-progress="handleSaveProgress"
-              @video-ended="handleVideoEnded"
-            />
-          </div>
-
-          <div class="video-info-section">
-            <div class="video-meta">
-              <span class="video-type">Video</span>
-              <span class="video-duration">{{ videos[currentIndex].suggested_reading_time }} min</span>
-            </div>
-            <div class="video-description">
-              <span>Video by: {{ videos[currentIndex].author }}</span><br />
-              <span>Published date: {{ videos[currentIndex].publish_date }}</span>
-            </div>
-          </div>
-
-          <!-- Related Suggestions -->
-          <div v-if="showRecommendations" class="related-content">
-            <h2 class="related-content__heading">Recommended for You</h2>
-
-            <div v-if="relatedVideos.length" class="related-content__videos">
-              <h3 class="related-content__section-title">Related Videos</h3>
-              <ul class="related-content__video-list">
-                <li v-for="video in relatedVideos" :key="video.id" class="related-content__video-item">
-                  <button class="related-content__video-link" @click="loadVideo(video.id)">
-                    {{ video.title }}
-                  </button>
-                  <span class="related-content__video-time">— {{ video.suggested_reading_time }} min</span>
-                </li>
-              </ul>
-            </div>
-
-            <div v-if="relatedQuiz" class="related-content__quiz">
-              <h3 class="related-content__section-title">Quick Quiz: {{ relatedQuiz.question_text }}</h3>
-              <ul class="related-content__quiz-options">
-                <li v-for="option in relatedQuiz.options" :key="option.identifier" class="related-content__quiz-option">
-                  <label class="related-content__quiz-label">
-                    <input
-                      type="radio"
-                      :name="relatedQuiz.id"
-                      :value="option.identifier"
-                      class="related-content__quiz-input"
-                    />
-                    {{ option.identifier }}. {{ option.text }}
-                  </label>
-                </li>
-              </ul>
-              <details class="related-content__explanation">
-                <summary class="related-content__explanation-toggle">Show Explanation</summary>
-                <p class="related-content__explanation-text">{{ relatedQuiz.explanation }}</p>
-              </details>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- All Content Modal -->
-    <div v-if="showAllContent" class="modal-overlay" @click="showAllContent = false">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2 class="modal-title">All Learning Video Resources</h2>
-          <button class="modal-close" @click="showAllContent = false">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div class="content-grid">
-            <div v-for="video in allVideos" :key="video.id" class="content-card" @click="loadVideo(video.id)">
-              <div class="card-thumbnail">
-                <img :src="getYouTubeThumbnail(video.link)" :alt="video.title" class="thumbnail-image" />
-                <div class="play-overlay">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                    <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
-                  </svg>
-                </div>
-                <div class="duration-badge">{{ video.suggested_reading_time }} min</div>
-              </div>
-              <div class="card-content">
-                <h3 class="card-title">{{ video.title }}</h3>
-                <p class="card-author">by {{ video.author }}</p>
-                <p class="card-date">{{ video.publish_date }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import YoutubePlayer from '@/components/YoutubePlayer.vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const videos = ref([])
-const allVideos = ref([])
-const currentIndex = ref(0)
 const showAllContent = ref(false)
-const handleSaveProgress = async (progressData) => {
-  try {
-    const token = localStorage.getItem('access_token')
-    if (!token) {
-      console.log('User not authenticated, progress not saved')
-      return
-    }
 
-    const { videoId, currentTime, duration } = progressData
-
-    // 保存到本地状态
-    videoProgress.value[videoId] = {
-      currentTime,
-      duration,
-      lastWatched: new Date().toISOString()
-    }
-
-    // 发送到后端保存
-    const response = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${videoId}/progress/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        current_time: currentTime,
-        duration: duration
-      })
-    })
-
-    if (!response.ok) {
-      console.error('Failed to save progress to backend')
-    }
-  } catch (error) {
-    console.error('Error saving video progress:', error)
+const displayedVideos = computed(() => {
+  if (showAllContent.value) {
+    return videos.value
+  } else {
+    return videos.value.slice(0, 6)
   }
-}
-
-const relatedVideos = ref([])
-const relatedQuiz = ref(null)
-const showRecommendations = ref(false)
-const videoProgress = ref({}) // 存储每个视频的观看进度
+})
 
 
 // const currentVideo = computed(() => videos.value[currentIndex.value] || {})
@@ -337,8 +195,6 @@ const fetchFilteredVideos = async () => {
     const res = await fetch(url)
     const data = await res.json()
     videos.value = data
-    currentIndex.value = -1
-    showRecommendations.value = false
   } catch (err) {
     console.error('Error fetching videos:', err)
   }
@@ -348,9 +204,7 @@ const fetchVideos = async () => {
   try {
     const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/')
     const data = await res.json()
-    videos.value = data
-    allVideos.value = data // Store all videos for the modal
-    currentIndex.value = -1
+    videos.value = data // 存储所有视频
   } catch (err) {
     console.error('Error fetching videos:', err)
   }
@@ -379,59 +233,10 @@ const getYouTubeThumbnail = (url) => {
 }
 
 const loadVideo = (id) => {
-  const index = videos.value.findIndex(v => v.id === id)
-  if (index !== -1) {
-    currentIndex.value = index
-    showRecommendations.value = false
-    relatedVideos.value = []
-    relatedQuiz.value = null
-    showAllContent.value = false // Close modal when video is loaded
-  }
+  // 导航到新的视频页面
+  router.push(`/video/${id}`)
 }
 
-const handleVideoEnded = (payload) => {
-  relatedVideos.value = payload.relatedVideos
-  relatedQuiz.value = payload.relatedQuiz
-  showRecommendations.value = true
-}
-
-// 获取用户的视频观看进度
-const fetchUserProgress = async () => {
-  try {
-    const token = localStorage.getItem('access_token')
-    if (!token) {
-      console.log('User not authenticated, no progress to fetch')
-      return
-    }
-
-    const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/progress/', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-
-    if (response.ok) {
-      const progressData = await response.json()
-      // 将后端返回的进度数据转换为本地格式
-      videoProgress.value = {}
-      progressData.forEach(progress => {
-        videoProgress.value[progress.video_id] = {
-          currentTime: progress.current_time,
-          duration: progress.duration,
-          lastWatched: progress.last_watched
-        }
-      })
-    }
-  } catch (error) {
-    console.error('Error fetching user progress:', error)
-  }
-}
-
-// 获取特定视频的观看进度
-const getVideoProgress = (videoId) => {
-  return videoProgress.value[videoId] || null
-}
 
 
 // const fetchRelatedItems = async (videoId) => {
@@ -448,7 +253,6 @@ const getVideoProgress = (videoId) => {
 
 onMounted(async () => {
   await fetchVideos()
-  await fetchUserProgress()
 })
 </script>
 
@@ -756,117 +560,11 @@ onMounted(async () => {
 
 }
 
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 2rem;
-}
 
-/* Video Player Modal */
-.video-player-modal {
-  max-width: 1000px;
-  width: 100%;
-}
 
-.video-player-container {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  margin-bottom: 1.5rem;
-}
-
-.video-info-section {
-  margin-bottom: 2rem;
-}
-
-.video-info-section .video-meta {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.video-info-section .video-type {
-  background: var(--violet-deep);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.video-info-section .video-duration {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-}
-
-.video-info-section .video-description {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 1200px;
-  max-height: 90vh;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2rem;
-  border-bottom: 1px solid var(--border-light);
-  background: var(--bg-light);
-}
-
-.modal-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  transition: all 0.3s ease;
-}
-
-.modal-close:hover {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-.modal-body {
-  padding: 2rem;
-  max-height: calc(90vh - 120px);
-  overflow-y: auto;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+/* View More Button Animation */
+.view-more-btn svg.rotated {
+  transform: rotate(180deg);
 }
 
 .content-card {
@@ -953,39 +651,21 @@ onMounted(async () => {
   margin: 0 0 0.25rem 0;
 }
 
-.card-date {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin: 0;
-}
+  .card-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
 
 /* Responsive Modal */
 @media (max-width: 768px) {
-  .modal-overlay {
-    padding: 1rem;
-  }
-
-  .modal-content {
-    max-height: 95vh;
-  }
-
-  .modal-header {
-    padding: 1.5rem;
-  }
-
-  .modal-title {
-    font-size: 1.5rem;
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-    max-height: calc(95vh - 100px);
-  }
 
   .content-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
+
 
   .card-thumbnail {
     height: 200px;

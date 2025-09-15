@@ -21,17 +21,20 @@
               </div>
             </div>
 
-            <div class="video-preview">
-              <YoutubePlayer
-                v-if="videos.length && videos[currentIndex] && extractYouTubeId(videos[currentIndex].link)"
-                :key="videos[currentIndex].id"
-                :videoId="extractYouTubeId(videos[currentIndex].link)"
-                :videoKey="videos[currentIndex].id"
-                @save-progress="handleSaveProgress"
-                @video-ended="handleVideoEnded"
-              />
-              <div v-else class="video-placeholder">
-                <p>Loading video...</p>
+            <div class="video-preview" @click="loadVideo(videos[currentIndex].id)">
+              <div class="video-thumbnail">
+                <img
+                  :src="getYouTubeThumbnail(videos[currentIndex].link)"
+                  :alt="videos[currentIndex].title"
+                  class="thumbnail-image"
+                  @error="handleImageError"
+                />
+                <div class="play-overlay">
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div class="duration-badge">{{ videos[currentIndex].suggested_reading_time }} min</div>
               </div>
             </div>
           </div>
@@ -61,14 +64,12 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import YoutubePlayer from '@/components/YoutubePlayer.vue'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'ExploreLibrarySection',
-  components: {
-    YoutubePlayer,
-  },
   setup() {
+    const router = useRouter()
     const videos = ref([])
     const currentIndex = ref(0)
 
@@ -103,6 +104,31 @@ export default {
       // Handle video ended event
     }
 
+    const loadVideo = (videoId) => {
+      router.push(`/video/${videoId}`)
+    }
+
+    const getYouTubeThumbnail = (url) => {
+      const videoId = extractYouTubeId(url)
+      console.log('Getting thumbnail for URL:', url, 'Video ID:', videoId)
+      if (videoId) {
+        // 尝试多个缩略图尺寸
+        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+      }
+      return ''
+    }
+
+    const handleImageError = (event) => {
+      console.log('Image failed to load, using fallback')
+      // 设置一个默认的视频图标
+      event.target.style.display = 'none'
+      const thumbnail = event.target.parentElement
+      thumbnail.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      thumbnail.style.display = 'flex'
+      thumbnail.style.alignItems = 'center'
+      thumbnail.style.justifyContent = 'center'
+    }
+
     const scrollToTop = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -121,6 +147,9 @@ export default {
       videos,
       currentIndex,
       extractYouTubeId,
+      loadVideo,
+      getYouTubeThumbnail,
+      handleImageError,
       handleSaveProgress,
       handleVideoEnded,
       nextVideo,
@@ -264,6 +293,54 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
+  cursor: pointer;
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.video-preview:hover .play-overlay {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.duration-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .video-placeholder {

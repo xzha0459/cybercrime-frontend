@@ -52,9 +52,12 @@
 
       <!-- Step 2: Verification Code Input -->
       <div v-if="currentStep === 2" class="step-content">
+        <!-- 用户欢迎信息 -->
+        <div v-if="signupResponse?.username" class="user-welcome">
+          <p class="welcome-text">Welcome, <span class="username">{{ signupResponse.username }}</span>!</p>
+        </div>
         <h2 class="step-title">Enter Verification Code</h2>
         <p class="step-description">Please enter the 6-digit verification code from Google Authenticator</p>
-
         <div class="verification-form">
           <div class="code-input-container">
             <input
@@ -279,7 +282,6 @@ export default {
       }
     },
 
-
     // Copy to clipboard
     async copyToClipboard(text) {
       try {
@@ -357,8 +359,6 @@ export default {
       }
     },
 
-
-
     previousStep() {
       if (this.currentStep > 1) {
         this.currentStep--
@@ -376,7 +376,6 @@ export default {
       }
     }
   },
-
 
   mounted() {
     console.log('SignUp component mounted')
@@ -408,9 +407,6 @@ export default {
   max-width: 800px;
   width: 100%;
 }
-
-
-
 
 .step-content {
   animation: fadeIn 0.3s ease;
@@ -628,6 +624,27 @@ export default {
   text-align: center;
 }
 
+/* 用户欢迎信息 */
+.user-welcome {
+  margin: 20px auto;
+  padding: 16px 0;
+  border-bottom: 3px solid var(--violet-sage);
+  text-align: center;
+  width: 500px;
+}
+
+.welcome-text {
+  font-size: 18px;
+  color: var(--violet-dark);
+  margin: 0;
+  font-weight: 500;
+}
+
+.username {
+  font-weight: 700;
+  color: var(--violet-deep);
+}
+
 @media (max-width: 768px) {
   .signup-card {
     padding: 20px;
@@ -651,6 +668,15 @@ export default {
   .verification-actions,
   .completion-actions {
     flex-direction: column;
+  }
+
+  .user-welcome {
+    margin: 15px 0;
+    padding: 12px;
+  }
+
+  .welcome-text {
+    font-size: 16px;
   }
 }
 </style>

@@ -60,7 +60,34 @@
         </div>
       </div>
 
-      <!-- Featured Article Carousel -->
+       <!-- Featured Articles Grid -->
+      <div class="featured-videos-grid" v-if="articles.length && (selectedContentType === 'all' || selectedContentType === 'articles')">
+        <div
+          v-for="article in displayedArticles"
+          :key="article.id"
+          class="video-card"
+          @click="loadArticle(article.id)"
+        >
+          <div class="video-thumbnail">
+            <img :src="getArticleThumbnail(article)" :alt="article.title" class="thumbnail-image" />
+            <div class="play-overlay">📰</div>
+            <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
+          </div>
+
+          <div class="video-info">
+            <h3 class="video-title">{{ article.title }}</h3>
+            <div class="video-description">
+              <span>By: {{ article.author || 'Unknown' }}</span><br />
+              <span>Published: {{ article.publish_date }}</span>
+            </div>
+            <div class="video-meta">
+              <span class="video-type">Article</span>
+              <span class="video-duration">{{ article.suggested_reading_time }} min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- <div class="featured-article" v-if="selectedContentType === 'all' || selectedContentType === 'articles'">
         <div class="article-content">
           <div class="content-info">
@@ -148,6 +175,17 @@ const router = useRouter()
 
 const videos = ref([])
 const showAllContent = ref(false)
+const articles = ref([])
+
+const fetchArticles = async () => {
+  try {
+    const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/')
+    const data = await res.json()
+    articles.value = data
+  } catch (err) {
+    console.error('Error fetching articles:', err)
+  }
+}
 
 const displayedVideos = computed(() => {
   if (showAllContent.value) {
@@ -156,6 +194,37 @@ const displayedVideos = computed(() => {
     return videos.value.slice(0, 6)
   }
 })
+
+const displayedArticles = computed(() => {
+  if (showAllContent.value) {
+    return articles.value
+  } else {
+    return articles.value.slice(0, 6)
+  }
+})
+
+const loadArticle = (id) => {
+  router.push(`/article/${id}`)
+}
+
+const getArticleThumbnail = (article) => {
+  // Use backend-provided thumbnail if available
+  if (article.thumbnail_url) {
+    return article.thumbnail_url
+  }
+
+  // Fallbacks
+  if (article.category?.toLowerCase().includes('privacy')) {
+    return '/images/privacy-default.jpg'
+  } else if (article.category?.toLowerCase().includes('scam')) {
+    return '/images/scam-default.jpg'
+  } else if (article.category?.toLowerCase().includes('harassment')) {
+    return '/images/harassment-default.jpg'
+  }
+
+  // Generic placeholder
+  return '/images/article-placeholder.jpg'
+}
 
 
 // const currentVideo = computed(() => videos.value[currentIndex.value] || {})
@@ -253,6 +322,8 @@ const loadVideo = (id) => {
 
 onMounted(async () => {
   await fetchVideos()
+  await fetchArticles()
+
 })
 </script>
 

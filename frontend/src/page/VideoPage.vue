@@ -149,7 +149,7 @@ const showRecommendations = ref(false)
 const videoProgress = ref({})
 const selectedAnswer = ref(null)
 const isAnswerCorrect = ref(null)
-const viewedVideoIds = ref(new Set())
+// const viewedVideoIds = ref(new Set())
 
 
 const fetchVideo = async () => {

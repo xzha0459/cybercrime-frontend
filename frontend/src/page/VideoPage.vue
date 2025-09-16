@@ -181,13 +181,11 @@ const fetchVideo = async () => {
 
     video.value = foundVideo
     relatedQuiz.value = null
-    relatedVideos.value = (data.related_videos || []).filter(
-      v => !viewedVideoIds.value.has(v.id)
-    )
+    relatedVideos.value = []
     showRecommendations.value = false
     selectedAnswer.value = null
     isAnswerCorrect.value = null
-    viewedVideoIds.value.add(route.params.id)
+
 
   } catch (err) {
     console.error('Error fetching video:', err)
@@ -266,9 +264,6 @@ const fetchRelatedVideos = async (id) => {
     const data = await response.json()
     relatedVideos.value = data.related_videos || []
     relatedQuiz.value = data.related_quiz || null
-    selectedAnswer.value = null
-    showAnswer.value = false
-
 
     // ❌ Do NOT do this here anymore:
     // showRecommendations.value = true

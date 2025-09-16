@@ -223,7 +223,7 @@ const handleSaveProgress = async (progressData) => {
 
   try {
     await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${actualVideoId}/progress/`, {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -265,8 +265,6 @@ const fetchRelatedVideos = async (id) => {
     relatedVideos.value = data.related_videos || []
     relatedQuiz.value = data.related_quiz || null
 
-    // ❌ Do NOT do this here anymore:
-    // showRecommendations.value = true
   } catch (err) {
     console.error('Error fetching related videos:', err)
   }

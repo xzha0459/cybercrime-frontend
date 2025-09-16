@@ -51,6 +51,11 @@
             <div class="related-videos-grid">
               <div v-for="relatedVideo in relatedVideos" :key="relatedVideo.id" class="related-video-card" @click="loadRelatedVideo(relatedVideo)">
                 <div class="video-thumbnail">
+                    <img
+                      :src="'https://img.youtube.com/vi/' + extractYouTubeId(relatedVideo.link) + '/0.jpg'"
+                      alt="Thumbnail"
+                      class="thumbnail-img"
+                    />
                   <div class="play-button">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M8 5v14l11-7z"/>
@@ -74,20 +79,51 @@
           <div v-if="relatedQuiz" class="related-content__quiz">
             <h3 class="related-content__section-title">Quick Quiz: {{ relatedQuiz.question_text }}</h3>
             <ul class="related-content__quiz-options">
-              <li v-for="option in relatedQuiz.options" :key="option.identifier" class="related-content__quiz-option">
+              <li
+                v-for="option in relatedQuiz.options"
+                :key="option.identifier"
+                class="related-content__quiz-option"
+                :class="{
+                  'correct-option': option.is_answer,
+                  'incorrect-option': selectedAnswer === option.identifier && !option.is_answer,
+                  'selected-option': selectedAnswer === option.identifier
+                }"
+              >
                 <label class="related-content__quiz-label">
                   <input
                     type="radio"
                     :name="relatedQuiz.id"
                     :value="option.identifier"
                     class="related-content__quiz-input"
+                    :checked="selectedAnswer === option.identifier"
+                    @change="checkAnswer(option)"
+                    :disabled="selectedAnswer !== null"
                   />
                   {{ option.identifier }}. {{ option.text }}
+
+                  <!-- Feedback next to selected option -->
+                  <span v-if="selectedAnswer === option.identifier">
+                    <span v-if="option.is_answer" style="color: green; font-weight: bold;">✔ Correct</span>
+                    <span v-else style="color: red; font-weight: bold;">✘ Incorrect</span>
+                  </span>
+
+                  <!-- Show ✔ on correct answer, even if not selected -->
+                  <span
+                    v-if="selectedAnswer && option.is_answer && selectedAnswer !== option.identifier"
+                    style="color: green; font-weight: bold; margin-left: 10px;"
+                  >
+                    ✔ Correct Answer
+                  </span>
                 </label>
               </li>
+
             </ul>
-            <details class="related-content__explanation">
-              <summary class="related-content__explanation-toggle">Show Explanation</summary>
+            <details
+              v-if="selectedAnswer"
+              class="related-content__explanation"
+              open
+            >
+              <summary class="related-content__explanation-toggle">Explanation</summary>
               <p class="related-content__explanation-text">{{ relatedQuiz.explanation }}</p>
             </details>
           </div>
@@ -98,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import YoutubePlayer from '@/components/YoutubePlayer.vue'
 
@@ -111,13 +147,23 @@ const relatedVideos = ref([])
 const relatedQuiz = ref(null)
 const showRecommendations = ref(false)
 const videoProgress = ref({})
+const selectedAnswer = ref(null)
+const isAnswerCorrect = ref(null)
+const viewedVideoIds = ref(new Set())
 
-const videoId = route.params.id
 
 const fetchVideo = async () => {
+  const token = localStorage.getItem('access_token')
+  if (!token) {
+    console.error('No access token found')
+    return
+  }
+
   try {
     loading.value = true
-    const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/')
+    const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
 
     if (!response.ok) {
       console.error('Failed to fetch videos')
@@ -125,7 +171,8 @@ const fetchVideo = async () => {
     }
 
     const videosData = await response.json()
-    const foundVideo = videosData.find(v => v.id === videoId || v.id === videoId.toString())
+    const currentId = route.params.id
+    const foundVideo = videosData.find(v => v.id === currentId || v.id === currentId.toString())
 
     if (!foundVideo) {
       console.error('Video not found')
@@ -133,12 +180,28 @@ const fetchVideo = async () => {
     }
 
     video.value = foundVideo
+    relatedQuiz.value = null
+    relatedVideos.value = (data.related_videos || []).filter(
+      v => !viewedVideoIds.value.has(v.id)
+    )
+    showRecommendations.value = false
+    selectedAnswer.value = null
+    isAnswerCorrect.value = null
+    viewedVideoIds.value.add(route.params.id)
+
   } catch (err) {
     console.error('Error fetching video:', err)
   } finally {
     loading.value = false
   }
 }
+
+const checkAnswer = (option) => {
+  selectedAnswer.value = option.identifier
+  isAnswerCorrect.value = option.is_answer === true
+}
+
+
 
 const extractYouTubeId = (url) => {
   const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
@@ -175,17 +238,55 @@ const handleSaveProgress = async (progressData) => {
   } catch (error) {
     console.error('Error saving video progress:', error)
   }
+
 }
 
-const handleVideoEnded = (payload) => {
-  relatedVideos.value = payload.relatedVideos || []
-  relatedQuiz.value = payload.relatedQuiz || null
+const fetchRelatedVideos = async (id) => {
+  const token = localStorage.getItem('access_token')
+  if (!token) {
+    console.error('No access token found')
+    return
+  }
+
+  try {
+    const response = await fetch(
+      `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${id}/related/`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Failed to fetch related videos')
+      return
+    }
+
+    const data = await response.json()
+    relatedVideos.value = data.related_videos || []
+    relatedQuiz.value = data.related_quiz || null
+    selectedAnswer.value = null
+    showAnswer.value = false
+
+
+    // ❌ Do NOT do this here anymore:
+    // showRecommendations.value = true
+  } catch (err) {
+    console.error('Error fetching related videos:', err)
+  }
+}
+
+
+const handleVideoEnded = () => {
   showRecommendations.value = true
 }
+
 
 const loadRelatedVideo = (relatedVideo) => {
   if (!relatedVideo?.id) return
   router.push(`/video/${relatedVideo.id}`)
+  fetchRelatedVideos(relatedVideo.id)
 }
 
 const getVideoProgress = (videoId) => {
@@ -224,6 +325,17 @@ const goBack = () => {
 onMounted(async () => {
   await fetchVideo()
   await fetchUserProgress()
+  await fetchVideo()
+  if (video.value?.id) {
+    await fetchRelatedVideos(video.value.id)
+  }
+})
+
+watch(() => route.params.id, async (newId) => {
+  loading.value = true
+  await fetchVideo()
+  await fetchRelatedVideos(newId)
+  loading.value = false
 })
 </script>
 
@@ -396,7 +508,18 @@ onMounted(async () => {
   justify-content: center;
 }
 
+.thumbnail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
 .play-button {
+  z-index: 2;
   width: 60px;
   height: 60px;
   background: rgba(0, 0, 0, 0.8);

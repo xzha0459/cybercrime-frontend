@@ -37,7 +37,7 @@
       >
         <div class="test-header">
           <div class="test-info">
-            <h3>{{ getCategoryDisplayName(attempt.category) }}</h3>
+            <h3>{{ getCategoryDisplayName(attempt.category, attempt) }}</h3>
             <p class="test-date">{{ formatDate(attempt.finished_at) }}</p>
           </div>
           <div class="test-score" :class="getScoreClass(attempt.accuracy_pct)">
@@ -111,7 +111,7 @@
         <div class="test-summary">
           <div class="summary-row">
             <span>Category:</span>
-            <span>{{ getCategoryDisplayName(selectedAttempt.category) }}</span>
+            <span>{{ getCategoryDisplayName(selectedAttempt.category, selectedAttempt) }}</span>
           </div>
           <div class="summary-row">
             <span>Score:</span>
@@ -451,11 +451,14 @@ export default {
     },
 
     // 获取类别显示名称
-    getCategoryDisplayName(category) {
-      if (!category || category === 'null' || category === 'undefined') {
-        return 'Mixed Categories'
+    getCategoryDisplayName(category, attempt) {
+      // 优先使用 module_name
+      if (attempt && attempt.module_name) {
+        return attempt.module_name
       }
-      return category
+
+      // 如果没有 module_name，显示默认文本
+      return 'Mixed Categories'
     },
 
     // 获取正确格式的分数

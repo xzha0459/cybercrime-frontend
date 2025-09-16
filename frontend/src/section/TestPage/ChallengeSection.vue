@@ -13,8 +13,21 @@
     <div v-else>
       <!-- Module Selection Page -->
       <div v-if="!selectedModule" class="challenge-content">
-        <!-- Task 1 Page -->
-        <div v-if="currentTask === 0" class="task-section">
+        <!-- Loading State for Task Data -->
+        <div v-if="taskDataLoading" class="loading-section">
+          <div class="loading-spinner"></div>
+          <p>Loading challenge data...</p>
+        </div>
+
+        <!-- Error State for Task Data -->
+        <div v-else-if="taskDataError" class="error-section">
+          <div class="error-icon">⚠️</div>
+          <p class="error-message">{{ taskDataError }}</p>
+          <button @click="fetchTaskData" class="retry-btn">Retry</button>
+        </div>
+
+        <!-- Challenge Levels Page -->
+        <div v-else-if="currentTask === 0" class="challenge-levels">
           <!-- Progress Indicator -->
           <div class="progress-indicator">
             <div class="progress-steps">
@@ -23,52 +36,120 @@
                 :key="step"
                 class="progress-step"
                 :class="{
-                  'active': step === 1,
-                  'completed': step < 1,
-                  'locked': step > 1
+                  'active': step === currentLevel,
+                  'completed': isLevelCompleted(step),
+                  'locked': !isLevelUnlocked(step)
                 }"
+                @click="switchLevel(step)"
               >
-                <div class="step-number">{{ step }}</div>
+                <div class="step-number">
+                  <svg v-if="isLevelCompleted(step)" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                  <span v-else>{{ step }}</span>
+                </div>
                 <div class="step-line" v-if="step < 3"></div>
               </div>
             </div>
           </div>
 
-          <!-- Task Header -->
-          <div class="task-header">
-            <h1 class="task-title">Task 1: Network Novice Protection</h1>
-            <p class="task-description">
-              Users who are new to the online world need to master the most basic security protection knowledge. Through three core modules, build cybersecurity awareness from scratch.
-            </p>
+          <!-- Current Level Display -->
+          <div class="current-level">
+            <!-- Level Header -->
+            <div class="level-header">
+              <h1 class="level-title">Level {{ currentLevel }}: {{ getTaskTitle(currentLevel) }}</h1>
+              <p class="level-description">{{ getTaskDescription(currentLevel) }}</p>
+
+
+              <!-- Module Progress -->
+              <div class="module-progress">
+                <span class="progress-text">{{ getCompletedModuleCount(currentLevel) }}/{{ getTaskModules(currentLevel).length }} modules completed</span>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    :style="{ width: `${(getCompletedModuleCount(currentLevel) / getTaskModules(currentLevel).length) * 100}%` }"
+                  ></div>
+                </div>
+              </div>
           </div>
 
           <!-- Module Cards -->
           <div class="module-cards">
-            <!-- Module 1 -->
-            <div class="module-card">
+              <div
+                v-for="module in getTaskModules(currentLevel)"
+                :key="module.id"
+                class="module-card"
+                :class="{ 'completed': isModuleCompleted(module.name) }"
+              >
+                <!-- Completion Badge -->
+                <div v-if="isModuleCompleted(module.name)" class="completion-badge">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                  <span>Completed ({{ getModuleScore(module.name) }}%)</span>
+                </div>
+
+                <div class="module-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                    <path :d="module.icon" />
+                  </svg>
+                </div>
               <div class="module-info">
-                <h3 class="module-title">Module 1:<br>Understanding Cyberbullying</h3>
-                <p class="module-description">Learn to identify and respond to cyberbullying behavior</p>
+                  <h3 class="module-title">{{ module.name }}</h3>
+                  <p class="module-description">{{ module.description }}</p>
               </div>
-              <button class="start-module-btn" @click="() => selectModule({ id: 1, name: 'Understanding Cyberbullying', description: 'Learn to identify and respond to cyberbullying behavior', questionCount: 15 })">Start Learning →</button>
+                <button
+                  v-if="isLevelUnlocked(currentLevel)"
+                  class="start-module-btn"
+                  @click="() => selectModule(module)"
+                >
+                  {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
+                </button>
+                <div v-else class="locked-module">
+                  Complete previous level to unlock
+                </div>
+              </div>
+            </div>
+          </div>
             </div>
 
-            <!-- Module 2 -->
-            <div class="module-card">
-              <div class="module-info">
-                <h3 class="module-title">Module 2:<br>Identifying Common Scams</h3>
-                <p class="module-description">Master basic scam identification techniques</p>
+        <!-- Individual Task Page -->
+        <div v-else-if="currentTask > 0" class="task-section">
+          <!-- Back Button -->
+          <div class="task-header">
+            <button @click="goBack" class="back-btn">← Back to Levels</button>
+            <h1 class="task-title">Level {{ currentTask }}: {{ getTaskTitle(currentTask) }}</h1>
+            <p class="task-description">{{ getTaskDescription(currentTask) }}</p>
               </div>
-              <button class="start-module-btn" @click="() => selectModule({ id: 2, name: 'Identifying Common Scams', description: 'Master basic scam identification techniques', questionCount: 17 })">Start Learning →</button>
+
+          <!-- Module Cards -->
+          <div class="module-cards">
+            <div
+              v-for="module in getTaskModules(currentTask)"
+              :key="module.id"
+              class="module-card"
+              :class="{ 'completed': isModuleCompleted(module.name) }"
+            >
+              <!-- Completion Badge -->
+              <div v-if="isModuleCompleted(module.name)" class="completion-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                <span>Completed ({{ getModuleScore(module.name) }}%)</span>
             </div>
 
-            <!-- Module 3 -->
-            <div class="module-card">
-              <div class="module-info">
-                <h3 class="module-title">Module 3:<br>Basic Privacy Protection</h3>
-                <p class="module-description">Understand basic methods of personal information protection</p>
+              <div class="module-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path :d="module.icon" />
+                </svg>
               </div>
-              <button class="start-module-btn" @click="() => selectModule({ id: 3, name: 'Basic Privacy Protection', description: 'Understand basic methods of personal information protection', questionCount: 13 })">Start Learning →</button>
+              <div class="module-info">
+                <h3 class="module-title">{{ module.name }}</h3>
+                <p class="module-description">{{ module.description }}</p>
+              </div>
+              <button class="start-module-btn" @click="() => selectModule(module)">
+                {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
+              </button>
             </div>
           </div>
         </div>
@@ -79,22 +160,36 @@
 
         <!-- Back Button -->
         <div class="test-header">
-          <button @click="goBackToModules" class="back-to-modules-btn">← Back to Module Selection</button>
+          <button @click="goBackToModules" class="back-to-modules-btn">Back</button>
         </div>
 
-        <!-- Test Progress Indicator -->
-        <div class="test-progress-section" v-if="currentStep > 0">
-          <div class="test-progress-bar">
-            <div class="test-progress-fill" :style="{ width: `${(currentStep / testQuestions.length) * 100}%` }"></div>
+        <!-- Progress Indicator -->
+        <div class="progress-section" v-if="currentStep > 0 && currentStep <= testQuestions.length">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: `${(currentStep / testQuestions.length) * 100}%` }"></div>
           </div>
-          <p class="test-progress-text">Question {{ currentStep }} / {{ testQuestions.length }}</p>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-section">
+          <div class="loading-spinner"></div>
+          <p>Loading questions...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-section">
+          <div class="error-icon">⚠️</div>
+          <p class="error-message">{{ error }}</p>
+          <button @click="startModuleTest" class="retry-btn">Retry</button>
         </div>
 
         <!-- Question Page -->
-        <div v-if="currentStep > 0 && currentStep <= testQuestions.length" class="question-section">
-          <div class="question-card">
+        <div v-else-if="currentStep > 0 && currentStep <= testQuestions.length" class="question-section">
             <div class="question-header">
               <h3 class="question-title">{{ currentQuestion.question_text }}</h3>
+            <p class="question-description" v-if="currentQuestion.description">
+              {{ currentQuestion.description }}
+            </p>
             </div>
 
             <div class="options-container">
@@ -109,8 +204,8 @@
                   <div class="radio-circle" :class="{ 'checked': selectedAnswer === index }"></div>
                 </div>
                 <div class="option-text">
-                  <span class="option-label">{{ String.fromCharCode(65 + index) }}.</span>
-                  <span class="option-content">{{ option }}</span>
+                <span class="option-label">{{ option.identifier }}.</span>
+                <span class="option-content">{{ option.text }}</span>
                 </div>
               </div>
             </div>
@@ -130,17 +225,13 @@
               >
                 {{ currentStep === testQuestions.length ? 'Complete Test' : 'Next' }}
               </button>
-            </div>
           </div>
         </div>
 
         <!-- Results Page -->
         <div v-else-if="currentStep > testQuestions.length" class="results-section">
-          <div class="results-card">
             <div class="results-header">
-              <div class="results-icon">🎉</div>
               <h2>Test Completed!</h2>
-              <p>Congratulations on completing the {{ selectedModule.name }} module</p>
             </div>
 
             <div class="score-section">
@@ -157,7 +248,6 @@
             <div class="results-actions">
               <button @click="retakeTest" class="action-btn retake-btn">Retake Test</button>
               <button @click="goBackToModules" class="action-btn back-btn">Back to Modules</button>
-            </div>
           </div>
         </div>
       </div>
@@ -181,6 +271,7 @@ export default {
 
     // Challenge state
     const currentTask = ref(0)
+    const currentLevel = ref(1) // 当前显示的level
     const selectedModule = ref(null)
 
     // Test state
@@ -190,11 +281,16 @@ export default {
     const correctAnswers = ref(0)
     const userAnswers = ref([])
 
-    // CSV data
-    const quizData = ref([])
+    // API configuration
+    const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
+
+    // Quiz attempt state
+    const currentAttemptId = ref(null)
+    const loading = ref(false)
+    const error = ref(null)
 
     // Check user authentication status
-    const checkAuthStatus = () => {
+    const checkAuthStatus = async () => {
       try {
         const accessToken = localStorage.getItem('access_token')
         const userInfoStr = localStorage.getItem('user_info')
@@ -202,6 +298,10 @@ export default {
         if (accessToken && userInfoStr) {
           isAuthenticated.value = true
           currentUser.value = JSON.parse(userInfoStr)
+
+          // 获取用户的challenge_level
+          await fetchUserStats()
+
           console.log('User authenticated:', currentUser.value)
         } else {
           isAuthenticated.value = false
@@ -215,94 +315,232 @@ export default {
       }
     }
 
+    // 获取用户统计信息（包括challenge_level）
+    const fetchUserStats = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/stats/`, {
+          headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+          }
+        })
+
+        if (response.ok) {
+          const stats = await response.json()
+          // 更新用户的challenge_level
+          if (currentUser.value) {
+            currentUser.value.challenge_level = stats.challenge_level
+          }
+          console.log('User stats:', stats)
+        }
+      } catch (error) {
+        console.error('Error fetching user stats:', error)
+      }
+    }
+
     // Redirect to sign up function
     const redirectToSignUp = () => {
       router.push('/signup')
     }
 
-    // Task data
-    const taskData = {
+    // 获取Access Token
+    const getAccessToken = () => {
+      try {
+        const token = localStorage.getItem('access_token')
+        if (!token) {
+          throw new Error('No access token found')
+        }
+        return token
+      } catch (error) {
+        console.error('Error getting access token:', error)
+        throw error
+      }
+    }
+
+    // Module name mapping for API - 使用题库中的正确模块名称
+    const moduleNameMapping = {
+      1: 'Cyber Harassment Basic Recognition',
+      2: 'Common Scam Identification',
+      3: 'Personal Privacy Protection Basics',
+      4: 'Deep Threat Understanding',
+      5: 'Scam Technique Analysis',
+      6: 'Technical Protection Application',
+      7: 'Regulatory Policy Understanding',
+      8: 'Organizational Security Management'
+    }
+
+    // Challenge level mapping
+    const getChallengeLevel = (moduleId) => {
+      if (moduleId <= 3) return 1  // Beginner level
+      if (moduleId <= 6) return 2  // Intermediate level
+      if (moduleId <= 8) return 3  // Advanced level
+      return 1
+    }
+
+    // Task data - 通过API获取模块名称，硬编码其他信息
+    const taskData = ref({})
+    const taskDataLoading = ref(false)
+    const taskDataError = ref(null)
+
+    // 硬编码的模块信息映射
+    const moduleInfoMapping = {
+      'Cyber Harassment Basic Recognition': {
+        description: 'Learn to identify and respond to cyberbullying behavior',
+        icon: 'M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z',
+      },
+      'Common Scam Identification': {
+        description: 'Master basic techniques for identifying scams',
+        icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
+      },
+      'Personal Privacy Protection Basics': {
+        description: 'Learn basic methods for protecting personal information',
+        icon: 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z',
+      },
+      'Deep Threat Understanding': {
+        description: 'Understand the underlying principles of network threats',
+        icon: 'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'
+      },
+      'Scam Technique Analysis': {
+        description: 'Analyze the operational mechanisms of complex scams',
+        icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z',
+      },
+      'Technical Protection Application': {
+        description: 'Learn to use technical tools for protection',
+        icon: 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
+      },
+      'Regulatory Policy Understanding': {
+        description: 'Understand relevant legal and regulatory requirements',
+        icon: 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
+      },
+      'Organizational Security Management': {
+        description: 'Learn enterprise-level security strategy development',
+        icon: 'M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z',
+      }
+    }
+
+    // 获取任务数据
+    const fetchTaskData = async () => {
+      try {
+        taskDataLoading.value = true
+        taskDataError.value = null
+
+        // 获取三个挑战级别的模块数据
+        const [level1Response, level2Response, level3Response] = await Promise.all([
+          fetch(`${API_BASE_URL}/quizzes/modules/?challenge_level=1`, {
+            headers: {
+              'Authorization': `Bearer ${getAccessToken()}`
+            }
+          }),
+          fetch(`${API_BASE_URL}/quizzes/modules/?challenge_level=2`, {
+            headers: {
+              'Authorization': `Bearer ${getAccessToken()}`
+            }
+          }),
+          fetch(`${API_BASE_URL}/quizzes/modules/?challenge_level=3`, {
+            headers: {
+              'Authorization': `Bearer ${getAccessToken()}`
+            }
+          })
+        ])
+
+        if (!level1Response.ok || !level2Response.ok || !level3Response.ok) {
+          throw new Error(`Failed to fetch modules: ${level1Response.status}, ${level2Response.status}, ${level3Response.status}`)
+        }
+
+        const [level1Modules, level2Modules, level3Modules] = await Promise.all([
+          level1Response.json(),
+          level2Response.json(),
+          level3Response.json()
+        ])
+
+        console.log('API返回的模块数据:', {
+          level1: level1Modules,
+          level2: level2Modules,
+          level3: level3Modules
+        })
+
+        // 检查模块名称映射
+        console.log('Level 2模块映射检查:', {
+          'ID 4': moduleNameMapping[4],
+          'ID 5': moduleNameMapping[5],
+          'ID 6': moduleNameMapping[6],
+          'API返回的Level 2模块': level2Modules
+        })
+
+        // 构建任务数据
+        taskData.value = {
+          1: {
+            title: 'Network Newbie Protection',
+            description: 'Learn basic security protection knowledge as you start exploring the online world.',
+            modules: level1Modules.map((moduleName, index) => ({
+              id: index + 1,
+              name: moduleName,
+              challenge_level: 1,
+              ...moduleInfoMapping[moduleName]
+            }))
+          },
+          2: {
+            title: 'Security Awareness Enhancement',
+            description: 'Face more complex network threat scenarios as you develop deeper security awareness.',
+            modules: level2Modules.map((moduleName, index) => ({
+              id: index + 4,
+              name: moduleName,
+              challenge_level: 2,
+              ...moduleInfoMapping[moduleName]
+            }))
+          },
+          3: {
+            title: 'Security Expert Advancement',
+            description: 'Master professional-level security management and compliance knowledge.',
+            modules: level3Modules.map((moduleName, index) => ({
+              id: index + 7,
+              name: moduleName,
+              challenge_level: 3,
+              ...moduleInfoMapping[moduleName]
+            }))
+          }
+        }
+
+      } catch (err) {
+        console.error('Error fetching task data:', err)
+        taskDataError.value = err.message
+        // 如果API失败，使用默认数据作为fallback
+        taskData.value = {
       1: {
         title: 'Network Newbie Protection',
         description: 'Learn basic security protection knowledge as you start exploring the online world.',
         modules: [
           {
             id: 1,
-            name: 'Understanding Cyber Bullying',
+            name: 'Cyber Harassment Basic Recognition',
             description: 'Learn to identify and respond to cyberbullying behavior',
             icon: 'shield',
             questionCount: 15,
-            difficulty: 'Beginner'
+            difficulty: 'Beginner',
+            challenge_level: 1
           },
           {
             id: 2,
-            name: 'Identifying Common Scams',
+            name: 'Common Scam Identification',
             description: 'Master basic techniques for identifying scams',
             icon: 'warning',
             questionCount: 17,
-            difficulty: 'Beginner'
+            difficulty: 'Beginner',
+            challenge_level: 1
           },
           {
             id: 3,
-            name: 'Basic Privacy Protection',
+            name: 'Personal Privacy Protection Basics',
             description: 'Learn basic methods for protecting personal information',
             icon: 'lock',
             questionCount: 13,
-            difficulty: 'Beginner'
+            difficulty: 'Beginner',
+            challenge_level: 1
           }
         ]
-      },
-      2: {
-        title: 'Security Awareness Enhancement',
-        description: 'Face more complex network threat scenarios as you develop deeper security awareness.',
-        modules: [
-          {
-            id: 4,
-            name: 'Deep Threat Analysis',
-            description: 'Understand the underlying principles of network threats',
-            icon: '🔍',
-            questionCount: 13,
-            difficulty: 'Intermediate'
-          },
-          {
-            id: 5,
-            name: 'Scam Technique Analysis',
-            description: 'Analyze the operational mechanisms of complex scams',
-            icon: '🧠',
-            questionCount: 12,
-            difficulty: 'Intermediate'
-          },
-          {
-            id: 6,
-            name: 'Technical Protection Application',
-            description: 'Learn to use technical tools for protection',
-            icon: 'settings',
-            questionCount: 10,
-            difficulty: 'Intermediate'
           }
-        ]
-      },
-      3: {
-        title: 'Security Expert Advancement',
-        description: 'Master professional-level security management and compliance knowledge.',
-        modules: [
-          {
-            id: 7,
-            name: 'Regulatory Policy Mastery',
-            description: 'Understand relevant legal and regulatory requirements',
-            icon: '📋',
-            questionCount: 10,
-            difficulty: 'Advanced'
-          },
-          {
-            id: 8,
-            name: 'Organizational Security Management',
-            description: 'Learn enterprise-level security strategy development',
-            icon: '🏢',
-            questionCount: 10,
-            difficulty: 'Advanced'
-          }
-        ]
+        }
+      } finally {
+        taskDataLoading.value = false
       }
     }
 
@@ -316,109 +554,97 @@ export default {
       }
     }
 
+    // 切换level显示
+    const switchLevel = (level) => {
+      if (isLevelUnlocked(level)) {
+        currentLevel.value = level
+        selectedModule.value = null
+      }
+    }
+
     const selectModule = (module) => {
       selectedModule.value = module
       startModuleTest()
     }
 
-    // Load Excel data
-    const loadQuizData = async () => {
+
+    // Start module test - 使用新的API
+    const startModuleTest = async () => {
+      if (!selectedModule.value) return
+
       try {
-        // For now, let's use the CSV data as fallback since we need to install xlsx library
-        const response = await fetch('/quiz.csv')
+        loading.value = true
+        error.value = null
+
+        // 构建查询参数 - 直接使用模块数据
+        const challengeLevel = selectedModule.value.challenge_level
+        const moduleName = selectedModule.value.name
+
+        console.log('模块数据检查:', {
+          selectedModule: selectedModule.value,
+          challengeLevel,
+          moduleName,
+          '硬编码映射': {
+            challengeLevel: getChallengeLevel(selectedModule.value.id),
+            moduleName: moduleNameMapping[selectedModule.value.id]
+          }
+        })
+
+        console.log('Starting test for module:', {
+          module: selectedModule.value,
+          challengeLevel,
+          moduleName
+        })
+
+        const params = new URLSearchParams()
+        params.append('challenge_level', challengeLevel.toString())
+        params.append('module_name', moduleName)
+        params.append('count', '5') // 固定5道题
+
+        const apiUrl = `${API_BASE_URL}/quizzes/attempt/?${params.toString()}`
+        console.log('API URL:', apiUrl)
+        console.log('Request params:', {
+          challenge_level: challengeLevel.toString(),
+          module_name: moduleName,
+          count: '5'
+        })
+
+        // 调用API开始测试
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempt/?${params.toString()}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+          }
+        })
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`Failed to start test: ${response.status}`)
         }
-        const csvText = await response.text()
 
-        const lines = csvText.split('\n')
-        const headers = lines[0].split(',')
+        const data = await response.json()
 
-        const data = []
-        for (let i = 1; i < lines.length; i++) {
-          if (lines[i].trim()) {
-            const values = lines[i].split(',')
-            const row = {}
-            headers.forEach((header, index) => {
-              row[header.trim()] = values[index] ? values[index].trim() : ''
-            })
-            data.push(row)
-          }
-        }
-        quizData.value = data
-      } catch (error) {
-        console.error('Error loading quiz data:', error)
-        // Fallback: create some test data
-        quizData.value = [
-          {
-            id: '1',
-            question_text: 'What is cyberbullying?',
-            option_a: 'A form of physical bullying',
-            option_b: 'Bullying using electronic means',
-            option_c: 'Only happens in schools',
-            option_d: 'Less harmful than traditional bullying',
-            correct_answer: 'Bullying using electronic means',
-            module_name: 'Cyber Harassment Basic Recognition'
-          },
-          {
-            id: '2',
-            question_text: 'What should you do if you encounter cyberbullying?',
-            option_a: 'Ignore it completely',
-            option_b: 'Respond aggressively to the bully',
-            option_c: 'Report it to a trusted adult or authority',
-            option_d: 'Share it with as many people as possible',
-            correct_answer: 'Report it to a trusted adult or authority',
-            module_name: 'Cyber Harassment Basic Recognition'
-          },
-          {
-            id: '3',
-            question_text: 'What is a common characteristic of cyberbullying?',
-            option_a: 'It is always done face-to-face',
-            option_b: 'It can be done anonymously',
-            option_c: 'It only happens in schools',
-            option_d: 'It is less harmful than traditional bullying',
-            correct_answer: 'It can be done anonymously',
-            module_name: 'Cyber Harassment Basic Recognition'
-          },
-          {
-            id: '4',
-            question_text: 'What is a common characteristic of imposter scams?',
-            option_a: 'They offer large sums of money',
-            option_b: 'They impersonate trusted organizations',
-            option_c: 'They require immediate payment',
-            option_d: 'They are always conducted in person',
-            correct_answer: 'They impersonate trusted organizations',
-            module_name: 'Common Scam Identification'
-          },
-          {
-            id: '5',
-            question_text: 'What is a red flag in a job offer that could indicate a scam?',
-            option_a: 'High salary',
-            option_b: 'Request for personal financial information',
-            option_c: 'Flexible working hours',
-            option_d: 'Job description related to your field',
-            correct_answer: 'Request for personal financial information',
-            module_name: 'Common Scam Identification'
-          }
-        ]
-      }
-    }
+        // 保存attempt ID和题目
+        currentAttemptId.value = data.attempt_id
+        testQuestions.value = data.questions || []
 
-    // Start module test
-    const startModuleTest = () => {
-      // For now, use all available questions for any module
-      // This ensures we always have questions to test with
-      let moduleQuestions = quizData.value
-
-      // Randomly select 5 questions
-      const shuffled = [...moduleQuestions].sort(() => 0.5 - Math.random())
-      testQuestions.value = shuffled.slice(0, 5)
-
-      // Reset test state
+        if (testQuestions.value.length > 0) {
       currentStep.value = 1
       selectedAnswer.value = null
       correctAnswers.value = 0
       userAnswers.value = []
+          // 发射挑战开始事件
+          emit('challenge-status-changed', true)
+        } else {
+          throw new Error('No questions received')
+        }
+
+      } catch (err) {
+        console.error('Error starting test:', err)
+        error.value = `Failed to start test: ${err.message}`
+      } finally {
+        loading.value = false
+      }
     }
 
     // Get current question
@@ -429,18 +655,12 @@ export default {
       return null
     })
 
-    // Get current question options
+    // Get current question options - 使用API格式
     const currentQuestionOptions = computed(() => {
       if (!currentQuestion.value) return []
 
-      const options = []
-      if (currentQuestion.value.option_a) options.push(currentQuestion.value.option_a)
-      if (currentQuestion.value.option_b) options.push(currentQuestion.value.option_b)
-      if (currentQuestion.value.option_c) options.push(currentQuestion.value.option_c)
-      if (currentQuestion.value.option_d) options.push(currentQuestion.value.option_d)
-      if (currentQuestion.value.option_e) options.push(currentQuestion.value.option_e)
-
-      return options
+      // API返回的格式: options数组，每个选项有identifier, text, is_answer
+      return currentQuestion.value.options || []
     })
 
     // Select answer
@@ -449,12 +669,28 @@ export default {
     }
 
     // Next question
-    const nextQuestion = () => {
+    const nextQuestion = async () => {
       if (selectedAnswer.value === null || !currentQuestion.value) return
 
-      // Check if answer is correct
-      const correctAnswerIndex = getCorrectAnswerIndex()
-      const isCorrect = selectedAnswer.value === correctAnswerIndex
+      // Check if this question has already been answered
+      const currentQuestionIndex = currentStep.value - 1
+      const existingAnswer = userAnswers.value.find(ans => ans.questionIndex === currentQuestionIndex)
+
+      if (existingAnswer) {
+        // Question already answered, just move to next
+        if (currentStep.value < testQuestions.value.length) {
+          currentStep.value++
+          selectedAnswer.value = null
+        } else {
+          await finishTest()
+        }
+        return
+      }
+
+      // Check if answer is correct - 使用API格式
+      const selectedOption = currentQuestion.value.options[selectedAnswer.value]
+      const correctOption = currentQuestion.value.options.find(opt => opt.is_answer === true)
+      const isCorrect = selectedOption && correctOption && selectedOption.identifier === correctOption.identifier
 
       if (isCorrect) {
         correctAnswers.value++
@@ -462,7 +698,7 @@ export default {
 
       // Store user answer
       userAnswers.value.push({
-        questionIndex: currentStep.value - 1,
+        questionIndex: currentQuestionIndex,
         selectedAnswer: selectedAnswer.value,
         isCorrect: isCorrect
       })
@@ -472,8 +708,92 @@ export default {
         currentStep.value++
         selectedAnswer.value = null
       } else {
-        // Test completed
+        // Test completed - 调用完成测试API
+        await finishTest()
+      }
+    }
+
+    // 完成测试 - 调用PATCH /quizzes/attempt/{id}
+    const finishTest = async () => {
+      if (!currentAttemptId.value) return
+
+      try {
+        loading.value = true
+
+        // 收集所有用户答案
+        const allAnswers = []
+
+        // 遍历所有题目，收集用户的答案
+        for (let i = 0; i < testQuestions.value.length; i++) {
+          const question = testQuestions.value[i]
+          let userAnswer = null
+          let isCorrect = false
+
+          if (i < currentStep.value - 1) {
+            // 已答题目
+            const userAnswerData = userAnswers.value.find(ans => ans.questionIndex === i)
+            if (userAnswerData) {
+              userAnswer = question.options[userAnswerData.selectedAnswer]?.identifier
+              isCorrect = userAnswerData.isCorrect
+            }
+          } else if (i === currentStep.value - 1) {
+            // 当前题目
+            if (selectedAnswer.value !== null && question.options[selectedAnswer.value]) {
+              userAnswer = question.options[selectedAnswer.value].identifier
+            }
+            // 找到正确答案的identifier
+            const correctOption = question.options.find(opt => opt.is_answer === true)
+            isCorrect = userAnswer !== null && correctOption && userAnswer === correctOption.identifier
+          }
+
+          if (userAnswer !== null) {
+            allAnswers.push({
+              question_id: question.id,
+              chosen_answer: userAnswer,
+              is_correct: isCorrect
+            })
+          }
+        }
+
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempt/${currentAttemptId.value}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+          },
+          body: JSON.stringify({
+            is_final: true,
+            quiz_question_attempts: allAnswers
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to finish test: ${response.status}`)
+        }
+
+        const result = await response.json()
+        console.log('Test completion result:', result)
+
+        // 显示结果页面
         currentStep.value = testQuestions.value.length + 1
+
+        // 重新加载用户进度以获取最新分数
+        await loadUserProgress()
+
+        // 重新获取用户stats以更新challenge_level
+        await fetchUserStats()
+
+        // 检查是否有challenge_level更新
+        if (result.challenge_level_updated) {
+          console.log('Challenge level updated! User can now access next level.')
+        }
+
+      } catch (err) {
+        console.error('Error finishing test:', err)
+        // 即使提交失败，也显示结果页面
+        currentStep.value = testQuestions.value.length + 1
+      } finally {
+        loading.value = false
       }
     }
 
@@ -485,20 +805,6 @@ export default {
       }
     }
 
-    // Get correct answer index
-    const getCorrectAnswerIndex = () => {
-      if (!currentQuestion.value) return -1
-
-      const correctAnswer = currentQuestion.value.correct_answer
-      const options = currentQuestionOptions.value
-
-      for (let i = 0; i < options.length; i++) {
-        if (options[i] === correctAnswer) {
-          return i
-        }
-      }
-      return -1
-    }
 
     // Retake test
     const retakeTest = () => {
@@ -524,21 +830,128 @@ export default {
     }
 
     const getTaskTitle = (taskNumber) => {
-      return taskData[taskNumber]?.title || ''
+      return taskData.value[taskNumber]?.title || ''
     }
 
     const getTaskDescription = (taskNumber) => {
-      return taskData[taskNumber]?.description || ''
+      return taskData.value[taskNumber]?.description || ''
     }
 
     const getTaskModules = (taskNumber) => {
-      return taskData[taskNumber]?.modules || []
+      return taskData.value[taskNumber]?.modules || []
+    }
+
+    // 用户进度数据 - 使用API获取
+    const userProgress = ref({})
+    const progressLoading = ref(false)
+
+    // 从API获取用户进度
+    const loadUserProgress = async () => {
+      try {
+        progressLoading.value = true
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempts/`, {
+          headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user progress: ${response.status}`)
+        }
+
+        const data = await response.json()
+        // 只处理已完成的测试 (有finished_at的记录)
+        const completedAttempts = (Array.isArray(data) ? data : [])
+          .filter(attempt => attempt.finished_at)
+
+        // 按模块名称分组，获取每个模块的最高分数
+        const moduleProgress = {}
+        completedAttempts.forEach(attempt => {
+          const moduleName = attempt.module_name
+
+          if (moduleName) {
+            const currentAccuracy = parseFloat(attempt.accuracy_pct)
+            const existingAccuracy = moduleProgress[moduleName] ? parseFloat(moduleProgress[moduleName].accuracy_pct) : 0
+
+            if (!moduleProgress[moduleName] || currentAccuracy > existingAccuracy) {
+              moduleProgress[moduleName] = {
+                accuracy_pct: attempt.accuracy_pct,
+                correct_count: attempt.correct_count,
+                total_questions: attempt.total_questions,
+                isCompleted: currentAccuracy >= 80,
+                completedAt: attempt.finished_at
+              }
+            }
+          }
+        })
+
+        userProgress.value = moduleProgress
+
+      } catch (err) {
+        console.error('Error loading user progress:', err)
+        userProgress.value = {}
+      } finally {
+        progressLoading.value = false
+      }
+    }
+
+    // 检查模块是否已完成（80%正确率）
+    const isModuleCompleted = (moduleName) => {
+      return userProgress.value[moduleName]?.isCompleted || false
+    }
+
+    // 获取模块分数
+    const getModuleScore = (moduleName) => {
+      const progress = userProgress.value[moduleName]
+      return progress ? Math.round(progress.accuracy_pct) : 0
+    }
+
+    // 检查指定level的所有模块是否都已完成
+    const isLevelCompleted = (level) => {
+      const modules = getTaskModules(level)
+      if (!modules || modules.length === 0) return false
+
+      return modules.every(module => isModuleCompleted(module.name))
+    }
+
+    // 检查指定level是否已解锁
+    const isLevelUnlocked = (level) => {
+      if (level === 1) return true // Level 1 总是解锁的
+      // 根据API文档：challenge_level表示用户可以尝试的级别
+      // challenge_level: 1 表示可以尝试Level 1
+      // challenge_level: 2 表示可以尝试Level 2
+      const unlocked = currentUser.value?.challenge_level >= level
+      console.log(`Level ${level} unlock check:`, {
+        userChallengeLevel: currentUser.value?.challenge_level,
+        requiredLevel: level,
+        unlocked
+      })
+      return unlocked
+    }
+
+    // 获取指定level的已完成模块数量
+    const getCompletedModuleCount = (level) => {
+      const modules = getTaskModules(level)
+      if (!modules || modules.length === 0) return 0
+
+      return modules.filter(module => isModuleCompleted(module.name)).length
+    }
+
+    // 获取level图标
+    const getLevelIcon = (level) => {
+      const icons = {
+        1: "M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z", // Shield
+        2: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", // Check circle
+        3: "M13 10V3L4 14h7v7l9-11h-7z" // Lightning
+      }
+      return icons[level] || icons[1]
     }
 
     // Check authentication on mount
-    onMounted(() => {
-      checkAuthStatus()
-      loadQuizData()
+    onMounted(async () => {
+      await checkAuthStatus()
+      await fetchTaskData()
+      await loadUserProgress()
     })
 
     return {
@@ -550,6 +963,7 @@ export default {
 
       // Challenge state
       currentTask,
+      currentLevel,
       selectedModule,
 
       // Test state
@@ -559,9 +973,27 @@ export default {
       correctAnswers,
       currentQuestion,
       currentQuestionOptions,
+      loading,
+      error,
+
+      // Task data state
+      taskData,
+      taskDataLoading,
+      taskDataError,
+
+      // User progress state
+      userProgress,
+      progressLoading,
+      isModuleCompleted,
+      getModuleScore,
+      isLevelCompleted,
+      isLevelUnlocked,
+      getCompletedModuleCount,
+      getLevelIcon,
 
       // Methods
       startTask,
+      switchLevel,
       selectModule,
       goBack,
       goBackToModules,
@@ -587,7 +1019,7 @@ export default {
   padding: 20px 30px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -607,12 +1039,6 @@ export default {
   transition: width 0.3s ease;
 }
 
-.progress-text {
-  text-align: center;
-  color: var(--violet-ultra-dark);
-  font-weight: 500;
-  margin: 0;
-}
 
 .challenge-content {
   max-width: 1400px;
@@ -637,6 +1063,12 @@ export default {
   display: flex;
   align-items: center;
   position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.progress-step:hover:not(.locked) {
+  transform: scale(1.05);
 }
 
 .step-number {
@@ -723,6 +1155,7 @@ export default {
   grid-template-columns: repeat(3, 1fr);
   gap: 30px;
   margin-top: 40px;
+  margin-bottom: 40px;
 }
 
 .module-card {
@@ -737,11 +1170,57 @@ export default {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  height: 320px; /* 固定高度确保所有卡片一致 */
+  justify-content: space-between; /* 内容均匀分布 */
 }
 
 .module-card:hover {
   border-color: var(--violet-dark);
 }
+
+.module-card.completed {
+  border-color: var(--violet-dark);
+  background: var(--violet-sage);
+}
+
+/* Completion Badge */
+.completion-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #10B981;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  z-index: 10;
+}
+
+.completion-badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Module Icon */
+.module-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--violet-light);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--violet-dark);
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+}
+
+
 
 .module-info {
   flex: 1;
@@ -762,25 +1241,6 @@ export default {
   margin-bottom: 15px;
 }
 
-.module-stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-.question-count {
-  color: var(--violet-dark);
-  font-weight: 600;
-  background: var(--violet-light);
-  padding: 4px 8px;
-  border-radius: 12px;
-}
-
-.difficulty {
-  color: var(--violet-deep);
-  font-weight: 500;
-}
 
 .start-module-btn {
   background: var(--violet-ultra-dark);
@@ -798,45 +1258,6 @@ export default {
   background: var(--violet-dark);
 }
 
-.card-graphic {
-  flex: 0 0 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.graphic-container {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.task-icon {
-  font-size: 3rem;
-  color: var(--violet-dark);
-}
-
-.checkmark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  background: #ffffff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--violet-dark);
-  z-index: 10;
-}
 
 
 /* Module Test */
@@ -846,7 +1267,8 @@ export default {
 }
 
 .test-header {
-  margin-bottom: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .back-to-modules-btn {
@@ -865,17 +1287,6 @@ export default {
   background: var(--violet-dark);
 }
 
-.test-progress-text {
-  text-align: center;
-  color: var(--violet-ultra-dark);
-  font-weight: 500;
-  margin: 0;
-}
-
-.test-content {
-  max-width: 1200px;
-  margin: 0 auto;
-}
 
 .question-section {
   max-width: 1200px;
@@ -883,15 +1294,8 @@ export default {
   padding-bottom: 60px;
 }
 
-.question-card {
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
 .question-header {
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .question-title {
@@ -902,8 +1306,14 @@ export default {
   line-height: 1.4;
 }
 
+.question-description {
+  color: var(--violet-deep);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
 .options-container {
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .option-item {
@@ -915,7 +1325,7 @@ export default {
   margin-bottom: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .option-item:hover {
@@ -982,6 +1392,10 @@ export default {
   align-items: center;
 }
 
+.question-actions .next-btn:only-child {
+  margin-left: auto;
+}
+
 .nav-btn {
   padding: 12px 24px;
   border: none;
@@ -1027,15 +1441,8 @@ export default {
   padding-bottom: 60px;
 }
 
-.results-card {
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
 .results-header {
+  text-align: center;
   margin-bottom: 40px;
 }
 
@@ -1056,12 +1463,12 @@ export default {
 }
 
 .score-section {
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .overall-score {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .score-circle {
@@ -1178,6 +1585,66 @@ export default {
   box-shadow: 0 6px 20px var(--shadow-dark);
 }
 
+.loading-section {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--violet-sage);
+  border-top: 4px solid var(--violet-dark);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-section p {
+  color: var(--violet-deep);
+  margin: 0;
+}
+
+.error-section {
+  text-align: center;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--violet-light);
+  border-radius: 12px;
+  border: 1px solid var(--violet-sage);
+}
+
+.error-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: var(--violet-deep);
+  margin: 0 0 15px 0;
+  font-weight: 500;
+}
+
+.retry-btn {
+  background: var(--violet-deep);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: var(--violet-dark);
+}
+
 @media (max-width: 1024px) {
   .module-cards {
     grid-template-columns: 1fr;
@@ -1190,9 +1657,6 @@ export default {
     padding: 10px;
   }
 
-  .task-card {
-    padding: 20px;
-  }
 
   .task-title {
     font-size: 2rem;
@@ -1209,6 +1673,18 @@ export default {
 
   .module-card {
     padding: 20px;
+    height: auto; /* 移动端使用自动高度 */
+    min-height: 250px; /* 设置最小高度 */
+  }
+
+  .module-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .module-icon svg {
+    width: 40px;
+    height: 40px;
   }
 
 
@@ -1221,5 +1697,69 @@ export default {
     width: 40px;
   }
 
+}
+
+/* Challenge Levels Styles */
+.challenge-levels {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.current-level {
+  margin-top: 2rem;
+}
+
+.level-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--violet-dark);
+  margin-bottom: 0.5rem;
+}
+
+.level-description {
+  color: #6b7280;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+
+.module-progress {
+  margin-top: 1rem;
+}
+
+.progress-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.locked-module {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+}
+
+
+.back-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.back-btn:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
 }
 </style>

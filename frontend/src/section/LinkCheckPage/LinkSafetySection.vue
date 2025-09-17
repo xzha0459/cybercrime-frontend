@@ -31,7 +31,7 @@
 
         <p class="footer-text">
           Add your link or paste it from the device's clipboard. Your data is processed by our
-          <a href="#" class="privacy-link">privacy policy.</a>
+          <router-link to="/privacy-policy" class="privacy-link">privacy policy.</router-link>
         </p>
       </div>
     </div>
@@ -44,48 +44,43 @@
     </div>
 
     <div v-if="results && !error" class="results-container">
-      <div class="result-header">
-        <h3>Safety Check Results</h3>
-        <span :class="['result-status', results.is_safe ? 'safe' : 'unsafe']">
-          {{ results.is_safe ? '✅ Safe' : '❌ Potentially Unsafe' }}
-        </span>
+      <!-- 简化的状态摘要 -->
+      <div class="status-summary">
+        <div class="status-info">
+          <h3 class="status-title">{{ results.is_safe ? 'Safe' : 'Unsafe' }}</h3>
+          <p class="status-desc">{{ getAnalysisText() }}</p>
+        </div>
+        <div class="status-badge" :class="results.is_safe ? 'safe' : 'unsafe'">
+          {{ getRiskLevel() }}
+        </div>
       </div>
 
-      <div class="result-details">
-        <div class="result-item">
-          <strong>Risk Level:</strong>
-          <span :class="['risk-level', results.is_safe ? 'safe' : 'unsafe']">
-            {{ getRiskLevel() }}
-          </span>
-        </div>
-        <div class="result-item">
-          <strong>Analysis:</strong> {{ getAnalysisText() }}
-        </div>
-        <div v-if="results.blacklisted !== undefined" class="result-item">
-          <strong>Blacklisted:</strong>
+      <!-- 简化的信息列表 -->
+      <div class="info-list">
+        <div v-if="results.blacklisted !== undefined" class="info-item">
+          <span class="info-label">Blacklisted:</span>
           <span :class="results.blacklisted ? 'text-danger' : 'text-success'">
             {{ results.blacklisted ? 'Yes' : 'No' }}
           </span>
         </div>
-      </div>
 
-      <div v-if="results.details" class="domain-details">
-        <h4>Domain Information</h4>
-        <div class="detail-grid">
-          <div v-if="results.details.domain_name" class="detail-item">
-            <strong>Domain:</strong> {{ results.details.domain_name }}
-          </div>
-          <div v-if="results.details.registrar" class="detail-item">
-            <strong>Registrar:</strong> {{ results.details.registrar }}
-          </div>
+        <div v-if="results.details?.domain_name" class="info-item">
+          <span class="info-label">Domain:</span>
+          <span class="info-value">{{ results.details.domain_name }}</span>
+        </div>
+
+        <div v-if="results.details?.registrar" class="info-item">
+          <span class="info-label">Registrar:</span>
+          <span class="info-value">{{ results.details.registrar }}</span>
         </div>
       </div>
 
-      <div v-if="results.matches?.length" class="threat-matches">
-        <h4>Security Matches</h4>
-        <div class="matches-list">
-          <div v-for="match in results.matches" :key="match.threatType" class="match-item">
-            <strong>Threat Type:</strong> {{ match.threatType }}
+      <!-- 简化的威胁列表 -->
+      <div v-if="results.matches?.length" class="threats-list">
+        <h4 class="threats-title">Security Threats</h4>
+        <div class="threat-items">
+          <div v-for="match in results.matches" :key="match.threatType" class="threat-item">
+            {{ match.threatType }}
           </div>
         </div>
       </div>
@@ -202,7 +197,7 @@ export default {
 
 .top-text {
   font-size: 1.125rem;
-  color: var(--forest-medium);
+  color: var(--violet-medium);
   margin: 0;
   font-weight: 500;
 }
@@ -210,14 +205,14 @@ export default {
 .main-title {
   font-size: 2.75rem;
   font-weight: 700;
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   margin: 0;
   line-height: 1.2;
 }
 
 .description {
   font-size: 1.25rem;
-  color: var(--forest-dark);
+  color: var(--violet-dark);
   margin: 0 auto;
   max-width: 1000px;
   line-height: 1.5;
@@ -244,7 +239,7 @@ export default {
   width: 100%;
   min-width: 0;
   padding: 1rem 1.25rem;
-  border: 2px solid var(--forest-sage);
+  border: 2px solid var(--violet-sage);
   border-radius: 12px;
   font-size: 1rem;
   background: white;
@@ -253,7 +248,7 @@ export default {
 
 .url-input:focus {
   outline: none;
-  border-color: var(--forest-deep);
+  border-color: var(--violet-deep);
 }
 
 .url-input:disabled {
@@ -265,8 +260,8 @@ export default {
 
 .check-button {
   padding: 1rem 2rem;
-  background: var(--forest-deep);
-  color: var(--forest-light);
+  background: var(--violet-deep);
+  color: var(--violet-light);
   border: none;
   border-radius: 12px;
   font-weight: 600;
@@ -283,7 +278,7 @@ export default {
 }
 
 .check-button:hover:not(:disabled) {
-  background: var(--forest-dark);
+  background: var(--violet-dark);
 }
 
 .check-button:disabled {
@@ -293,13 +288,13 @@ export default {
 
 .footer-text {
   font-size: 0.875rem;
-  color: var(--forest-medium);
+  color: var(--violet-medium);
   margin: 0;
   line-height: 1.4;
 }
 
 .privacy-link {
-  color: var(--forest-deep);
+  color: var(--violet-deep);
   text-decoration: none;
   font-weight: 500;
 }
@@ -330,11 +325,11 @@ export default {
 }
 
 .error-message {
-  background: var(--forest-light);
-  color: var(--forest-deep);
+  background: var(--violet-light);
+  color: var(--violet-deep);
   padding: 1rem 1.25rem;
   border-radius: 12px;
-  border: 2px solid var(--forest-sage);
+  border: 2px solid var(--violet-sage);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -346,78 +341,97 @@ export default {
 }
 
 .results-container {
-  background: var(--forest-light);
+  background: var(--violet-dark);
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 20px var(--shadow-medium);
 }
 
-.result-header {
+/* 新的results样式 - 保留 */
+.status-summary {
+  background: var(--violet-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid var(--forest-sage);
+  max-width: 900px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.result-header h3 {
+.status-info {
+  flex: 1;
+}
+
+.status-title {
   font-size: 1.5rem;
-  color: var(--forest-dark);
-  margin: 0;
+  font-weight: 700;
+  color: var(--violet-dark);
+  margin: 0 0 0.5rem 0;
 }
 
-.result-status {
-  font-weight: 600;
-  font-size: 1.125rem;
+.status-desc {
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.status-badge {
   padding: 0.5rem 1rem;
   border-radius: 20px;
-}
-
-.result-status.safe {
-  background: var(--violet-light);
-  color: var(--violet-ultra-dark);
-}
-
-.result-status.unsafe {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.result-details {
-  margin-bottom: 2rem;
-}
-
-.result-item {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  background: var(--forest-sage);
-  border-radius: 8px;
-}
-
-.result-item strong {
-  color: var(--forest-dark);
-}
-
-.risk-level {
   font-weight: 600;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  margin-left: 0.5rem;
+  font-size: 0.875rem;
 }
 
-.risk-level.safe {
+.status-badge.safe {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.status-badge.unsafe {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.info-list {
   background: var(--violet-light);
-  color: var(--violet-ultra-dark);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.risk-level.unsafe {
-  background: #f8d7da;
-  color: #721c24;
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--violet-dark);
+}
+
+.info-value {
+  color: var(--text-primary);
 }
 
 .text-danger {
-  color: #721c24;
+  color: #dc2626;
   font-weight: 600;
 }
 
@@ -426,40 +440,33 @@ export default {
   font-weight: 600;
 }
 
-.domain-details, .threat-matches {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--forest-sage);
+.threats-list {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.domain-details h4, .threat-matches h4 {
-  font-size: 1.25rem;
-  color: var(--forest-dark);
-  margin-bottom: 1rem;
+.threats-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--violet-dark);
+  margin: 0 0 1rem 0;
 }
 
-.detail-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.detail-item {
-  padding: 0.75rem;
-  background: var(--forest-sage);
-  border-radius: 8px;
-}
-
-.matches-list {
+.threat-items {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.match-item {
-  padding: 1rem;
-  background: var(--forest-sage);
-  border-radius: 8px;
-  border-left: 4px solid #ffc107;
+.threat-item {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {

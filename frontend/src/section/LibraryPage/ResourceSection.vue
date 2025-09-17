@@ -61,32 +61,51 @@
       </div>
 
        <!-- Featured Articles Grid -->
-      <div class="featured-videos-grid" v-if="articles.length && (selectedContentType === 'all' || selectedContentType === 'articles')">
-        <div
-          v-for="article in displayedArticles"
-          :key="article.id"
-          class="video-card"
-          @click="loadArticle(article.id)"
-        >
-          <div class="video-thumbnail">
-            <img :src="getArticleThumbnail(article)" :alt="article.title" class="thumbnail-image" />
-            <div class="play-overlay">📰</div>
-            <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
-          </div>
+        <div class="article-grid" v-if="articles.length && (selectedContentType === 'all' || selectedContentType === 'articles')">
+          <a
+            v-for="article in displayedArticles"
+            :key="article.id"
+            :href="article.link"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="article-card"
+          >
+            <div class="article-thumbnail">
+              <img
+                :src="getArticleThumbnail(article)"
+                :alt="article.title"
+                class="thumbnail-image"
+                @error="onImageError"
+              />
 
-          <div class="video-info">
-            <h3 class="video-title">{{ article.title }}</h3>
-            <div class="video-description">
-              <span>By: {{ article.author || 'Unknown' }}</span><br />
-              <span>Published: {{ article.publish_date }}</span>
+
+              <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
             </div>
-            <div class="video-meta">
-              <span class="video-type">Article</span>
-              <span class="video-duration">{{ article.suggested_reading_time }} min</span>
+
+            <div class="article-info">
+              <h3 class="article-title">{{ article.title }}</h3>
+              <div class="article-description">
+                <span>By: {{ article.author || 'Unknown' }}</span><br />
+                <span>Published: {{ article.publish_date }}</span>
+              </div>
+              <div class="article-meta">
+                <span class="article-type">Article</span>
+                <span class="article-duration">{{ article.suggested_reading_time }} min</span>
+              </div>
             </div>
-          </div>
+          </a>
         </div>
+
+      <!-- View More Articles Button -->
+      <div class="view-more-section" v-if="selectedContentType === 'articles' || selectedContentType === 'all'">
+        <button class="view-more-btn" @click="showAllArticles = !showAllArticles">
+          <span>{{ showAllArticles ? 'Show Less Articles' : 'View More Articles' }}</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :class="{ 'rotated': showAllArticles }">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
+
 
       <!-- <div class="featured-article" v-if="selectedContentType === 'all' || selectedContentType === 'articles'">
         <div class="article-content">
@@ -151,11 +170,11 @@
         </div>
       </div>
 
-      <!-- View More Button -->
-      <div class="view-more-section">
-        <button class="view-more-btn" @click="showAllContent = !showAllContent">
-          <span>{{ showAllContent ? 'Show Less' : 'View More' }}</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :class="{ 'rotated': showAllContent }">
+      <!-- View More Videos Button -->
+      <div class="view-more-section" v-if="selectedContentType === 'videos' || selectedContentType === 'all'">
+        <button class="view-more-btn" @click="showAllVideos = !showAllVideos">
+          <span>{{ showAllVideos ? 'Show Less Videos' : 'View More Videos' }}</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :class="{ 'rotated': showAllVideos }">
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
@@ -170,11 +189,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import placeholderImage from '@/assets/placeholder.jpg'
 
 const router = useRouter()
 
 const videos = ref([])
-const showAllContent = ref(false)
+const showAllVideos = ref(false)
+const showAllArticles = ref(false)
 const articles = ref([])
 
 const fetchArticles = async () => {
@@ -188,42 +209,38 @@ const fetchArticles = async () => {
 }
 
 const displayedVideos = computed(() => {
-  if (showAllContent.value) {
-    return videos.value
-  } else {
-    return videos.value.slice(0, 6)
-  }
+  return showAllVideos.value ? videos.value : videos.value.slice(0, 6)
 })
 
 const displayedArticles = computed(() => {
-  if (showAllContent.value) {
-    return articles.value
-  } else {
-    return articles.value.slice(0, 6)
-  }
+  return showAllArticles.value ? articles.value : articles.value.slice(0, 6)
 })
+
 
 const loadArticle = (id) => {
   router.push(`/article/${id}`)
 }
 
 const getArticleThumbnail = (article) => {
-  // Use backend-provided thumbnail if available
-  if (article.thumbnail_url) {
-    return article.thumbnail_url
+  const thumb = article.thumbnail_url?.trim()
+
+  // Use backend thumbnail if it looks valid
+  if (thumb && !thumb.startsWith('data:image/svg+xml')) {
+    return thumb
   }
 
-  // Fallbacks
-  if (article.category?.toLowerCase().includes('privacy')) {
+  // Fallbacks by category
+  const category = article.category?.toLowerCase() || ''
+  if (category.includes('privacy')) {
     return '/images/privacy-default.jpg'
-  } else if (article.category?.toLowerCase().includes('scam')) {
+  } else if (category.includes('scam')) {
     return '/images/scam-default.jpg'
-  } else if (article.category?.toLowerCase().includes('harassment')) {
+  } else if (category.includes('harassment')) {
     return '/images/harassment-default.jpg'
   }
 
-  // Generic placeholder
-  return '/images/article-placeholder.jpg'
+  // Generic fallback
+  return placeholderImage
 }
 
 
@@ -235,12 +252,20 @@ const selectedDuration = ref('all')
 const applyDurationFilter = async (duration) => {
   selectedDuration.value = duration
   await fetchFilteredVideos()
+  if (selectedContentType.value === 'articles' || selectedContentType.value === 'all') {
+    await fetchFilteredArticles()
+  }
 }
+
 
 const applyContentTypeFilter = async (type) => {
   selectedContentType.value = type
   await fetchFilteredVideos()
+  if (selectedContentType.value === 'articles' || selectedContentType.value === 'all') {
+    await fetchFilteredArticles()
+  }
 }
+
 
 const fetchFilteredVideos = async () => {
   let url = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/'
@@ -266,6 +291,33 @@ const fetchFilteredVideos = async () => {
     videos.value = data
   } catch (err) {
     console.error('Error fetching videos:', err)
+  }
+}
+
+const fetchFilteredArticles = async () => {
+  let url = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/'
+  const params = new URLSearchParams()
+
+  if (selectedDuration.value === 'under3') {
+    params.append('min_time', 0)
+    params.append('max_time', 2)
+  } else if (selectedDuration.value === '3to5') {
+    params.append('min_time', 3)
+    params.append('max_time', 5)
+  } else if (selectedDuration.value === 'over10') {
+    params.append('min_time', 10)
+  }
+
+  if (selectedDuration.value !== 'all') {
+    url = `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/filter/?${params.toString()}`
+  }
+
+  try {
+    const res = await fetch(url)
+    const data = await res.json()
+    articles.value = data
+  } catch (err) {
+    console.error('Error fetching articles:', err)
   }
 }
 
@@ -424,7 +476,7 @@ onMounted(async () => {
 
 
 /* Featured Videos Grid */
-.featured-videos-grid {
+.featured-videos-grid, .article-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
@@ -433,7 +485,7 @@ onMounted(async () => {
   margin: 0 auto 3rem auto;
 }
 
-.video-card {
+.video-card, .article-card {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px var(--shadow-light);
@@ -443,12 +495,12 @@ onMounted(async () => {
   border: 1px solid var(--border-light);
 }
 
-.video-card:hover {
+.video-card:hover, .article-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.video-thumbnail {
+.video-thumbnail, .article-thumbnail {
   position: relative;
   width: 100%;
   height: 200px;
@@ -494,11 +546,11 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.video-info {
+.video-info, .article-info{
   padding: 1.5rem;
 }
 
-.video-title {
+.video-title, .article-title {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -511,20 +563,20 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-.video-description {
+.video-description, .article-description {
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin-bottom: 1rem;
   line-height: 1.5;
 }
 
-.video-meta {
+.video-meta, .article-meta {
   display: flex;
   gap: 0.75rem;
   align-items: center;
 }
 
-.video-type {
+.video-type, .article-type {
   background: var(--violet-deep);
   color: white;
   padding: 0.25rem 0.75rem;
@@ -533,7 +585,7 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.video-duration {
+.video-duration, .article-duration {
   color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
@@ -543,7 +595,7 @@ onMounted(async () => {
 
 
 
-.video-type {
+.video-type, .article-type {
   background: var(--violet-deep);
   color: white;
   padding: 0.5rem 1rem;
@@ -552,19 +604,11 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-
-
-
-
-
 .thumbnail-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
-
-
 
 
 /* Responsive Design */
@@ -600,38 +644,34 @@ onMounted(async () => {
 
 
   /* Featured Videos Grid Responsive */
-  .featured-videos-grid {
+  .featured-videos-grid, .article-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
     margin: 0 auto 2rem auto;
   }
 
-  .video-thumbnail {
+  .video-thumbnail, .article-thumbnail {
     height: 180px;
   }
 
-  .video-info {
+  .video-info, .article-info {
     padding: 1.25rem;
   }
 
   .video-meta,
-  .video-description {
+  .video-description, .article-description, .article-meta {
     font-size: 0.85rem;
     line-height: 1.2;
   }
 
-  .video-title {
+  .video-title, .article-title {
     font-size: 0.9rem;
     line-height: 1.3;
     word-break: break-word;
     hyphens: auto;
   }
 
-
-
 }
-
-
 
 /* View More Button Animation */
 .view-more-btn svg.rotated {

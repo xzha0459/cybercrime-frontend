@@ -53,61 +53,54 @@
             </div>
           </div>
 
-          <!-- Current Level Display -->
-          <div class="current-level">
-            <!-- Level Header -->
-            <div class="level-header">
-              <h1 class="level-title">Level {{ currentLevel }}: {{ getTaskTitle(currentLevel) }}</h1>
-              <p class="level-description">{{ getTaskDescription(currentLevel) }}</p>
-
-
-              <!-- Module Progress -->
-              <div class="module-progress">
-                <span class="progress-text">{{ getCompletedModuleCount(currentLevel) }}/{{ getTaskModules(currentLevel).length }} modules completed</span>
-                <div class="progress-bar">
-                  <div
-                    class="progress-fill"
-                    :style="{ width: `${(getCompletedModuleCount(currentLevel) / getTaskModules(currentLevel).length) * 100}%` }"
-                  ></div>
-                </div>
+          <!-- Level Header -->
+          <div class="level-header">
+            <h1 class="level-title">Level {{ currentLevel }}: {{ getTaskTitle(currentLevel) }}</h1>
+            <p class="level-description">{{ getTaskDescription(currentLevel) }}</p>
+            <div class="module-progress">
+              <span class="progress-text">{{ getCompletedModuleCount(currentLevel) }}/{{ getTaskModules(currentLevel).length }} modules completed</span>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  :style="{ width: `${(getCompletedModuleCount(currentLevel) / getTaskModules(currentLevel).length) * 100}%` }"
+                ></div>
               </div>
+            </div>
           </div>
 
           <!-- Module Cards -->
           <div class="module-cards">
-              <div
-                v-for="module in getTaskModules(currentLevel)"
-                :key="module.id"
-                class="module-card"
-                :class="{ 'completed': isModuleCompleted(module.name) }"
-              >
-                <!-- Completion Badge -->
-                <div v-if="isModuleCompleted(module.name)" class="completion-badge">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
-                  <span>Completed ({{ getModuleScore(module.name) }}%)</span>
-                </div>
-
-                <div class="module-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                    <path :d="module.icon" />
-                  </svg>
-                </div>
-              <div class="module-info">
-                  <h3 class="module-title">{{ module.name }}</h3>
-                  <p class="module-description">{{ module.description }}</p>
+            <div
+              v-for="module in getTaskModules(currentLevel)"
+              :key="module.id"
+              class="module-card"
+              :class="{ 'completed': isModuleCompleted(module.name) }"
+            >
+              <div v-if="isModuleCompleted(module.name)" class="completion-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                <span>Completed ({{ getModuleScore(module.name) }}%)</span>
               </div>
-                <button
-                  v-if="isLevelUnlocked(currentLevel)"
-                  class="start-module-btn"
-                  @click="() => selectModule(module)"
-                >
-                  {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
-                </button>
-                <div v-else class="locked-module">
-                  Complete previous level to unlock
-                </div>
+
+              <div class="module-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path :d="module.icon" />
+                </svg>
+              </div>
+              <div class="module-info">
+                <h3 class="module-title">{{ module.name }}</h3>
+                <p class="module-description">{{ module.description }}</p>
+              </div>
+              <button
+                v-if="isLevelUnlocked(currentLevel)"
+                class="start-module-btn"
+                @click="() => selectModule(module)"
+              >
+                {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
+              </button>
+              <div v-else class="locked-module">
+                Complete previous level to unlock
               </div>
             </div>
           </div>
@@ -117,7 +110,7 @@
         <div v-else-if="currentTask > 0" class="task-section">
           <!-- Back Button -->
           <div class="task-header">
-            <button @click="goBack" class="back-btn">← Back to Levels</button>
+            <button @click="goBack" class="nav-back-btn">← Back to Levels</button>
             <h1 class="task-title">Level {{ currentTask }}: {{ getTaskTitle(currentTask) }}</h1>
             <p class="task-description">{{ getTaskDescription(currentTask) }}</p>
               </div>
@@ -246,8 +239,8 @@
             </div>
 
             <div class="results-actions">
-              <button @click="retakeTest" class="action-btn retake-btn">Retake Test</button>
-              <button @click="goBackToModules" class="action-btn back-btn">Back to Modules</button>
+              <button @click="retakeTest" class="retake-btn">Retake Test</button>
+              <button @click="goBackToModules" class="results-back-btn">Back to Modules</button>
           </div>
         </div>
       </div>
@@ -302,16 +295,13 @@ export default {
           // 获取用户的challenge_level
           await fetchUserStats()
 
-          console.log('User authenticated:', currentUser.value)
         } else {
           isAuthenticated.value = false
           currentUser.value = null
-          console.log('User not authenticated: No token found')
         }
-      } catch (error) {
+      } catch {
         isAuthenticated.value = false
         currentUser.value = null
-        console.log('User not authenticated:', error)
       }
     }
 
@@ -330,7 +320,6 @@ export default {
           if (currentUser.value) {
             currentUser.value.challenge_level = stats.challenge_level
           }
-          console.log('User stats:', stats)
         }
       } catch (error) {
         console.error('Error fetching user stats:', error)
@@ -356,25 +345,6 @@ export default {
       }
     }
 
-    // Module name mapping for API - 使用题库中的正确模块名称
-    const moduleNameMapping = {
-      1: 'Cyber Harassment Basic Recognition',
-      2: 'Common Scam Identification',
-      3: 'Personal Privacy Protection Basics',
-      4: 'Deep Threat Understanding',
-      5: 'Scam Technique Analysis',
-      6: 'Technical Protection Application',
-      7: 'Regulatory Policy Understanding',
-      8: 'Organizational Security Management'
-    }
-
-    // Challenge level mapping
-    const getChallengeLevel = (moduleId) => {
-      if (moduleId <= 3) return 1  // Beginner level
-      if (moduleId <= 6) return 2  // Intermediate level
-      if (moduleId <= 8) return 3  // Advanced level
-      return 1
-    }
 
     // Task data - 通过API获取模块名称，硬编码其他信息
     const taskData = ref({})
@@ -384,36 +354,79 @@ export default {
     // 硬编码的模块信息映射
     const moduleInfoMapping = {
       'Cyber Harassment Basic Recognition': {
-        description: 'Learn to identify and respond to cyberbullying behavior',
+            description: 'Learn to identify and respond to cyberbullying behavior',
         icon: 'M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z',
-      },
+          },
       'Common Scam Identification': {
-        description: 'Master basic techniques for identifying scams',
+            description: 'Master basic techniques for identifying scams',
         icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
-      },
+          },
       'Personal Privacy Protection Basics': {
-        description: 'Learn basic methods for protecting personal information',
+            description: 'Learn basic methods for protecting personal information',
         icon: 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z',
       },
       'Deep Threat Understanding': {
-        description: 'Understand the underlying principles of network threats',
+            description: 'Understand the underlying principles of network threats',
         icon: 'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'
-      },
+          },
       'Scam Technique Analysis': {
-        description: 'Analyze the operational mechanisms of complex scams',
+            description: 'Analyze the operational mechanisms of complex scams',
         icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z',
-      },
+          },
       'Technical Protection Application': {
-        description: 'Learn to use technical tools for protection',
+            description: 'Learn to use technical tools for protection',
         icon: 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
       },
       'Regulatory Policy Understanding': {
-        description: 'Understand relevant legal and regulatory requirements',
+            description: 'Understand relevant legal and regulatory requirements',
         icon: 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
-      },
+          },
       'Organizational Security Management': {
-        description: 'Learn enterprise-level security strategy development',
+            description: 'Learn enterprise-level security strategy development',
         icon: 'M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z',
+      }
+    }
+
+    // 获取单个级别的模块数据
+    const fetchLevelModules = async (level) => {
+      const response = await fetch(`${API_BASE_URL}/quizzes/modules/?challenge_level=${level}`, {
+        headers: {
+          'Authorization': `Bearer ${getAccessToken()}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch level ${level} modules: ${response.status}`)
+      }
+
+      return response.json()
+    }
+
+    // 构建级别数据
+    const buildLevelData = (level, modules, startId) => {
+      const levelConfig = {
+        1: {
+          title: 'Network Newbie Protection',
+          description: 'Learn basic security protection knowledge as you start exploring the online world.'
+        },
+        2: {
+          title: 'Security Awareness Enhancement',
+          description: 'Face more complex network threat scenarios as you develop deeper security awareness.'
+        },
+        3: {
+          title: 'Security Expert Advancement',
+          description: 'Master professional-level security management and compliance knowledge.'
+        }
+      }
+
+      return {
+        ...levelConfig[level],
+        modules: modules.map((moduleName, index) => ({
+          id: startId + index,
+          name: moduleName,
+          challenge_level: level,
+          ...moduleInfoMapping[moduleName]
+        }))
       }
     }
 
@@ -424,80 +437,17 @@ export default {
         taskDataError.value = null
 
         // 获取三个挑战级别的模块数据
-        const [level1Response, level2Response, level3Response] = await Promise.all([
-          fetch(`${API_BASE_URL}/quizzes/modules/?challenge_level=1`, {
-            headers: {
-              'Authorization': `Bearer ${getAccessToken()}`
-            }
-          }),
-          fetch(`${API_BASE_URL}/quizzes/modules/?challenge_level=2`, {
-            headers: {
-              'Authorization': `Bearer ${getAccessToken()}`
-            }
-          }),
-          fetch(`${API_BASE_URL}/quizzes/modules/?challenge_level=3`, {
-            headers: {
-              'Authorization': `Bearer ${getAccessToken()}`
-            }
-          })
-        ])
-
-        if (!level1Response.ok || !level2Response.ok || !level3Response.ok) {
-          throw new Error(`Failed to fetch modules: ${level1Response.status}, ${level2Response.status}, ${level3Response.status}`)
-        }
-
         const [level1Modules, level2Modules, level3Modules] = await Promise.all([
-          level1Response.json(),
-          level2Response.json(),
-          level3Response.json()
+          fetchLevelModules(1),
+          fetchLevelModules(2),
+          fetchLevelModules(3)
         ])
-
-        console.log('API返回的模块数据:', {
-          level1: level1Modules,
-          level2: level2Modules,
-          level3: level3Modules
-        })
-
-        // 检查模块名称映射
-        console.log('Level 2模块映射检查:', {
-          'ID 4': moduleNameMapping[4],
-          'ID 5': moduleNameMapping[5],
-          'ID 6': moduleNameMapping[6],
-          'API返回的Level 2模块': level2Modules
-        })
 
         // 构建任务数据
         taskData.value = {
-          1: {
-            title: 'Network Newbie Protection',
-            description: 'Learn basic security protection knowledge as you start exploring the online world.',
-            modules: level1Modules.map((moduleName, index) => ({
-              id: index + 1,
-              name: moduleName,
-              challenge_level: 1,
-              ...moduleInfoMapping[moduleName]
-            }))
-          },
-          2: {
-            title: 'Security Awareness Enhancement',
-            description: 'Face more complex network threat scenarios as you develop deeper security awareness.',
-            modules: level2Modules.map((moduleName, index) => ({
-              id: index + 4,
-              name: moduleName,
-              challenge_level: 2,
-              ...moduleInfoMapping[moduleName]
-            }))
-          },
-          3: {
-            title: 'Security Expert Advancement',
-            description: 'Master professional-level security management and compliance knowledge.',
-            modules: level3Modules.map((moduleName, index) => ({
-              id: index + 7,
-              name: moduleName,
-              challenge_level: 3,
-              ...moduleInfoMapping[moduleName]
-            }))
-          }
+          1: buildLevelData(1, level1Modules, 1),
+          2: buildLevelData(2, level2Modules, 4),
+          3: buildLevelData(3, level3Modules, 7)
         }
 
       } catch (err) {
@@ -505,39 +455,11 @@ export default {
         taskDataError.value = err.message
         // 如果API失败，使用默认数据作为fallback
         taskData.value = {
-      1: {
-        title: 'Network Newbie Protection',
-        description: 'Learn basic security protection knowledge as you start exploring the online world.',
-        modules: [
-          {
-            id: 1,
-            name: 'Cyber Harassment Basic Recognition',
-            description: 'Learn to identify and respond to cyberbullying behavior',
-            icon: 'shield',
-            questionCount: 15,
-            difficulty: 'Beginner',
-            challenge_level: 1
-          },
-          {
-            id: 2,
-            name: 'Common Scam Identification',
-            description: 'Master basic techniques for identifying scams',
-            icon: 'warning',
-            questionCount: 17,
-            difficulty: 'Beginner',
-            challenge_level: 1
-          },
-          {
-            id: 3,
-            name: 'Personal Privacy Protection Basics',
-            description: 'Learn basic methods for protecting personal information',
-            icon: 'lock',
-            questionCount: 13,
-            difficulty: 'Beginner',
-            challenge_level: 1
-          }
-        ]
-          }
+          1: buildLevelData(1, [
+            'Cyber Harassment Basic Recognition',
+            'Common Scam Identification',
+            'Personal Privacy Protection Basics'
+          ], 1)
         }
       } finally {
         taskDataLoading.value = false
@@ -580,21 +502,6 @@ export default {
         const challengeLevel = selectedModule.value.challenge_level
         const moduleName = selectedModule.value.name
 
-        console.log('模块数据检查:', {
-          selectedModule: selectedModule.value,
-          challengeLevel,
-          moduleName,
-          '硬编码映射': {
-            challengeLevel: getChallengeLevel(selectedModule.value.id),
-            moduleName: moduleNameMapping[selectedModule.value.id]
-          }
-        })
-
-        console.log('Starting test for module:', {
-          module: selectedModule.value,
-          challengeLevel,
-          moduleName
-        })
 
         const params = new URLSearchParams()
         params.append('challenge_level', challengeLevel.toString())
@@ -771,8 +678,7 @@ export default {
           throw new Error(`Failed to finish test: ${response.status}`)
         }
 
-        const result = await response.json()
-        console.log('Test completion result:', result)
+        await response.json()
 
         // 显示结果页面
         currentStep.value = testQuestions.value.length + 1
@@ -782,11 +688,6 @@ export default {
 
         // 重新获取用户stats以更新challenge_level
         await fetchUserStats()
-
-        // 检查是否有challenge_level更新
-        if (result.challenge_level_updated) {
-          console.log('Challenge level updated! User can now access next level.')
-        }
 
       } catch (err) {
         console.error('Error finishing test:', err)
@@ -829,17 +730,14 @@ export default {
       userAnswers.value = []
     }
 
-    const getTaskTitle = (taskNumber) => {
-      return taskData.value[taskNumber]?.title || ''
+    // 获取任务信息的通用方法
+    const getTaskInfo = (taskNumber, field) => {
+      return taskData.value[taskNumber]?.[field] || (field === 'modules' ? [] : '')
     }
 
-    const getTaskDescription = (taskNumber) => {
-      return taskData.value[taskNumber]?.description || ''
-    }
-
-    const getTaskModules = (taskNumber) => {
-      return taskData.value[taskNumber]?.modules || []
-    }
+    const getTaskTitle = (taskNumber) => getTaskInfo(taskNumber, 'title')
+    const getTaskDescription = (taskNumber) => getTaskInfo(taskNumber, 'description')
+    const getTaskModules = (taskNumber) => getTaskInfo(taskNumber, 'modules')
 
     // 用户进度数据 - 使用API获取
     const userProgress = ref({})
@@ -895,45 +793,37 @@ export default {
       }
     }
 
-    // 检查模块是否已完成（80%正确率）
-    const isModuleCompleted = (moduleName) => {
-      return userProgress.value[moduleName]?.isCompleted || false
+    // 模块进度相关方法
+    const getModuleProgress = (moduleName) => {
+      return userProgress.value[moduleName] || null
     }
 
-    // 获取模块分数
+    const isModuleCompleted = (moduleName) => {
+      return getModuleProgress(moduleName)?.isCompleted || false
+    }
+
     const getModuleScore = (moduleName) => {
-      const progress = userProgress.value[moduleName]
+      const progress = getModuleProgress(moduleName)
       return progress ? Math.round(progress.accuracy_pct) : 0
     }
 
-    // 检查指定level的所有模块是否都已完成
+    // Level相关方法
+    const getLevelModules = (level) => {
+      return getTaskModules(level) || []
+    }
+
     const isLevelCompleted = (level) => {
-      const modules = getTaskModules(level)
-      if (!modules || modules.length === 0) return false
-
-      return modules.every(module => isModuleCompleted(module.name))
+      const modules = getLevelModules(level)
+      return modules.length > 0 && modules.every(module => isModuleCompleted(module.name))
     }
 
-    // 检查指定level是否已解锁
     const isLevelUnlocked = (level) => {
-      if (level === 1) return true // Level 1 总是解锁的
-      // 根据API文档：challenge_level表示用户可以尝试的级别
-      // challenge_level: 1 表示可以尝试Level 1
-      // challenge_level: 2 表示可以尝试Level 2
-      const unlocked = currentUser.value?.challenge_level >= level
-      console.log(`Level ${level} unlock check:`, {
-        userChallengeLevel: currentUser.value?.challenge_level,
-        requiredLevel: level,
-        unlocked
-      })
-      return unlocked
+      if (level === 1) return true
+      return currentUser.value?.challenge_level >= level
     }
 
-    // 获取指定level的已完成模块数量
     const getCompletedModuleCount = (level) => {
-      const modules = getTaskModules(level)
-      if (!modules || modules.length === 0) return 0
-
+      const modules = getLevelModules(level)
       return modules.filter(module => isModuleCompleted(module.name)).length
     }
 
@@ -1122,6 +1012,7 @@ export default {
   padding: 40px 20px;
 }
 
+/* Card Styles */
 .task-card {
   background: #ffffff;
   border-radius: 20px;
@@ -1170,7 +1061,7 @@ export default {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  height: 320px; /* 固定高度确保所有卡片一致 */
+  height: 350px; /* 固定高度确保所有卡片一致 */
   justify-content: space-between; /* 内容均匀分布 */
 }
 
@@ -1220,8 +1111,6 @@ export default {
   flex-shrink: 0;
 }
 
-
-
 .module-info {
   flex: 1;
   margin-bottom: 20px;
@@ -1242,35 +1131,8 @@ export default {
 }
 
 
-.start-module-btn {
-  background: var(--violet-ultra-dark);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-}
-
-.start-module-btn:hover {
-  background: var(--violet-dark);
-}
-
-
-
-/* Module Test */
-.module-test {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.test-header {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
+/* Button Styles */
+.start-module-btn,
 .back-to-modules-btn {
   background: var(--violet-ultra-dark);
   color: white;
@@ -1283,8 +1145,20 @@ export default {
   font-size: 0.95rem;
 }
 
+.start-module-btn:hover,
 .back-to-modules-btn:hover {
   background: var(--violet-dark);
+}
+
+/* Module Test */
+.module-test {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.test-header {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 
@@ -1396,6 +1270,7 @@ export default {
   margin-left: auto;
 }
 
+/* Navigation Buttons */
 .nav-btn {
   padding: 12px 24px;
   border: none;
@@ -1423,8 +1298,6 @@ export default {
 
 .next-btn:hover:not(:disabled) {
   background: var(--violet-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .next-btn:disabled {
@@ -1446,10 +1319,6 @@ export default {
   margin-bottom: 40px;
 }
 
-.results-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
-}
 
 .results-header h2 {
   color: var(--violet-ultra-dark);
@@ -1475,7 +1344,7 @@ export default {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--violet-dark) 0%, var(--violet-ultra-dark) 100%);
+  background: var(--violet-ultra-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1515,40 +1384,34 @@ export default {
   justify-content: center;
 }
 
-.action-btn {
-  padding: 12px 24px;
+/* Action Buttons */
+.retake-btn {
+  background: var(--violet-ultra-dark);
+  color: white;
   border: none;
+  padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.retake-btn {
-  background: var(--violet-ultra-dark);
-  color: white;
-}
-
 .retake-btn:hover {
   background: var(--violet-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--shadow-medium);
 }
 
-.back-btn {
-  background: var(--violet-sage);
-  color: var(--violet-deep);
-  border: 2px solid var(--violet-dark);
+.results-back-btn {
+  background: var(--violet-deep);
+  color: white;
   padding: 12px 24px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.back-btn:hover {
+.results-back-btn:hover {
   background: var(--violet-dark);
-  color: white;
 }
 
 .auth-required {
@@ -1645,6 +1508,7 @@ export default {
   background: var(--violet-dark);
 }
 
+/* Responsive Design */
 @media (max-width: 1024px) {
   .module-cards {
     grid-template-columns: 1fr;
@@ -1656,7 +1520,6 @@ export default {
   .challenge-content {
     padding: 10px;
   }
-
 
   .task-title {
     font-size: 2rem;
@@ -1673,8 +1536,8 @@ export default {
 
   .module-card {
     padding: 20px;
-    height: auto; /* 移动端使用自动高度 */
-    min-height: 250px; /* 设置最小高度 */
+    height: auto;
+    min-height: 250px;
   }
 
   .module-icon {
@@ -1687,7 +1550,6 @@ export default {
     height: 40px;
   }
 
-
   .progress-steps {
     flex-wrap: wrap;
     gap: 10px;
@@ -1696,7 +1558,6 @@ export default {
   .step-line {
     width: 40px;
   }
-
 }
 
 /* Challenge Levels Styles */
@@ -1717,7 +1578,7 @@ export default {
 }
 
 .level-description {
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 1rem;
   line-height: 1.5;
 }
@@ -1728,26 +1589,26 @@ export default {
 }
 
 .progress-text {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
   display: block;
 }
 
 .locked-module {
-  color: #9ca3af;
+  color: var(--violet-medium);
   font-size: 0.875rem;
   font-weight: 500;
   text-align: center;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--violet-light);
   border-radius: 8px;
-  border: 1px dashed #d1d5db;
+  border: 1px dashed var(--border-light);
 }
 
 
-.back-btn {
-  background: #6b7280;
+.nav-back-btn {
+  background: var(--violet-medium);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -1758,8 +1619,8 @@ export default {
   margin-bottom: 1rem;
 }
 
-.back-btn:hover {
-  background: #4b5563;
+.nav-back-btn:hover {
+  background: var(--text-secondary);
   transform: translateY(-1px);
 }
 </style>

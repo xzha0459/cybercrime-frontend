@@ -22,11 +22,20 @@
                   Member since: {{ formatDate(userInfo.createdAt) }}
                 </p>
               </div>
+              <div class="points-section">
+                <div class="points-display">
+                  <div class="points-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <div class="points-info">
+                    <div class="points-number">{{ points }}</div>
+                    <div class="points-label">Points</div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-
-
-
           </div>
 
           <!-- Not Authenticated State -->
@@ -67,6 +76,7 @@ export default {
     const isAuthenticated = ref(false)
     const userInfo = ref(null)
     const authError = ref(null)
+    const points = ref(0)
 
     const checkAuthStatus = async () => {
       try {
@@ -97,6 +107,9 @@ export default {
           libraryVisits: 0,
         }
 
+        // 获取用户积分
+        await fetchUserStats()
+
       } catch (error) {
         console.error('Error checking auth status:', error)
         isAuthenticated.value = false
@@ -126,6 +139,51 @@ export default {
       }
     }
 
+    // 获取Access Token
+    const getAccessToken = () => {
+      try {
+        const token = localStorage.getItem('access_token')
+        if (!token) {
+          throw new Error('No access token found')
+        }
+        return token
+      } catch (error) {
+        console.error('Error getting access token:', error)
+        throw error
+      }
+    }
+
+    // 获取用户积分
+    const fetchUserStats = async () => {
+      try {
+        const accessToken = localStorage.getItem('access_token')
+        if (!accessToken) {
+          points.value = 0
+          return
+        }
+
+        const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
+        const response = await fetch(`${API_BASE_URL}/stats/`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAccessToken()}`
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          points.value = data.points || 0
+        } else {
+          points.value = 0
+        }
+      } catch (err) {
+        console.error('Error fetching user stats:', err)
+        points.value = 0
+      }
+    }
+
 
 
     const goToSignIn = () => {
@@ -145,6 +203,7 @@ export default {
       isAuthenticated,
       userInfo,
       authError,
+      points,
       getUserInitial,
       formatDate,
       goToSignIn,
@@ -225,6 +284,55 @@ export default {
 
 .user-details {
   flex: 1;
+}
+
+.points-section {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.points-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--violet-light);
+  border-radius: 12px;
+  border: 1px solid var(--violet-sage);
+  box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.points-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--violet-deep);
+}
+
+.points-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.points-info {
+  text-align: center;
+}
+
+.points-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--violet-ultra-dark);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.points-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--violet-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .username {
@@ -338,6 +446,19 @@ export default {
 
   .username {
     font-size: 1.5rem;
+  }
+
+  .points-section {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .points-display {
+    padding: 0.75rem 1rem;
+  }
+
+  .points-number {
+    font-size: 1.25rem;
   }
 }
 

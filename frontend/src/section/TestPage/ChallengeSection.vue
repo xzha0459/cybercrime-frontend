@@ -227,14 +227,48 @@
               <h2>Test Completed!</h2>
             </div>
 
-            <div class="score-section">
-              <div class="overall-score">
-                <p class="score-label">Your Score</p>
-                <div class="score-circle">
-                  <span class="score-number">{{ Math.round((correctAnswers / testQuestions.length) * 100) }}</span>
-                  <span class="score-percent">%</span>
+            <!-- Combined Score and Feedback Container -->
+            <div class="results-container">
+              <div class="score-section">
+                <div class="overall-score">
+                  <p class="score-label">Your Score</p>
+                  <div class="score-circle">
+                    <span class="score-number">{{ Math.round((correctAnswers / testQuestions.length) * 100) }}</span>
+                    <span class="score-percent">%</span>
+                  </div>
+                  <p class="score-detail">{{ correctAnswers }} out of {{ testQuestions.length }} correct</p>
                 </div>
-                <p class="score-detail">{{ correctAnswers }} out of {{ testQuestions.length }} correct</p>
+              </div>
+
+              <!-- AI Feedback Section -->
+              <div v-if="testResult && testResult.feedback" class="feedback-section">
+                <div class="feedback-header">
+                  <h3 class="feedback-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="feedback-icon">
+                      <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                    </svg>
+                    Feedback
+                  </h3>
+                </div>
+
+                <div class="feedback-content">
+                  <div class="feedback-summary">
+                    <h4 class="feedback-subtitle">Summary</h4>
+                    <p class="feedback-text">{{ testResult.feedback.summary }}</p>
+                  </div>
+
+                  <div v-if="testResult.feedback.action_items && testResult.feedback.action_items.length > 0" class="feedback-actions">
+                    <h4 class="feedback-subtitle">Action Items</h4>
+                    <ul class="action-items-list">
+                      <li v-for="(item, index) in testResult.feedback.action_items" :key="index" class="action-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="action-icon">
+                          <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ item }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -281,6 +315,7 @@ export default {
     const currentAttemptId = ref(null)
     const loading = ref(false)
     const error = ref(null)
+    const testResult = ref(null)
 
     // Check user authentication status
     const checkAuthStatus = async () => {
@@ -678,7 +713,8 @@ export default {
           throw new Error(`Failed to finish test: ${response.status}`)
         }
 
-        await response.json()
+        const resultData = await response.json()
+        testResult.value = resultData
 
         // 显示结果页面
         currentStep.value = testQuestions.value.length + 1
@@ -728,6 +764,7 @@ export default {
       selectedAnswer.value = null
       correctAnswers.value = 0
       userAnswers.value = []
+      testResult.value = null
     }
 
     // 获取任务信息的通用方法
@@ -865,6 +902,7 @@ export default {
       currentQuestionOptions,
       loading,
       error,
+      testResult,
 
       // Task data state
       taskData,
@@ -1331,8 +1369,18 @@ export default {
   font-size: 1.1rem;
 }
 
+/* Results Container */
+.results-container {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 20px var(--shadow-light);
+  border: 1px solid var(--border-light);
+}
+
 .score-section {
-  margin-bottom: 15px;
+  margin-bottom: 2rem;
 }
 
 .overall-score {
@@ -1412,6 +1460,106 @@ export default {
 
 .results-back-btn:hover {
   background: var(--violet-dark);
+}
+
+/* Feedback Section */
+.feedback-section {
+  margin-top: 1.5rem;
+}
+
+.feedback-header {
+  margin-bottom: 1.5rem;
+}
+
+.feedback-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--violet-ultra-dark);
+  margin: 0;
+}
+
+.feedback-icon {
+  color: var(--violet-deep);
+}
+
+.feedback-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.feedback-summary {
+  background: var(--violet-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--violet-sage);
+}
+
+.feedback-subtitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--violet-dark);
+  margin: 0 0 0.75rem 0;
+}
+
+.feedback-text {
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.feedback-actions {
+  background: var(--violet-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--violet-sage);
+}
+
+.action-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.action-item:last-child {
+  border-bottom: none;
+}
+
+.action-icon {
+  color: var(--violet-deep);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+/* Responsive Design for Results */
+@media (max-width: 768px) {
+  .results-container {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .feedback-title {
+    font-size: 1.25rem;
+  }
+
+  .feedback-summary,
+  .feedback-actions {
+    padding: 1.25rem;
+  }
 }
 
 .auth-required {

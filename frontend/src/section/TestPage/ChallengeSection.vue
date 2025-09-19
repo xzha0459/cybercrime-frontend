@@ -240,6 +240,13 @@
                 </div>
               </div>
 
+              <!-- Stats Update Messages -->
+              <div v-if="testResult && testResult.stats_update && testResult.stats_update.messages && testResult.stats_update.messages.length > 0" class="messages-content">
+                <div v-for="(message, index) in testResult.stats_update.messages" :key="index">
+                  {{ message }}
+                </div>
+              </div>
+
               <!-- AI Feedback Section -->
               <div v-if="testResult && testResult.feedback" class="feedback-section">
                 <div class="feedback-header">
@@ -247,7 +254,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="feedback-icon">
                       <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
                     </svg>
-                    Feedback
+                    Feedback (AI Generated)
                   </h3>
                 </div>
 
@@ -1462,6 +1469,15 @@ export default {
   background: var(--violet-dark);
 }
 
+/* Messages Content */
+.messages-content {
+  background: transparent;
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
 /* Feedback Section */
 .feedback-section {
   margin-top: 1.5rem;
@@ -1550,6 +1566,10 @@ export default {
   .results-container {
     padding: 1.5rem;
     margin: 1.5rem 0;
+  }
+
+  .messages-content {
+    padding: 1rem;
   }
 
   .feedback-title {

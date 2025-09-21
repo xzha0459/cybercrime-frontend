@@ -1,7 +1,7 @@
 <template>
   <div class="leaderboard-section">
     <div class="container">
-      <h2 class="section-title">🏆 Leaderboard</h2>
+      <h2 class="section-title">Leaderboard</h2>
       <p class="section-subtitle">Top performers in cybersecurity challenges</p>
 
       <div class="leaderboard-container">

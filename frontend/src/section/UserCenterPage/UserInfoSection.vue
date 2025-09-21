@@ -16,7 +16,18 @@
                 {{ getUserInitial() }}
               </div>
               <div class="user-details">
-                <h3 class="username">{{ userInfo.username || 'User' }}</h3>
+                <div class="username-container">
+                  <h3 class="username">{{ userInfo.username || 'User' }}</h3>
+                  <div v-if="getUserBadges(points).length > 0" class="user-badges">
+                    <div
+                      v-for="badge in getUserBadges(points)"
+                      :key="badge.name"
+                      class="user-badge"
+                    >
+                      <img :src="badge.src" :alt="badge.name" class="badge-image" />
+                    </div>
+                  </div>
+                </div>
                 <p v-if="userInfo.age" class="age">Age: {{ userInfo.age }}</p>
                 <p v-if="userInfo.createdAt" class="member-since">
                   Member since: {{ formatDate(userInfo.createdAt) }}
@@ -194,6 +205,41 @@ export default {
       checkAuthStatus()
     }
 
+    // 根据积分获取所有符合条件的徽章
+    const getUserBadges = (userPoints) => {
+      const badges = []
+
+      if (userPoints >= 10) {
+        badges.push({
+          name: 'Novice Scholar',
+          src: '/src/assets/Badges/Novice Scholar.png'
+        })
+      }
+
+      if (userPoints >= 30) {
+        badges.push({
+          name: 'Knowledge Explorer',
+          src: '/src/assets/Badges/Knowledge Explorer.png'
+        })
+      }
+
+      if (userPoints >= 60) {
+        badges.push({
+          name: 'Learning Expert',
+          src: '/src/assets/Badges/Learning Expert.png'
+        })
+      }
+
+      if (userPoints >= 90) {
+        badges.push({
+          name: 'Cybersecurity Master',
+          src: '/src/assets/Badges/Cybersecurity Master.png'
+        })
+      }
+
+      return badges
+    }
+
     onMounted(() => {
       checkAuthStatus()
     })
@@ -208,6 +254,7 @@ export default {
       formatDate,
       goToSignIn,
       retryLoad,
+      getUserBadges,
     }
   },
 }
@@ -335,11 +382,36 @@ export default {
   letter-spacing: 0.5px;
 }
 
+.username-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
 .username {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--violet-ultra-dark);
+}
+
+.user-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+}
+
+.badge-image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .age, .member-since {
@@ -446,6 +518,17 @@ export default {
 
   .username {
     font-size: 1.5rem;
+  }
+
+  .username-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .badge-image {
+    width: 35px;
+    height: 35px;
   }
 
   .points-section {

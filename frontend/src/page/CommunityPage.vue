@@ -1,42 +1,33 @@
 <template>
-  <div class="library-page">
+  <div class="community-page">
     <div class="page-header">
       <div class="container">
-        <h1 class="page-title">Educational Library</h1>
-        <p class="page-subtitle">Access cybersecurity videos, articles, and infographics to enhance your digital safety knowledge</p>
+        <h1 class="page-title">Community</h1>
+        <p class="page-subtitle">Connect with fellow cybersecurity enthusiasts, compete in challenges, and climb the leaderboard</p>
       </div>
     </div>
 
     <div class="page-content">
       <div class="container">
-        <!-- US 3.1 Section - Resource -->
-        <ResourceSection />
-
-        <!-- US 3.2 Section - Infographic -->
-        <InfographicSection />
+        <LeaderboardSection />
       </div>
     </div>
-    <FooterSection />
   </div>
 </template>
 
 <script>
-import ResourceSection from '../section/LibraryPage/ResourceSection.vue'
-import InfographicSection from '../section/LibraryPage/InfographicSection.vue'
-import FooterSection from '../section/HomePage/FooterSection.vue'
+import LeaderboardSection from '../section/CommunityPage/LeaderboardSection.vue'
 
 export default {
-  name: 'LibraryPage',
+  name: 'CommunityPage',
   components: {
-    ResourceSection,
-    InfographicSection,
-    FooterSection
+    LeaderboardSection
   }
 }
 </script>
 
 <style scoped>
-.library-page {
+.community-page {
   background-color: var(--violet-light);
 }
 
@@ -68,7 +59,6 @@ export default {
 .container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 0 8rem;
 }
 
 @media (max-width: 768px) {

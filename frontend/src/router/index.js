@@ -3,6 +3,7 @@ import HomePage from '../page/HomePage.vue'
 import LinkCheckPage from '../page/LinkCheckPage.vue'
 import LibraryPage from '../page/LibraryPage.vue'
 import ChallengePage from '../page/ChallengePage.vue'
+import CommunityPage from '../page/CommunityPage.vue'
 import UserCenterPage from '../page/UserCenterPage.vue'
 import SignUpPage from '../page/SignUpPage.vue'
 import SignInPage from '../page/SignInPage.vue'
@@ -29,6 +30,11 @@ const routes = [
     path: '/challenge',
     name: 'Challenge',
     component: ChallengePage,
+  },
+  {
+    path: '/community',
+    name: 'Community',
+    component: CommunityPage,
   },
   {
     path: '/user-center',

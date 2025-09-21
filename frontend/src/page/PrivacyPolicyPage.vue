@@ -73,7 +73,12 @@
 </template>
 
 <script setup>
-// Privacy Policy page component
+import { onMounted } from 'vue'
+
+// 页面加载时滚动到顶部
+onMounted(() => {
+  window.scrollTo(0, 0)
+})
 </script>
 
 <style scoped>

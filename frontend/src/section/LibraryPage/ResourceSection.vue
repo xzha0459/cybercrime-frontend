@@ -3,7 +3,7 @@
     <div class="section-header">
       <h2 class="section-title">Learning Resources</h2>
       <p class="section-description">
-        Access 3-5 minute cybersecurity videos and articles perfect for learning during breaks between classes
+        Access 3-5 minute cybersecurity videos and articles perfect for learning during breaks
       </p>
     </div>
 
@@ -60,86 +60,103 @@
         </div>
       </div>
 
-       <!-- Featured Articles Grid -->
-        <div class="article-grid" v-if="articles.length && (selectedContentType === 'all' || selectedContentType === 'articles')">
-          <a
-            v-for="article in displayedArticles"
-            :key="article.id"
-            :href="article.link"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="article-card"
-          >
-            <div class="article-thumbnail">
-              <img
-                :src="getArticleThumbnail(article)"
-                :alt="article.title"
-                class="thumbnail-image"
-                @error="onImageError"
-              />
+      <!-- Combined Content Grid (Articles + Videos) -->
+      <div v-if="selectedContentType === 'all'" class="combined-content-grid">
+        <!-- Articles -->
+        <a
+          v-for="article in displayedArticles"
+          :key="`article-${article.id}`"
+          :href="article.link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="content-card article-card"
+        >
+          <div class="card-thumbnail article-thumbnail">
+            <img
+              :src="getArticleThumbnail(article)"
+              :alt="article.title"
+              class="thumbnail-image"
+              @error="onImageError"
+            />
+            <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
+          </div>
 
-
-              <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
-            </div>
-
-            <div class="article-info">
-              <h3 class="article-title">{{ article.title }}</h3>
-              <div class="article-description">
-                <span>By: {{ article.author || 'Unknown' }}</span><br />
-                <span>Published: {{ article.publish_date }}</span>
-              </div>
-              <div class="article-meta">
-                <span class="article-type">Article</span>
-                <span class="article-duration">{{ article.suggested_reading_time }} min</span>
-              </div>
-            </div>
-          </a>
-        </div>
-
-      <!-- View More Articles Button -->
-      <div class="view-more-section" v-if="selectedContentType === 'articles' || selectedContentType === 'all'">
-        <button class="view-more-btn" @click="showAllArticles = !showAllArticles">
-          <span>{{ showAllArticles ? 'Show Less Articles' : 'View More Articles' }}</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :class="{ 'rotated': showAllArticles }">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-
-
-      <!-- <div class="featured-article" v-if="selectedContentType === 'all' || selectedContentType === 'articles'">
-        <div class="article-content">
-          <div class="content-info">
-            <h3 class="article-title">Social Media Privacy Guide</h3>
-            <p class="article-description">Essential tips to protect your privacy on social media platforms. Learn how to secure your accounts, control your data sharing, and avoid common privacy pitfalls that could compromise your personal information.</p>
+          <div class="card-content article-info">
+            <h3 class="card-title article-title">{{ article.title }}</h3>
+            <div class="card-author">{{ article.author || 'Unknown' }}</div>
+            <div class="card-date">{{ article.publish_date }}</div>
             <div class="article-meta">
               <span class="article-type">Article</span>
-              <span class="article-duration">3 min read</span>
-            </div>
-            <button class="view-btn">View</button>
-          </div>
-          <div class="article-cover">
-            <div class="cover-image">
-              <div class="cover-icon">📱</div>
+              <span class="article-duration">{{ article.suggested_reading_time }} min</span>
             </div>
           </div>
-        </div> -->
+        </a>
 
-        <!-- Navigation Arrows - Updated Style -->
-        <!-- <button class="nav-arrow nav-prev">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button class="nav-arrow nav-next">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div> -->
+        <!-- Videos -->
+        <div
+          v-for="video in displayedVideos"
+          :key="`video-${video.id}`"
+          class="content-card video-card"
+          @click="loadVideo(video.id)"
+        >
+          <div class="card-thumbnail video-thumbnail">
+            <img :src="getYouTubeThumbnail(video.link)" :alt="video.title" class="thumbnail-image" />
+            <div class="play-overlay">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="duration-badge">{{ video.suggested_reading_time }} min</div>
+          </div>
 
-      <!-- Featured Videos Grid (Six Videos in 2x3 Grid) -->
-      <div class="featured-videos-grid" v-if="videos.length && (selectedContentType === 'all' || selectedContentType === 'videos')">
+          <div class="card-content video-info">
+            <h3 class="card-title video-title">{{ video.title }}</h3>
+            <div class="card-author">{{ video.author }}</div>
+            <div class="card-date">{{ video.publish_date }}</div>
+            <div class="video-meta">
+              <span class="video-type">Video</span>
+              <span class="video-duration">{{ video.suggested_reading_time }} min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Articles Only Grid -->
+      <div v-else-if="selectedContentType === 'articles'" class="content-grid">
+        <a
+          v-for="article in displayedArticles"
+          :key="article.id"
+          :href="article.link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="article-card"
+        >
+          <div class="article-thumbnail">
+            <img
+              :src="getArticleThumbnail(article)"
+              :alt="article.title"
+              class="thumbnail-image"
+              @error="onImageError"
+            />
+            <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
+          </div>
+
+          <div class="article-info">
+            <h3 class="article-title">{{ article.title }}</h3>
+            <div class="article-description">
+              <span>By: {{ article.author || 'Unknown' }}</span><br />
+              <span>Published: {{ article.publish_date }}</span>
+            </div>
+            <div class="article-meta">
+              <span class="article-type">Article</span>
+              <span class="article-duration">{{ article.suggested_reading_time }} min</span>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Videos Only Grid -->
+      <div v-else-if="selectedContentType === 'videos'" class="content-grid">
         <div
           v-for="video in displayedVideos"
           :key="video.id"
@@ -170,11 +187,11 @@
         </div>
       </div>
 
-      <!-- View More Videos Button -->
-      <div class="view-more-section" v-if="selectedContentType === 'videos' || selectedContentType === 'all'">
-        <button class="view-more-btn" @click="showAllVideos = !showAllVideos">
-          <span>{{ showAllVideos ? 'Show Less Videos' : 'View More Videos' }}</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :class="{ 'rotated': showAllVideos }">
+      <!-- View More Button -->
+      <div class="view-more-section" v-if="(selectedContentType === 'articles' && articles.length > 6) || (selectedContentType === 'videos' && videos.length > 6) || (selectedContentType === 'all' && (articles.length > 6 || videos.length > 6))">
+        <button class="view-more-btn" @click="toggleShowAll">
+          <span>{{ getViewMoreText() }}</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :class="{ 'rotated': showAllContent }">
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
@@ -196,6 +213,7 @@ const router = useRouter()
 const videos = ref([])
 const showAllVideos = ref(false)
 const showAllArticles = ref(false)
+const showAllContent = ref(false)
 const articles = ref([])
 
 const fetchArticles = async () => {
@@ -209,17 +227,20 @@ const fetchArticles = async () => {
 }
 
 const displayedVideos = computed(() => {
+  if (selectedContentType.value === 'all') {
+    return showAllContent.value ? videos.value : videos.value.slice(0, 6)
+  }
   return showAllVideos.value ? videos.value : videos.value.slice(0, 6)
 })
 
 const displayedArticles = computed(() => {
+  if (selectedContentType.value === 'all') {
+    return showAllContent.value ? articles.value : articles.value.slice(0, 6)
+  }
   return showAllArticles.value ? articles.value : articles.value.slice(0, 6)
 })
 
 
-const loadArticle = (id) => {
-  router.push(`/article/${id}`)
-}
 
 const getArticleThumbnail = (article) => {
   const thumb = article.thumbnail_url?.trim()
@@ -242,9 +263,6 @@ const getArticleThumbnail = (article) => {
   // Generic fallback
   return placeholderImage
 }
-
-
-// const currentVideo = computed(() => videos.value[currentIndex.value] || {})
 
 const selectedContentType = ref('all')
 const selectedDuration = ref('all')
@@ -331,17 +349,6 @@ const fetchVideos = async () => {
   }
 }
 
-// const fetchAllVideos = async () => {
-//   try {
-//     const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/')
-//     const data = await res.json()
-//     allVideos.value = data
-//   } catch (err) {
-//     console.error('Error fetching all videos:', err)
-//   }
-// }
-
-
 const extractYouTubeId = (url) => {
   const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
   const match = url.match(regex)
@@ -358,18 +365,29 @@ const loadVideo = (id) => {
   router.push(`/video/${id}`)
 }
 
+const toggleShowAll = () => {
+  if (selectedContentType.value === 'all') {
+    showAllContent.value = !showAllContent.value
+  } else if (selectedContentType.value === 'articles') {
+    showAllArticles.value = !showAllArticles.value
+  } else if (selectedContentType.value === 'videos') {
+    showAllVideos.value = !showAllVideos.value
+  }
+}
+
+const getViewMoreText = () => {
+  if (selectedContentType.value === 'all') {
+    return showAllContent.value ? 'Show Less Content' : 'View More Content'
+  } else if (selectedContentType.value === 'articles') {
+    return showAllArticles.value ? 'Show Less Articles' : 'View More Articles'
+  } else if (selectedContentType.value === 'videos') {
+    return showAllVideos.value ? 'Show Less Videos' : 'View More Videos'
+  }
+  return 'View More'
+}
 
 
-// const fetchRelatedItems = async (videoId) => {
-//   try {
-//     const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${videoId}/related/`)
-//     const data = await res.json()
-//     relatedItems.value = data
-//     showRelated.value = true
-//   } catch (err) {
-//     console.error("Failed to load related content:", err)
-//   }
-// }
+
 
 
 onMounted(async () => {
@@ -395,7 +413,7 @@ onMounted(async () => {
 .section-description {
   font-size: 1.125rem;
   color: var(--text-secondary);
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -475,11 +493,11 @@ onMounted(async () => {
 }
 
 
-/* Featured Videos Grid */
-.featured-videos-grid, .article-grid {
+/* Content Grids */
+.combined-content-grid,
+.content-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto 3rem auto;
@@ -488,7 +506,6 @@ onMounted(async () => {
 .video-card, .article-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 20px var(--shadow-light);
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -500,7 +517,8 @@ onMounted(async () => {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.video-thumbnail, .article-thumbnail {
+.video-thumbnail,
+.article-thumbnail {
   position: relative;
   width: 100%;
   height: 200px;
@@ -546,11 +564,14 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.video-info, .article-info{
-  padding: 1.5rem;
+/* Card Content */
+.video-info,
+.article-info {
+  padding: 1rem;
 }
 
-.video-title, .article-title {
+.video-title,
+.article-title {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -563,39 +584,24 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-.video-description, .article-description {
+.video-description,
+.article-description {
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin-bottom: 1rem;
   line-height: 1.5;
 }
 
-.video-meta, .article-meta {
+.video-meta,
+.article-meta {
+  margin-top: 0.5rem;
   display: flex;
   gap: 0.75rem;
   align-items: center;
 }
 
-.video-type, .article-type {
-  background: var(--violet-deep);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.video-duration, .article-duration {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-
-
-
-
-.video-type, .article-type {
+.video-type,
+.article-type {
   background: var(--violet-deep);
   color: white;
   padding: 0.5rem 1rem;
@@ -604,10 +610,11 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.thumbnail-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.video-duration,
+.article-duration {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 
@@ -643,8 +650,9 @@ onMounted(async () => {
   }
 
 
-  /* Featured Videos Grid Responsive */
-  .featured-videos-grid, .article-grid {
+  /* Grid Responsive */
+  .combined-content-grid,
+  .content-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
     margin: 0 auto 2rem auto;
@@ -658,8 +666,7 @@ onMounted(async () => {
     padding: 1.25rem;
   }
 
-  .video-meta,
-  .video-description, .article-description, .article-meta {
+  .video-description, .article-description {
     font-size: 0.85rem;
     line-height: 1.2;
   }
@@ -676,110 +683,5 @@ onMounted(async () => {
 /* View More Button Animation */
 .view-more-btn svg.rotated {
   transform: rotate(180deg);
-}
-
-.content-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 1px solid var(--border-light);
-}
-
-.content-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.card-thumbnail {
-  position: relative;
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-}
-
-.thumbnail-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.play-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  transition: all 0.3s ease;
-}
-
-.content-card:hover .play-overlay {
-  background: rgba(0, 0, 0, 0.9);
-  transform: translate(-50%, -50%) scale(1.1);
-}
-
-.duration-badge {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 0.75rem;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.card-content {
-  padding: 1.25rem;
-}
-
-.card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-author {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin: 0 0 0.25rem 0;
-}
-
-  .card-date {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin: 0;
-  }
-
-
-/* Responsive Modal */
-@media (max-width: 768px) {
-
-  .content-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-
-  .card-thumbnail {
-    height: 200px;
-  }
 }
 </style>

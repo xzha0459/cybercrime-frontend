@@ -1052,8 +1052,8 @@ export default {
 }
 
 .member-avatar {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   background: var(--violet-ultra-dark);
   color: white;
   border-radius: 50%;
@@ -1074,8 +1074,8 @@ export default {
 .member-main-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .member-username {
@@ -1083,7 +1083,6 @@ export default {
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  flex-shrink: 0;
 }
 
 .member-stats {
@@ -1102,9 +1101,9 @@ export default {
 }
 
 .badge-name {
-  background: var(--violet-light);
+  background: var(--violet-sage);
   color: var(--violet-ultra-dark);
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -1152,6 +1151,10 @@ export default {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  .member-stats {
+    align-self: flex-start;
   }
 }
 

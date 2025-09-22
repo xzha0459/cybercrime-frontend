@@ -1,8 +1,30 @@
 <template>
   <div class="leaderboard-section">
     <div class="container">
-      <h2 class="section-title">Leaderboard</h2>
-      <p class="section-subtitle">Top 10 performers in cybersecurity challenges</p>
+      <div class="section-header">
+        <div class="title-section">
+          <h2 class="section-title">Leaderboard</h2>
+          <p class="section-subtitle">{{ currentView === 'users' ? 'Top 10 performers in cybersecurity challenges' : 'Top 10 teams by total points' }}</p>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-navigation">
+        <button
+          @click="switchView('users')"
+          class="tab-btn"
+          :class="{ 'active': currentView === 'users' }"
+        >
+          Users
+        </button>
+        <button
+          @click="switchView('teams')"
+          class="tab-btn"
+          :class="{ 'active': currentView === 'teams' }"
+        >
+          Teams
+        </button>
+      </div>
 
       <!-- Loading State -->
       <div v-if="loading" class="loading-state">
@@ -25,18 +47,20 @@
       <div v-else class="leaderboard-container">
         <div class="leaderboard-header">
           <div class="rank-header">Rank</div>
-          <div class="user-header">User</div>
+          <div class="name-header">{{ currentView === 'users' ? 'User' : 'Team' }}</div>
           <div class="score-header">Points</div>
-          <div class="badges-header">Title</div>
+          <div v-if="currentView === 'users'" class="badges-header">Title</div>
         </div>
 
         <div class="leaderboard-list">
-          <div
-            v-for="(user, index) in leaderboardData"
-            :key="user.id"
-            class="leaderboard-item"
-            :class="{ 'top-three': index < 3 }"
-          >
+          <!-- Users Leaderboard -->
+          <template v-if="currentView === 'users'">
+            <div
+              v-for="(user, index) in leaderboardData"
+              :key="user.id"
+              class="leaderboard-item"
+              :class="{ 'top-three': index < 3 }"
+            >
             <div class="rank">
               <span v-if="index === 0" class="rank-icon">🥇</span>
               <span v-else-if="index === 1" class="rank-icon">🥈</span>
@@ -63,28 +87,38 @@
                 {{ badge }}
               </span>
             </div>
-          </div>
+            </div>
+          </template>
+
+          <!-- Teams Leaderboard -->
+          <template v-if="currentView === 'teams'">
+            <div
+              v-for="(team, index) in leaderboardData"
+              :key="team.team_id"
+              class="leaderboard-item"
+              :class="{ 'top-three': index < 3 }"
+            >
+            <div class="rank">
+              <span v-if="index === 0" class="rank-icon">🥇</span>
+              <span v-else-if="index === 1" class="rank-icon">🥈</span>
+              <span v-else-if="index === 2" class="rank-icon">🥉</span>
+              <span v-else class="rank-number">{{ index + 1 }}</span>
+            </div>
+
+            <div class="team-info">
+              <div class="team-avatar">{{ team.team.charAt(0).toUpperCase() }}</div>
+              <div class="team-details">
+                <div class="team-name">{{ team.team }}</div>
+                <div class="team-id">ID: {{ team.team_id }}</div>
+              </div>
+            </div>
+
+            <div class="score">{{ team.points }}</div>
+            </div>
+          </template>
         </div>
       </div>
 
-      <!-- My Stats Section -->
-      <div v-if="myStats && !loading && !error" class="my-stats-section">
-        <h3 class="my-stats-title">Your Stats</h3>
-        <div class="my-stats-card">
-          <div class="my-stats-info">
-            <div class="my-avatar">{{ myStats.username.charAt(0).toUpperCase() }}</div>
-            <div class="my-details">
-              <div class="my-name">{{ myStats.username }}</div>
-              <div class="my-level">Level {{ myStats.challenge_level }}</div>
-            </div>
-          </div>
-          <div class="my-score">{{ myStats.points }} points</div>
-          <div class="my-badges">
-            <span v-if="myStats.badge" class="my-badge">{{ myStats.badge.name }}</span>
-            <span v-else class="no-badge">No badges yet</span>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -96,9 +130,9 @@ export default {
   name: 'LeaderboardSection',
   setup() {
     const leaderboardData = ref([])
-    const myStats = ref(null)
     const loading = ref(true)
     const error = ref(null)
+    const currentView = ref('users') // 'users' or 'teams'
 
     const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
 
@@ -129,15 +163,15 @@ export default {
       }
     }
 
-    // 获取我的统计数据
-    const fetchMyStats = async () => {
+    // 获取团队排行榜数据
+    const fetchTeamsLeaderboard = async () => {
       try {
         const accessToken = localStorage.getItem('access_token')
         if (!accessToken) {
-          return null
+          throw new Error('No access token found')
         }
 
-        const response = await fetch(`${API_BASE_URL}/leaderboard/me/`, {
+        const response = await fetch(`${API_BASE_URL}/leaderboard/teams/`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -145,17 +179,17 @@ export default {
             'Authorization': `Bearer ${accessToken}`
           }
         })
-
         if (!response.ok) {
-          throw new Error('Failed to fetch my stats')
+          throw new Error('Failed to fetch teams leaderboard data')
         }
         const data = await response.json()
         return data
       } catch (err) {
-        console.error('Error fetching my stats:', err)
-        return null
+        console.error('Error fetching teams leaderboard:', err)
+        throw err
       }
     }
+
 
     // 格式化排行榜数据
     const formatLeaderboardData = (data) => {
@@ -207,17 +241,16 @@ export default {
           return
         }
 
-        // 并行获取全局排行榜和我的统计数据
-        const [globalData, myData] = await Promise.all([
-          fetchGlobalLeaderboard(),
-          fetchMyStats()
-        ])
+        if (currentView.value === 'users') {
+          // 获取全局排行榜数据
+          const globalData = await fetchGlobalLeaderboard()
+          leaderboardData.value = formatLeaderboardData(globalData)
+        } else {
+          // 获取团队排行榜数据
+          const teamsData = await fetchTeamsLeaderboard()
 
-        console.log('API Response - globalData:', globalData)
-        console.log('API Response - myData:', myData)
-
-        leaderboardData.value = formatLeaderboardData(globalData)
-        myStats.value = myData
+          leaderboardData.value = teamsData.slice(0, 10) // 取前10个团队
+        }
 
       } catch (err) {
         if (err.message === 'No access token found') {
@@ -231,15 +264,22 @@ export default {
       }
     }
 
+    // 切换视图
+    const switchView = (view) => {
+      currentView.value = view
+      loadData() // 重新加载数据
+    }
+
     onMounted(() => {
       loadData()
     })
 
     return {
       leaderboardData,
-      myStats,
       loading,
       error,
+      currentView,
+      switchView,
       loadData
     }
   }
@@ -253,18 +293,54 @@ export default {
   padding: 0 1rem;
 }
 
+.section-header {
+  margin-bottom: 1rem;
+}
+
+.title-section {
+  text-align: center;
+}
+
 .section-title {
   font-size: 2rem;
   font-weight: 700;
-  text-align: center;
   margin-bottom: 0.5rem;
   color: var(--text-primary, #333);
 }
 
 .section-subtitle {
-  text-align: center;
   color: var(--text-secondary, #666);
-  margin-bottom: 2rem;
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-light, #e0e0e0);
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 1rem;
+  border-bottom: 2px solid transparent;
+  position: relative;
+}
+
+.tab-btn:hover {
+  color: var(--violet-dark);
+  background: rgba(139, 69, 19, 0.05);
+}
+
+.tab-btn.active {
+  color: var(--violet-dark);
+  border-bottom-color: var(--violet-dark);
+  background: rgba(139, 69, 19, 0.08);
 }
 
 .leaderboard-container {
@@ -348,6 +424,40 @@ export default {
 }
 
 .user-level {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+}
+
+.team-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.team-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--violet-dark);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.team-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-name {
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.team-id {
   font-size: 0.85rem;
   color: var(--text-secondary, #666);
 }
@@ -469,95 +579,19 @@ export default {
   transform: translateY(-1px);
 }
 
-/* My Stats Section */
-.my-stats-section {
-  margin-top: 2rem;
-}
-
-.my-stats-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary, #333);
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.my-stats-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.my-stats-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.my-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--violet-dark);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 1.2rem;
-}
-
-.my-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.my-name {
-  font-weight: 600;
-  color: var(--text-primary, #333);
-  font-size: 1.1rem;
-}
-
-.my-level {
-  font-size: 0.9rem;
-  color: var(--text-secondary, #666);
-}
-
-.my-score {
-  font-weight: 600;
-  font-size: 1.2rem;
-  color: var(--violet-dark);
-}
-
-.my-badges {
-  display: flex;
-  align-items: center;
-}
-
-.my-badge {
-  background: var(--violet-deep);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  white-space: nowrap;
-  display: inline-block;
-}
-
-.no-badge {
-  color: var(--text-secondary, #666);
-  font-style: italic;
-}
 
 @media (max-width: 768px) {
   .container {
     padding: 0 0.5rem;
+  }
+
+  .tab-navigation {
+    justify-content: center;
+  }
+
+  .tab-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
   }
 
   .leaderboard-header,
@@ -571,7 +605,8 @@ export default {
     font-size: 1.5rem;
   }
 
-  .user-avatar {
+  .user-avatar,
+  .team-avatar {
     width: 35px;
     height: 35px;
     font-size: 1rem;

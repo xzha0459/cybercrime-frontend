@@ -266,23 +266,28 @@ const getArticleThumbnail = (article) => {
 }
 
 const handleArticleClick = async (article) => {
+  const token = localStorage.getItem("access_token") // ✅ match video page
+
   try {
-    // 1. Call backend API to log click & award points
-    await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/${article.id}/click/`, {
+    const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/${article.id}/click/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // 👇 include token if your API is protected
-        Authorization: `Bearer ${localStorage.getItem("token")}`
+        Authorization: `Bearer ${token}`
       }
     })
 
-    console.log("Awarded points for article:", article.title)
+    const data = await res.json().catch(() => null)
+    console.log("Article click response:", res.status, data)
+
+    if (!res.ok) {
+      throw new Error(`Failed with status ${res.status}`)
+    }
   } catch (err) {
     console.error("Error awarding article points:", err)
   }
 
-  // 2. Open the article link in new tab
+  // only open after request succeeds
   window.open(article.link, "_blank", "noopener,noreferrer")
 }
 

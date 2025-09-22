@@ -126,10 +126,9 @@
         <a
           v-for="article in displayedArticles"
           :key="article.id"
-          :href="article.link"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="javascript:void(0)"
           class="article-card"
+          @click.prevent="handleArticleClick(article)"
         >
           <div class="article-thumbnail">
             <img
@@ -216,6 +215,8 @@ const showAllArticles = ref(false)
 const showAllContent = ref(false)
 const articles = ref([])
 
+
+
 const fetchArticles = async () => {
   try {
     const res = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/')
@@ -263,6 +264,28 @@ const getArticleThumbnail = (article) => {
   // Generic fallback
   return placeholderImage
 }
+
+const handleArticleClick = async (article) => {
+  try {
+    // 1. Call backend API to log click & award points
+    await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/${article.id}/click/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // 👇 include token if your API is protected
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    })
+
+    console.log("Awarded points for article:", article.title)
+  } catch (err) {
+    console.error("Error awarding article points:", err)
+  }
+
+  // 2. Open the article link in new tab
+  window.open(article.link, "_blank", "noopener,noreferrer")
+}
+
 
 const selectedContentType = ref('all')
 const selectedDuration = ref('all')

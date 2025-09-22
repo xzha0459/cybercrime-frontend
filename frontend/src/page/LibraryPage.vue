@@ -12,7 +12,7 @@
         <!-- US 3.1 Section - Resource -->
         <ResourceSection />
 
-        <!-- US 3.2 Section - Infographic -->
+        <!-- US 3.2 Section - Infographic --> 
         <InfographicSection />
       </div>
     </div>

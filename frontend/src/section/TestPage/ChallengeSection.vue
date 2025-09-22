@@ -27,7 +27,7 @@
         </div>
 
         <!-- Challenge Levels Page -->
-        <div v-else-if="currentTask === 0" class="challenge-levels">
+        <div v-else class="challenge-levels">
           <!-- Progress Indicator -->
           <div class="progress-indicator">
             <div class="progress-steps">
@@ -97,7 +97,7 @@
                 class="start-module-btn"
                 @click="() => selectModule(module)"
               >
-                {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
+                {{ isModuleCompleted(module.name) ? 'Retake →' : 'Start Learning →' }}
               </button>
               <div v-else class="locked-module">
                 Complete previous level to unlock
@@ -106,46 +106,6 @@
           </div>
             </div>
 
-        <!-- Individual Task Page -->
-        <div v-else-if="currentTask > 0" class="task-section">
-          <!-- Back Button -->
-          <div class="task-header">
-            <button @click="goBack" class="nav-back-btn">← Back to Levels</button>
-            <h1 class="task-title">Level {{ currentTask }}: {{ getTaskTitle(currentTask) }}</h1>
-            <p class="task-description">{{ getTaskDescription(currentTask) }}</p>
-              </div>
-
-          <!-- Module Cards -->
-          <div class="module-cards">
-            <div
-              v-for="module in getTaskModules(currentTask)"
-              :key="module.id"
-              class="module-card"
-              :class="{ 'completed': isModuleCompleted(module.name) }"
-            >
-              <!-- Completion Badge -->
-              <div v-if="isModuleCompleted(module.name)" class="completion-badge">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                </svg>
-                <span>Completed ({{ getModuleScore(module.name) }}%)</span>
-            </div>
-
-              <div class="module-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                  <path :d="module.icon" />
-                </svg>
-              </div>
-              <div class="module-info">
-                <h3 class="module-title">{{ module.name }}</h3>
-                <p class="module-description">{{ module.description }}</p>
-              </div>
-              <button class="start-module-btn" @click="() => selectModule(module)">
-                {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Module Test Page -->
@@ -290,7 +250,7 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default {
@@ -304,7 +264,6 @@ export default {
     const currentUser = ref(null)
 
     // Challenge state
-    const currentTask = ref(0)
     const currentLevel = ref(1) // 当前显示的level
     const selectedModule = ref(null)
 
@@ -313,7 +272,8 @@ export default {
     const currentStep = ref(0) //
     const selectedAnswer = ref(null)
     const correctAnswers = ref(0)
-    const userAnswers = ref([])
+    const userAnswers = ref([]) // 保持原有的数组格式用于API提交
+    const savedAnswers = ref({}) // 新增：用于记住用户选择的对象格式
 
     // API configuration
     const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
@@ -509,14 +469,6 @@ export default {
     }
 
     // Methods
-    const startTask = (taskNumber) => {
-      if (taskNumber <= currentTask.value) {
-        currentTask.value = taskNumber
-        selectedModule.value = null
-        // Emit challenge status change when starting a task
-        emit('challenge-status-changed', true)
-      }
-    }
 
     // 切换level显示
     const switchLevel = (level) => {
@@ -582,6 +534,7 @@ export default {
       selectedAnswer.value = null
       correctAnswers.value = 0
       userAnswers.value = []
+      savedAnswers.value = {}
           // 发射挑战开始事件
           emit('challenge-status-changed', true)
         } else {
@@ -615,6 +568,33 @@ export default {
     // Select answer
     const selectAnswer = (index) => {
       selectedAnswer.value = index
+      // 保存用户答案到savedAnswers中
+      if (currentQuestion.value && currentQuestion.value.options[index]) {
+        savedAnswers.value[currentQuestion.value.id] = currentQuestion.value.options[index].identifier
+      }
+    }
+
+    // 获取保存的答案
+    const getSavedAnswer = (questionId) => {
+      return savedAnswers.value[questionId] || null
+    }
+
+    // 恢复当前题目的已选答案
+    const restoreSelectedAnswer = () => {
+      if (currentQuestion.value) {
+        const savedAnswer = getSavedAnswer(currentQuestion.value.id)
+        if (savedAnswer) {
+          // 根据保存的identifier找到对应的选项索引
+          const optionIndex = currentQuestion.value.options.findIndex(
+            option => option.identifier === savedAnswer
+          )
+          selectedAnswer.value = optionIndex >= 0 ? optionIndex : null
+        } else {
+          selectedAnswer.value = null
+        }
+      } else {
+        selectedAnswer.value = null
+      }
     }
 
     // Next question
@@ -629,7 +609,7 @@ export default {
         // Question already answered, just move to next
         if (currentStep.value < testQuestions.value.length) {
           currentStep.value++
-          selectedAnswer.value = null
+          // watch会自动恢复答案，不需要手动调用
         } else {
           await finishTest()
         }
@@ -655,7 +635,7 @@ export default {
       // Move to next question or finish test
       if (currentStep.value < testQuestions.value.length) {
         currentStep.value++
-        selectedAnswer.value = null
+        // watch会自动恢复答案，不需要手动调用
       } else {
         // Test completed - 调用完成测试API
         await finishTest()
@@ -745,7 +725,7 @@ export default {
     const previousQuestion = () => {
       if (currentStep.value > 1) {
         currentStep.value--
-        selectedAnswer.value = null
+        // watch会自动恢复答案，不需要手动调用
       }
     }
 
@@ -757,12 +737,6 @@ export default {
       }
     }
 
-    const goBack = () => {
-      currentTask.value = 0
-      selectedModule.value = null
-      // Emit challenge status change when going back to main view
-      emit('challenge-status-changed', false)
-    }
 
     const goBackToModules = () => {
       selectedModule.value = null
@@ -771,6 +745,7 @@ export default {
       selectedAnswer.value = null
       correctAnswers.value = 0
       userAnswers.value = []
+      savedAnswers.value = {}
       testResult.value = null
     }
 
@@ -881,6 +856,16 @@ export default {
       return icons[level] || icons[1]
     }
 
+    // 监听当前步骤变化，自动恢复已保存的答案
+    watch(currentStep, (newStep) => {
+      if (newStep > 0 && newStep <= testQuestions.value.length) {
+        // 使用nextTick确保currentQuestion计算属性已更新
+        nextTick(() => {
+          restoreSelectedAnswer()
+        })
+      }
+    })
+
     // Check authentication on mount
     onMounted(async () => {
       await checkAuthStatus()
@@ -896,7 +881,6 @@ export default {
       redirectToSignUp,
 
       // Challenge state
-      currentTask,
       currentLevel,
       selectedModule,
 
@@ -927,10 +911,8 @@ export default {
       getLevelIcon,
 
       // Methods
-      startTask,
       switchLevel,
       selectModule,
-      goBack,
       goBackToModules,
       getTaskTitle,
       getTaskDescription,

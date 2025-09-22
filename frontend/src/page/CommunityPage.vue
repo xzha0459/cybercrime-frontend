@@ -9,7 +9,14 @@
 
     <div class="page-content">
       <div class="container">
-        <LeaderboardSection />
+        <div class="community-grid">
+          <div class="user-stats-section">
+            <UserStatsSection />
+          </div>
+          <div class="leaderboard-section">
+            <LeaderboardSection />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -17,11 +24,13 @@
 
 <script>
 import LeaderboardSection from '../section/CommunityPage/LeaderboardSection.vue'
+import UserStatsSection from '../section/CommunityPage/UserStatsSection.vue'
 
 export default {
   name: 'CommunityPage',
   components: {
-    LeaderboardSection
+    LeaderboardSection,
+    UserStatsSection
   }
 }
 </script>
@@ -61,6 +70,20 @@ export default {
   margin: 0 auto;
 }
 
+.community-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.user-stats-section {
+  order: 1;
+}
+
+.leaderboard-section {
+  order: 2;
+}
+
 @media (max-width: 768px) {
   .page-title {
     font-size: 2.5rem;
@@ -72,6 +95,10 @@ export default {
 
   .container {
     padding: 0 1rem;
+  }
+
+  .community-grid {
+    gap: 1.5rem;
   }
 }
 </style>

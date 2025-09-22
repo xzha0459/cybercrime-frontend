@@ -52,6 +52,12 @@
                   Challenge
                 </router-link>
               </li>
+              <li class="link-item">
+                <router-link to="/community" class="link-text">
+                  <span class="arrow-icon">▶</span>
+                  Community
+                </router-link>
+              </li>
             </ul>
           </div>
         </div>

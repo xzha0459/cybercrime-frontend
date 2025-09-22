@@ -66,6 +66,43 @@
               </button>
             </div>
           </div>
+
+          <!-- Team Members Section -->
+          <div class="team-members-section">
+            <div class="members-header">
+              <h4 class="members-title">Team Members</h4>
+            </div>
+
+            <!-- Members List -->
+            <div v-if="teamMembers.length > 0" class="members-list">
+              <div
+                v-for="(member, index) in teamMembers"
+                :key="member.username"
+                class="member-card"
+              >
+                <div class="member-rank">{{ index + 1 }}</div>
+                <div class="member-avatar">{{ member.username.charAt(0).toUpperCase() }}</div>
+                <div class="member-info">
+                  <div class="member-main-info">
+                    <h5 class="member-username">{{ member.username }}</h5>
+                    <div class="member-stats">
+                      <span class="member-points">{{ member.points }} points</span>
+                      <span class="member-level">Level {{ member.challenge_level }}</span>
+                      <div v-if="member.badge" class="member-badge">
+                        <span class="badge-name">{{ member.badge.name }}</span>
+                      </div>
+                      <div v-else class="no-badge">No badge yet</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- No Members State -->
+            <div v-else class="no-members">
+              <p>No team members found.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -312,11 +349,39 @@ const leaveTeamAPI = async () => {
   }
 }
 
+// 获取团队用户列表
+const getTeamMembersAPI = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/leaderboard/my-team/`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${getAccessToken()}`
+      }
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null // 用户没有团队
+      }
+      const errorData = await response.json()
+      throw new Error(errorData.detail || 'Failed to get team members')
+    }
+
+    const data = await response.json()
+    return data.leaderboard || [] // 返回用户列表
+  } catch (error) {
+    console.error('Error getting team members:', error)
+    throw error
+  }
+}
+
 export default {
   name: 'TeamInfoSection',
   setup() {
     const loading = ref(true)
     const currentTeam = ref(null)
+    const teamMembers = ref([])
     const error = ref(null)
 
     // Modal states
@@ -351,12 +416,27 @@ export default {
         }
 
         currentTeam.value = await getCurrentTeamAPI()
+
+        // 如果有团队，加载团队成员
+        if (currentTeam.value) {
+          await loadTeamMembers()
+        }
       } catch (err) {
         console.error('Error loading team info:', err)
         error.value = 'Failed to load team information. Please try again.'
         currentTeam.value = null
       } finally {
         loading.value = false
+      }
+    }
+
+    const loadTeamMembers = async () => {
+      try {
+        const members = await getTeamMembersAPI()
+        teamMembers.value = members || []
+      } catch (err) {
+        console.error('Error loading team members:', err)
+        teamMembers.value = []
       }
     }
 
@@ -469,8 +549,10 @@ export default {
     return {
       loading,
       currentTeam,
+      teamMembers,
       error,
       retryLoad,
+      loadTeamMembers,
       showCreateTeamModal,
       showJoinTeamModal,
       showLeaveTeamModal,
@@ -641,7 +723,6 @@ export default {
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -653,8 +734,6 @@ export default {
 
 .btn-primary:hover {
   background: var(--violet-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .btn-secondary {
@@ -666,7 +745,6 @@ export default {
 .btn-secondary:hover {
   background: var(--violet-dark);
   color: white;
-  transform: translateY(-2px);
 }
 
 .btn-danger {
@@ -677,8 +755,6 @@ export default {
 
 .btn-danger:hover {
   background: #dc2626;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .btn:disabled {
@@ -925,6 +1001,165 @@ export default {
 
   .no-team-title {
     font-size: 1.25rem;
+  }
+}
+
+/* Team Members Section */
+.team-members-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.members-header {
+  margin-bottom: 0.5rem;
+}
+
+.members-title {
+  color: var(--violet-ultra-dark);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.member-card {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--violet-light);
+  border: 1px solid var(--violet-sage);
+  border-radius: 8px;
+}
+
+.member-rank {
+  width: 32px;
+  height: 32px;
+  color: var(--violet-ultra-dark);;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.member-avatar {
+  width: 48px;
+  height: 48px;
+  background: var(--violet-ultra-dark);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.member-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.member-main-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.member-username {
+  color: var(--violet-ultra-dark);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.member-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.member-points,
+.member-level {
+  color: var(--violet-deep);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-name {
+  background: var(--violet-light);
+  color: var(--violet-ultra-dark);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.no-badge {
+  color: var(--violet-sage);
+  font-size: 0.75rem;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.no-members {
+  text-align: center;
+  padding: 2rem;
+  color: var(--violet-deep);
+  background: var(--violet-light);
+  border-radius: 12px;
+  border: 1px solid var(--violet-sage);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+  .member-card {
+    padding: 0.75rem;
+  }
+
+  .member-rank {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    margin-right: 0.75rem;
+  }
+
+  .member-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    margin-right: 0.75rem;
+  }
+
+  .member-main-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .member-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 }
 </style>

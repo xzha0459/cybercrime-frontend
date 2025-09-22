@@ -78,6 +78,11 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+// 导入badge图片
+import NoviceScholarBadge from '@/assets/Badges/Novice Scholar.png'
+import KnowledgeExplorerBadge from '@/assets/Badges/Knowledge Explorer.png'
+import LearningExpertBadge from '@/assets/Badges/Learning Expert.png'
+import CybersecurityMasterBadge from '@/assets/Badges/Cybersecurity Master.png'
 
 export default {
   name: 'UserInfoSection',
@@ -212,28 +217,28 @@ export default {
       if (userPoints >= 10) {
         badges.push({
           name: 'Novice Scholar',
-          src: '/src/assets/Badges/Novice Scholar.png'
+          src: NoviceScholarBadge
         })
       }
 
       if (userPoints >= 30) {
         badges.push({
           name: 'Knowledge Explorer',
-          src: '/src/assets/Badges/Knowledge Explorer.png'
+          src: KnowledgeExplorerBadge
         })
       }
 
       if (userPoints >= 60) {
         badges.push({
           name: 'Learning Expert',
-          src: '/src/assets/Badges/Learning Expert.png'
+          src: LearningExpertBadge
         })
       }
 
       if (userPoints >= 90) {
         badges.push({
           name: 'Cybersecurity Master',
-          src: '/src/assets/Badges/Cybersecurity Master.png'
+          src: CybersecurityMasterBadge
         })
       }
 

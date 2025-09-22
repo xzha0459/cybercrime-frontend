@@ -27,7 +27,7 @@
         </div>
 
         <!-- Challenge Levels Page -->
-        <div v-else-if="currentTask === 0" class="challenge-levels">
+        <div v-else class="challenge-levels">
           <!-- Progress Indicator -->
           <div class="progress-indicator">
             <div class="progress-steps">
@@ -97,7 +97,7 @@
                 class="start-module-btn"
                 @click="() => selectModule(module)"
               >
-                {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
+                {{ isModuleCompleted(module.name) ? 'Retake →' : 'Start Learning →' }}
               </button>
               <div v-else class="locked-module">
                 Complete previous level to unlock
@@ -106,46 +106,6 @@
           </div>
             </div>
 
-        <!-- Individual Task Page -->
-        <div v-else-if="currentTask > 0" class="task-section">
-          <!-- Back Button -->
-          <div class="task-header">
-            <button @click="goBack" class="nav-back-btn">← Back to Levels</button>
-            <h1 class="task-title">Level {{ currentTask }}: {{ getTaskTitle(currentTask) }}</h1>
-            <p class="task-description">{{ getTaskDescription(currentTask) }}</p>
-              </div>
-
-          <!-- Module Cards -->
-          <div class="module-cards">
-            <div
-              v-for="module in getTaskModules(currentTask)"
-              :key="module.id"
-              class="module-card"
-              :class="{ 'completed': isModuleCompleted(module.name) }"
-            >
-              <!-- Completion Badge -->
-              <div v-if="isModuleCompleted(module.name)" class="completion-badge">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                </svg>
-                <span>Completed ({{ getModuleScore(module.name) }}%)</span>
-            </div>
-
-              <div class="module-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                  <path :d="module.icon" />
-                </svg>
-              </div>
-              <div class="module-info">
-                <h3 class="module-title">{{ module.name }}</h3>
-                <p class="module-description">{{ module.description }}</p>
-              </div>
-              <button class="start-module-btn" @click="() => selectModule(module)">
-                {{ isModuleCompleted(module.name) ? 'Review →' : 'Start Learning →' }}
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Module Test Page -->
@@ -304,7 +264,6 @@ export default {
     const currentUser = ref(null)
 
     // Challenge state
-    const currentTask = ref(0)
     const currentLevel = ref(1) // 当前显示的level
     const selectedModule = ref(null)
 
@@ -510,14 +469,6 @@ export default {
     }
 
     // Methods
-    const startTask = (taskNumber) => {
-      if (taskNumber <= currentTask.value) {
-        currentTask.value = taskNumber
-        selectedModule.value = null
-        // Emit challenge status change when starting a task
-        emit('challenge-status-changed', true)
-      }
-    }
 
     // 切换level显示
     const switchLevel = (level) => {
@@ -786,12 +737,6 @@ export default {
       }
     }
 
-    const goBack = () => {
-      currentTask.value = 0
-      selectedModule.value = null
-      // Emit challenge status change when going back to main view
-      emit('challenge-status-changed', false)
-    }
 
     const goBackToModules = () => {
       selectedModule.value = null
@@ -936,7 +881,6 @@ export default {
       redirectToSignUp,
 
       // Challenge state
-      currentTask,
       currentLevel,
       selectedModule,
 
@@ -967,10 +911,8 @@ export default {
       getLevelIcon,
 
       // Methods
-      startTask,
       switchLevel,
       selectModule,
-      goBack,
       goBackToModules,
       getTaskTitle,
       getTaskDescription,

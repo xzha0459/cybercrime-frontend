@@ -11,9 +11,6 @@
       <div class="container">
         <!-- US 3.1 Section - Resource -->
         <ResourceSection />
-
-        <!-- US 3.2 Section - Infographic --> 
-        <InfographicSection />
       </div>
     </div>
     <FooterSection />
@@ -22,14 +19,12 @@
 
 <script>
 import ResourceSection from '../section/LibraryPage/ResourceSection.vue'
-import InfographicSection from '../section/LibraryPage/InfographicSection.vue'
 import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
   name: 'LibraryPage',
   components: {
     ResourceSection,
-    InfographicSection,
     FooterSection
   }
 }

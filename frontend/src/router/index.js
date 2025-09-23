@@ -9,6 +9,8 @@ import SignUpPage from '../page/SignUpPage.vue'
 import SignInPage from '../page/SignInPage.vue'
 import VideoPage from '../page/VideoPage.vue'
 import PrivacyPolicyPage from '../page/PrivacyPolicyPage.vue'
+import SupportPage from '../page/SupportPage.vue'
+import InfographicPage from '../page/InfographicPage.vue'
 
 const routes = [
   {
@@ -60,6 +62,16 @@ const routes = [
     path: '/privacy-policy',
     name: 'PrivacyPolicy',
     component: PrivacyPolicyPage,
+  },
+  {
+    path: '/support',
+    name: 'Support',
+    component: SupportPage,
+  },
+  {
+    path: '/infographic',
+    name: 'Infographic',
+    component: InfographicPage,
   },
 ]
 

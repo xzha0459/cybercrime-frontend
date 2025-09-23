@@ -2,17 +2,23 @@
   <nav class="navbar">
     <div class="nav-container">
       <!-- Logo/Brand -->
-      <div class="nav-brand">
+      <div class="nav-brand" @click="goToHome">
         <img src="./../assets/logo.png" alt="GuardU Logo" class="nav-logo">GuardU
       </div>
 
       <!-- Desktop Navigation Links -->
       <div class="nav-links desktop-nav">
-        <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/link-check" class="nav-link">Link Check</router-link>
-        <router-link to="/library" class="nav-link">Library</router-link>
-        <router-link to="/challenge" class="nav-link">Challenge</router-link>
+        <div class="nav-dropdown" @click="toggleActivityDropdown">
+          <span class="nav-link dropdown-trigger">Activity</span>
+          <div class="dropdown-menu" :class="{ open: isActivityDropdownOpen }">
+            <router-link to="/link-check" class="dropdown-item" @click="closeActivityDropdown">Link Check</router-link>
+            <router-link to="/library" class="dropdown-item" @click="closeActivityDropdown">Library</router-link>
+            <router-link to="/challenge" class="dropdown-item" @click="closeActivityDropdown">Challenge</router-link>
+          </div>
+        </div>
         <router-link to="/community" class="nav-link">Community</router-link>
+        <router-link to="/support" class="nav-link">Support</router-link>
+        <router-link to="/infographic" class="nav-link">Infographic</router-link>
       </div>
 
       <!-- Desktop Right side buttons -->
@@ -58,11 +64,17 @@
       <div class="mobile-menu-content">
         <!-- Mobile Navigation Links -->
         <div class="mobile-nav-links">
-          <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">Home</router-link>
-          <router-link to="/link-check" class="mobile-nav-link" @click="closeMobileMenu">Link Check</router-link>
-          <router-link to="/library" class="mobile-nav-link" @click="closeMobileMenu">Library</router-link>
-          <router-link to="/challenge" class="mobile-nav-link" @click="closeMobileMenu">Challenge</router-link>
+          <div class="mobile-dropdown" @click="toggleMobileActivityDropdown">
+            <span class="mobile-nav-link dropdown-trigger">Activity</span>
+            <div class="mobile-dropdown-menu" :class="{ open: isMobileActivityDropdownOpen }">
+              <router-link to="/link-check" class="mobile-dropdown-item" @click="closeMobileMenu">Link Check</router-link>
+              <router-link to="/library" class="mobile-dropdown-item" @click="closeMobileMenu">Library</router-link>
+              <router-link to="/challenge" class="mobile-dropdown-item" @click="closeMobileMenu">Challenge</router-link>
+            </div>
+          </div>
+          <router-link to="/infographic" class="mobile-nav-link" @click="closeMobileMenu">Infographic</router-link>
           <router-link to="/community" class="mobile-nav-link" @click="closeMobileMenu">Community</router-link>
+          <router-link to="/support" class="mobile-nav-link" @click="closeMobileMenu">Support</router-link>
         </div>
 
         <!-- Mobile User Section -->
@@ -105,6 +117,8 @@ export default {
     const userEmail = ref(null)
     const isMobileMenuOpen = ref(false)
     const isUserDropdownOpen = ref(false)
+    const isActivityDropdownOpen = ref(false)
+    const isMobileActivityDropdownOpen = ref(false)
 
     const signIn = async () => {
       router.push('/signin')
@@ -139,6 +153,10 @@ export default {
       closeMobileMenu()
     }
 
+    const goToHome = () => {
+      router.push('/')
+    }
+
     const toggleMobileMenu = () => {
       isMobileMenuOpen.value = !isMobileMenuOpen.value
       // Prevent body scroll when menu is open
@@ -156,6 +174,18 @@ export default {
 
     const toggleUserDropdown = () => {
       isUserDropdownOpen.value = !isUserDropdownOpen.value
+    }
+
+    const toggleActivityDropdown = () => {
+      isActivityDropdownOpen.value = !isActivityDropdownOpen.value
+    }
+
+    const closeActivityDropdown = () => {
+      isActivityDropdownOpen.value = false
+    }
+
+    const toggleMobileActivityDropdown = () => {
+      isMobileActivityDropdownOpen.value = !isMobileActivityDropdownOpen.value
     }
 
     const getUserInitial = () => {
@@ -216,8 +246,14 @@ export default {
 
     const handleClickOutside = (event) => {
       const avatarContainer = document.querySelector('.user-avatar-container')
+      const activityDropdown = document.querySelector('.nav-dropdown')
+
       if (avatarContainer && !avatarContainer.contains(event.target)) {
         isUserDropdownOpen.value = false
+      }
+
+      if (activityDropdown && !activityDropdown.contains(event.target)) {
+        isActivityDropdownOpen.value = false
       }
     }
 
@@ -227,14 +263,20 @@ export default {
       userEmail,
       isMobileMenuOpen,
       isUserDropdownOpen,
+      isActivityDropdownOpen,
+      isMobileActivityDropdownOpen,
       signIn,
       signOut,
       goToUserCenter,
       goToSignUp,
       goToSignIn,
+      goToHome,
       toggleMobileMenu,
       closeMobileMenu,
       toggleUserDropdown,
+      toggleActivityDropdown,
+      closeActivityDropdown,
+      toggleMobileActivityDropdown,
       getUserInitial,
     }
   },
@@ -269,7 +311,6 @@ export default {
   text-decoration: none;
   color: var(--text-primary);
   font-weight: 500;
-  font-size: 1rem;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   transition: all 0.3s ease;
@@ -277,10 +318,73 @@ export default {
 
 .nav-link:hover {
   background: var(--violet-sage);
-  color: var(--text-primary);
 }
 
 .nav-link.router-link-active {
+  background: var(--violet-dark);
+  color: var(--text-light);
+}
+
+/* Activity Dropdown Styles */
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-trigger {
+  cursor: pointer;
+  position: relative;
+}
+
+.dropdown-trigger::after {
+  content: '▼';
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--border-light);
+  min-width: 160px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-menu .dropdown-item {
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dropdown-menu .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background: var(--violet-sage);
+  color: var(--violet-dark);
+}
+
+.dropdown-menu .dropdown-item.router-link-active {
   background: var(--violet-dark);
   color: var(--text-light);
 }
@@ -293,12 +397,11 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: pointer;
 }
 
 .nav-logo {
   height: 2.8rem;
-  width: auto;
-  object-fit: contain;
 }
 
 .nav-buttons {
@@ -326,16 +429,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
   font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px var(--shadow-medium);
-}
-
-.user-avatar:hover {
-  background: var(--violet-deep);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--shadow-dark);
 }
 
 .user-dropdown {
@@ -343,8 +437,6 @@ export default {
   top: 100%;
   right: 0;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px var(--shadow-medium);
   border: 1px solid var(--border-light);
   min-width: 160px;
   opacity: 0;
@@ -352,7 +444,7 @@ export default {
   transform: translateY(-10px);
   transition: all 0.3s ease;
   z-index: 1000;
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .user-dropdown.open {
@@ -364,7 +456,6 @@ export default {
 .dropdown-item {
   padding: 12px 16px;
   cursor: pointer;
-  font-size: 0.95rem;
   color: var(--text-primary);
   transition: all 0.2s ease;
   border-bottom: 1px solid var(--border-light);
@@ -376,13 +467,11 @@ export default {
 
 .dropdown-item:hover {
   background: var(--violet-sage);
-  color: var(--violet-dark);
 }
 
 .user-email {
   color: var(--text-primary);
   font-weight: 500;
-  font-size: 1rem;
   background: var(--violet-sage);
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
@@ -395,13 +484,11 @@ export default {
 
 .user-email.clickable {
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .user-email.clickable:hover {
   background: var(--violet-medium);
   color: var(--text-light);
-  transform: translateY(-1px);
 }
 
 .btn {
@@ -410,14 +497,11 @@ export default {
   border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
 }
 
 .btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-  transform: none !important;
 }
 
 .btn-signin {
@@ -429,19 +513,15 @@ export default {
 .btn-signin:hover:not(:disabled) {
   background: var(--violet-medium);
   color: var(--text-light);
-  transform: translateY(-1px);
 }
 
 .btn-signup {
   background: var(--violet-dark);
   color: var(--text-light);
-  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .btn-signup:hover:not(:disabled) {
   background: var(--violet-deep);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--shadow-dark);
 }
 
 .btn-logout {
@@ -453,7 +533,6 @@ export default {
 .btn-logout:hover {
   background: var(--violet-medium);
   color: var(--text-light);
-  transform: translateY(-1px);
 }
 
 /* Mobile Menu Button */
@@ -476,7 +555,6 @@ export default {
   width: 100%;
   height: 2px;
   background: var(--text-primary);
-  border-radius: 1px;
   transition: all 0.3s ease;
   position: absolute;
 }
@@ -509,14 +587,6 @@ export default {
   transform: translateY(50%) rotate(-45deg);
 }
 
-/* Hover effects */
-.mobile-menu-btn:hover .hamburger-line {
-  background: var(--violet-medium);
-}
-
-.mobile-menu-btn.active:hover .hamburger-line {
-  background: var(--violet-deep);
-}
 
 /* Mobile Menu Backdrop */
 .mobile-menu-backdrop {
@@ -538,7 +608,6 @@ export default {
   right: 0;
   background: var(--violet-light);
   border-bottom: 1px solid var(--border-light);
-  box-shadow: 0 4px 12px var(--shadow-medium);
   transform: translateY(-100%);
   opacity: 0;
   visibility: hidden;
@@ -546,7 +615,7 @@ export default {
   z-index: 1000;
   max-height: 100vh;
   overflow-y: auto;
-  padding-top: 80px; /* Account for navbar height */
+  padding-top: 80px;
 }
 
 .mobile-menu.open {
@@ -572,7 +641,6 @@ export default {
   text-decoration: none;
   color: var(--text-primary);
   font-weight: 500;
-  font-size: 1.1rem;
   padding: 0.8rem 1rem;
   border-radius: 8px;
   transition: all 0.3s ease;
@@ -586,16 +654,64 @@ export default {
 .mobile-nav-link:hover {
   background: var(--violet-medium);
   color: var(--text-light);
-  border-color: var(--violet-medium);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .mobile-nav-link.router-link-active {
   background: var(--violet-dark);
   color: var(--text-light);
-  border-color: var(--violet-dark);
-  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+/* Mobile Activity Dropdown Styles */
+.mobile-dropdown {
+  position: relative;
+}
+
+.mobile-dropdown .dropdown-trigger::after {
+  content: '▼';
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+}
+
+.mobile-dropdown-menu {
+  background: var(--violet-sage);
+  margin-top: 0;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-light);
+}
+
+.mobile-dropdown-menu.open {
+  max-height: 200px;
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-dropdown-item {
+  display: block;
+  padding: 0.8rem 1.5rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--violet-sage);
+}
+
+.mobile-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-dropdown-item:hover {
+  background: var(--violet-medium);
+  color: var(--text-light);
+}
+
+.mobile-dropdown-item.router-link-active {
+  background: var(--violet-dark);
+  color: var(--text-light);
 }
 
 .mobile-user-section {
@@ -621,11 +737,6 @@ export default {
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.mobile-user-avatar:hover {
-  background: var(--violet-sage);
 }
 
 .mobile-avatar {
@@ -637,21 +748,17 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
   font-weight: bold;
-  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .mobile-username {
   color: var(--text-primary);
   font-weight: 500;
-  font-size: 1rem;
 }
 
 .mobile-user-email {
   color: var(--text-primary);
   font-weight: 500;
-  font-size: 1rem;
   background: var(--violet-sage);
   padding: 0.6rem 1rem;
   border-radius: 8px;
@@ -665,27 +772,17 @@ export default {
 
 .mobile-user-email.clickable {
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .mobile-user-email.clickable:hover {
   background: var(--violet-dark);
   color: var(--text-light);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .mobile-btn {
   width: 100%;
   padding: 0.8rem 1.5rem;
-  font-size: 1rem;
   border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.mobile-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive */
@@ -707,7 +804,7 @@ export default {
   }
 
   .mobile-menu {
-    padding-top: 70px; /* Adjust for smaller navbar */
+    padding-top: 70px;
   }
 }
 
@@ -725,17 +822,15 @@ export default {
   }
 
   .mobile-nav-link {
-    font-size: 1rem;
     padding: 0.7rem 0.8rem;
   }
 
   .mobile-btn {
     padding: 0.7rem 1.2rem;
-    font-size: 0.95rem;
   }
 
   .mobile-menu {
-    padding-top: 60px; /* Adjust for smaller navbar on mobile */
+    padding-top: 60px;
   }
 }
 </style>

@@ -78,6 +78,7 @@
               @error="onImageError"
             />
             <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
+            <div v-if="completedArticles.includes(String(article.id))" class="completed-badge">Completed</div>
           </div>
 
           <div class="card-content article-info">
@@ -106,6 +107,7 @@
               </svg>
             </div>
             <div class="duration-badge">{{ video.suggested_reading_time }} min</div>
+            <div v-if="completedVideos.includes(String(video.id))" class="completed-badge">Completed</div>
           </div>
 
           <div class="card-content video-info">
@@ -137,6 +139,7 @@
               @error="onImageError"
             />
             <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
+            <div v-if="completedArticles.includes(String(article.id))" class="completed-badge">Completed</div>
           </div>
 
           <div class="article-info">
@@ -169,6 +172,7 @@
               </svg>
             </div>
             <div class="duration-badge">{{ video.suggested_reading_time }} min</div>
+            <div v-if="completedVideos.includes(String(video.id))" class="completed-badge">Completed</div>
           </div>
 
           <div class="video-info">
@@ -234,6 +238,12 @@ const articles = ref([])
 // Popup state
 const showArticlePopup = ref(false)
 const selectedArticle = ref(null)
+
+// Track awarded/completed content IDs
+const completedArticles = ref([])
+const completedVideos = ref([])
+
+
 
 
 
@@ -458,14 +468,37 @@ const getViewMoreText = () => {
   return 'View More'
 }
 
+const fetchCompletedActivity = async () => {
+  const token = localStorage.getItem("access_token")
+  if (!token) return
 
+  try {
+    const res = await fetch("https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/leaderboard/activity/", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    const data = await res.json()
+
+    completedArticles.value = data
+      .filter(item => item.ref_table === "article")
+      .map(item => item.ref_id)
+
+    completedVideos.value = data
+      .filter(item => item.ref_table === "video")
+      .map(item => item.ref_id)
+
+  } catch (err) {
+    console.error("Error fetching completed activity:", err)
+  }
+}
 
 
 
 onMounted(async () => {
   await fetchVideos()
   await fetchArticles()
-
+  await fetchCompletedActivity()
 })
 </script>
 
@@ -566,6 +599,20 @@ onMounted(async () => {
 
 
 /* Content Grids */
+.completed-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+
 .combined-content-grid,
 .content-grid {
   display: grid;

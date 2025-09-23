@@ -99,7 +99,7 @@
     </div>
   </div>
 
-  <!-- 测试详情模态框 -->
+  <!-- Test History Details Modal -->
   <div v-if="selectedAttempt" class="modal-overlay" @click="closeModal">
     <div class="modal-content" @click.stop>
       <div class="modal-header">
@@ -125,9 +125,13 @@
             <span>Date:</span>
             <span>{{ formatDate(selectedAttempt.finished_at) }}</span>
           </div>
+          <div class="summary-row">
+            <span>Duration:</span>
+            <span>{{ calculateDuration(selectedAttempt.started_at, selectedAttempt.finished_at) }}</span>
+          </div>
         </div>
 
-        <!-- 如果有详细答案信息 -->
+        <!-- Question Details -->
         <div v-if="selectedAttempt.quiz_question_attempts" class="questions-detail">
           <h4>Question Details</h4>
           <div
@@ -135,13 +139,18 @@
             :key="index"
             class="question-item"
           >
-            <!-- 题目内容 -->
             <div v-if="qa.question" class="question-content">
-              <div class="question-text">
-                <strong>Q{{ index + 1 }}:</strong> {{ qa.question.question_text }}
+              <div class="question-header">
+                <div class="question-number">Q{{ index + 1 }}</div>
+                <div class="question-status" :class="qa.is_correct ? 'correct' : 'incorrect'">
+                  {{ qa.is_correct ? '✓ Correct' : '✗ Incorrect' }}
+                </div>
               </div>
 
-              <!-- 选项列表 -->
+              <div class="question-text">
+                {{ qa.question.question_text }}
+              </div>
+
               <div class="options-list">
                 <div
                   v-for="(option, optIndex) in qa.question.options"
@@ -149,45 +158,21 @@
                   class="option-item"
                   :class="{
                     'correct-option': option.is_answer,
-                    'user-selected': isUserSelectedOption(qa, option),
-                    'wrong-selected': isUserSelectedOption(qa, option) && !option.is_answer
+                    'user-selected': qa.chosen_answer === option.identifier,
+                    'wrong-selected': qa.chosen_answer === option.identifier && !option.is_answer
                   }"
                 >
                   <span class="option-identifier">{{ option.identifier }}.</span>
                   <span class="option-text">{{ option.text }}</span>
-                  <span v-if="option.is_answer" class="correct-mark">✓</span>
+                  <span v-if="option.is_answer" class="correct-indicator">✓ Correct Answer</span>
+                  <span v-if="qa.chosen_answer === option.identifier && !option.is_answer" class="wrong-indicator">✗ Your Answer</span>
                 </div>
               </div>
-            </div>
 
-            <div class="answer-info">
-              <div class="question-text">
-                Your answer: {{ getUserAnswerText(qa) }}
-              </div>
-              <span
-                class="answer-result"
-                :class="qa.is_correct ? 'correct' : 'incorrect'"
-                @click="toggleQuestionExpansion(index)"
-                style="cursor: pointer;"
-              >
-                {{ qa.is_correct ? 'Correct' : 'Incorrect' }}
-                <span class="expand-hint">(Click to see details)</span>
-              </span>
-            </div>
-
-            <!-- 展开的正确答案和解释 -->
-            <div v-if="isQuestionExpanded(index)" class="explanation-section">
-              <div class="explanation-content">
-                <h5>Answer Details & Explanation:</h5>
-                <p class="correct-answer">
-                  <strong>Correct Answer:</strong> {{ getCorrectAnswerText(qa) }}
-                </p>
-                <div v-if="getExplanationText(qa)" class="explanation-text">
-                  <strong>Explanation:</strong> {{ getExplanationText(qa) }}
-                </div>
-                <div v-else class="explanation-text no-explanation">
-                  <strong>Explanation:</strong> No explanation available for this question.
-                </div>
+              <!-- Explanation if available -->
+              <div v-if="qa.question.explanation" class="question-explanation">
+                <h5>Explanation:</h5>
+                <p>{{ qa.question.explanation }}</p>
               </div>
             </div>
           </div>
@@ -487,6 +472,7 @@ export default {
   backdrop-filter: blur(10px);
   max-width: 1200px;
   margin: 0 auto;
+  margin-bottom: 4rem;
 }
 
 .section-header {
@@ -758,58 +744,41 @@ export default {
   border: 1px solid var(--violet-sage);
 }
 
-.answer-info {
+.question-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
-  padding: 2px 0;
-  gap: 20px;
+  margin-bottom: 10px;
 }
 
-/* 答案结果样式 */
-.answer-result.correct {
-  color: #28a745;
-  font-weight: bold;
-  background: rgba(40, 167, 69, 0.1);
-  padding: 4px 8px;
-  border-radius: 6px;
+.question-number {
+  color: var(--violet-dark);
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
-.answer-result.incorrect {
-  color: #dc3545;
-  font-weight: bold;
-  background: rgba(220, 53, 69, 0.1);
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+.question-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
-.answer-result.incorrect:hover {
-  background: rgba(220, 53, 69, 0.2);
-  transform: translateY(-1px);
+.question-status.correct {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
 }
 
-.expand-hint {
-  font-size: 10px;
-  font-weight: normal;
-  opacity: 0.8;
-  margin-left: 5px;
-}
-
-
-/* 题目内容样式 */
-.question-content {
-  margin-bottom: 20px;
-  padding: 20px;
+.question-status.incorrect {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
 }
 
 .question-text {
-  font-size: 16px;
   color: var(--violet-dark);
-  margin-bottom: 18px;
-  line-height: 1.6;
-  font-weight: 500;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  font-size: 15px;
 }
 
 .options-list {
@@ -818,25 +787,48 @@ export default {
   gap: 8px;
 }
 
-.option-item {
+.modal-content .option-item {
   display: flex;
   align-items: center;
-  padding: 8px 0;
+  padding: 8px 12px;
   position: relative;
+  border-radius: 6px;
+  border: 1px solid rgba(200, 177, 228, 0.3);
+  background: rgba(255, 255, 255, 0.5);
 }
 
-.option-identifier {
+.modal-content .option-item.correct-option {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+.modal-content .option-item.user-selected {
+  background: rgba(0, 123, 255, 0.1);
+  border: 1px solid rgba(0, 123, 255, 0.3);
+}
+.modal-content .option-item.wrong-selected {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.correct-indicator {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.wrong-indicator {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.modal-content .option-identifier {
   font-weight: bold;
   color: var(--violet-dark);
   margin-right: 10px;
-  min-width: 20px;
 }
 
-.option-text {
+.modal-content .option-text {
+  color: var(--violet-dark);
   flex: 1;
-  color: var(--violet-deep);
-  font-size: 15px;
-  line-height: 1.5;
 }
 
 .correct-mark {
@@ -847,49 +839,29 @@ export default {
 }
 
 /* 选项状态样式 */
-.option-item.correct-option .option-text { color: #28a745; font-weight: 600; }
-.option-item.user-selected .option-text { color: #007bff; font-weight: 600; }
-.option-item.wrong-selected .option-text { color: #dc3545; font-weight: 600; }
+.modal-content .option-item.correct-option .option-text { color: #28a745; font-weight: 600; }
+.modal-content .option-item.user-selected .option-text { color: #007bff; font-weight: 600; }
+.modal-content .option-item.wrong-selected .option-text { color: #dc3545; font-weight: 600; }
 
-/* 解释部分样式 */
-.explanation-section {
+.question-explanation {
   margin-top: 15px;
   padding: 15px;
-  animation: slideDown 0.3s ease-out;
+  background: var(--violet-light);
+  border-radius: 8px;
+  border-left: 3px solid var(--violet-deep);
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.explanation-content h5 {
+.question-explanation h5 {
   margin: 0 0 12px 0;
   color: var(--violet-dark);
-  font-size: 14px;
   font-weight: 600;
 }
 
-.correct-answer {
-  margin: 8px 0;
-  padding: 8px 12px;
-  background: rgba(40, 167, 69, 0.1);
-  border-radius: 6px;
-  font-size: 13px;
-  color: #155724;
-  font-weight: 500;
-}
-
-.explanation-text {
-  margin: 8px 0 0 0;
-  padding: 18px 0;
-  font-size: 15px;
+.question-explanation p {
+  margin: 0;
   color: var(--violet-deep);
   line-height: 1.7;
 }
-
-.explanation-text.no-explanation { color: #856404; font-style: italic; }
-.explanation-text strong { color: var(--violet-dark); font-weight: 600; }
 
 /* 分页控件样式 */
 .pagination {

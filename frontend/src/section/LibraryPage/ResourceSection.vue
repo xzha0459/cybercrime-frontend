@@ -65,11 +65,10 @@
         <!-- Articles -->
         <a
           v-for="article in displayedArticles"
-          :key="`article-${article.id}`"
-          :href="article.link"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="content-card article-card"
+          :key="article.id"
+          href="javascript:void(0)"
+          class="article-card"
+          @click.prevent="handleArticleClick(article)"
         >
           <div class="card-thumbnail article-thumbnail">
             <img
@@ -266,7 +265,7 @@ const getArticleThumbnail = (article) => {
 }
 
 const handleArticleClick = async (article) => {
-  const token = localStorage.getItem("access_token") // ✅ match video page
+  const token = localStorage.getItem("access_token")
 
   try {
     const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/${article.id}/click/`, {

@@ -7,6 +7,9 @@
     <!-- AI ChatBot -->
     <ChatBot v-if="!isAuthPage && !isChallengePage" />
 
+    <!-- Back to Top Button -->
+    <BackToTop />
+
     <!-- Global Toast -->
     <Toast />
   </div>
@@ -15,6 +18,7 @@
 <script>
 import NavigationBar from '@/components/NavigationBar.vue'
 import ChatBot from '@/components/ChatBot.vue'
+import BackToTop from '@/components/BackToTop.vue'
 import Toast from '@/components/PopToast.vue'
 
 export default {
@@ -22,6 +26,7 @@ export default {
   components: {
     NavigationBar,
     ChatBot,
+    BackToTop,
     Toast,
   },
   computed: {

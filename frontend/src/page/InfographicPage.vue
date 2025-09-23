@@ -1,25 +1,26 @@
 <template>
-  <section class="infographic-section">
-    <!-- 修改header结构 -->
-    <div class="section-header">
-      <h2 class="section-title">Cybercrime Infographic</h2>
-      <!-- <p class="section-description">
-        Here's what happened in the past 28 days - Real-time data insights and threat analysis
-      </p> -->
+  <div class="infographic-page">
+    <div class="page-header">
+      <div class="container">
+        <h1 class="page-title">Cybercrime Infographic</h1>
+        <p class="page-subtitle">Explore real-time cybercrime data through interactive visualizations and charts</p>
+      </div>
     </div>
 
-    <div class="section-content">
-      <!-- Financial Loss Comparison Radar Chart -->
-      <!-- <RadarChart /> -->
+    <div class="page-content">
+      <div class="container">
+        <section class="infographic-section">
+          <div class="section-content">
+            <!-- Financial Impact Comparison Grouped Bar Chart -->
+            <GroupedBarChart />
 
-
-      <!-- Financial Impact Comparison Grouped Bar Chart -->
-      <GroupedBarChart />
-
-      <!-- Cybercrime Victimization Rate Heatmap by Age Group -->
-      <HeatmapChart />
+            <!-- Cybercrime Victimization Rate Heatmap by Age Group -->
+            <HeatmapChart />
+          </div>
+        </section>
+      </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script>
@@ -45,38 +46,66 @@ export default {
 </script>
 
 <style scoped>
+.infographic-page {
+  background-color: var(--violet-light);
+}
+
+.page-header {
+  background: var(--violet-dark);
+  color: var(--text-light);
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px var(--shadow-dark);
+}
+
+.page-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.page-content {
+  padding: 4rem 0;
+}
+
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 8rem;
+}
+
 .infographic-section {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 2rem 0;
+  padding: 0;
 }
 
-.section-header {
-  text-align: center;
-  position: relative;
-}
-
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  /* margin-bottom: 0.25rem; */
-}
-
-.section-description {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-  max-width: 700px;
-  margin: 0 auto 2rem;
+.section-content {
+  /* 保持原有的内容样式 */
 }
 
 @media (max-width: 768px) {
-  .infographic-section {
-    padding: 2rem 1rem;
+  .page-title {
+    font-size: 2.5rem;
   }
 
-  .section-title {
-    font-size: 2rem;
+  .page-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  .infographic-section {
+    padding: 0;
   }
 }
 </style>

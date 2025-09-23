@@ -6,16 +6,16 @@
     <div class="team-info-container">
 
       <!-- Loading State -->
-      <div v-if="loading" class="loading-state">
+      <div v-if="state.loading" class="loading-state">
         <div class="spinner"></div>
         <p>Loading team information...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="error-state">
+      <div v-else-if="state.error" class="error-state">
         <div class="alert alert-danger">
           <h6 class="alert-heading">Error loading team information:</h6>
-          <p>{{ error }}</p>
+          <p>{{ state.error }}</p>
           <button @click="retryLoad" class="btn btn-retry">
             Try Again
           </button>
@@ -23,7 +23,7 @@
       </div>
 
       <!-- No Team State -->
-      <div v-else-if="!currentTeam" class="no-team-state">
+      <div v-else-if="!state.currentTeam" class="no-team-state">
         <div class="empty-state-card card-base">
           <h3 class="no-team-title">
             <span class="no-team-icon">👥</span>
@@ -31,13 +31,13 @@
           </h3>
           <p>You're not currently part of any team. Create a new team or join an existing one to start collaborating with friends!</p>
           <div class="team-actions no-team-actions">
-            <button @click="showCreateTeamModal = true" class="btn btn-primary">
+            <button @click="modals.create = true" class="btn btn-primary">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               Create Team
             </button>
-            <button @click="showJoinTeamModal = true" class="btn btn-secondary">
+            <button @click="modals.join = true" class="btn btn-secondary">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M12.5 7C12.5 9.20914 10.7091 11 8.5 11C6.29086 11 4.5 9.20914 4.5 7C4.5 4.79086 6.29086 3 8.5 3C10.7091 3 12.5 4.79086 12.5 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45768C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -51,17 +51,17 @@
       <div v-else class="has-team-state">
         <div class="team-card card-base">
           <div class="team-content">
-            <h3 class="team-name">You are in: {{ currentTeam.name }}</h3>
+            <h3 class="team-name">You are in: {{ state.currentTeam.name }}</h3>
             <div class="team-actions">
-              <button @click="generateInvite" class="btn btn-primary" :disabled="inviteLoading">
-                <svg v-if="!inviteLoading" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <button @click="generateInvite" class="btn btn-primary" :disabled="loadingStates.invite">
+                <svg v-if="!loadingStates.invite" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2"/>
                   <path d="M8 12L10.5 14.5L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <div v-else class="btn-spinner"></div>
                 Generate Invite
               </button>
-              <button @click="showLeaveTeamModal = true" class="btn btn-danger">
+              <button @click="modals.leave = true" class="btn btn-danger">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9M16 17L21 12L16 7M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -77,9 +77,9 @@
             </div>
 
             <!-- Members List -->
-            <div v-if="teamMembers.length > 0" class="members-list">
+            <div v-if="state.teamMembers.length > 0" class="members-list">
               <div
-                v-for="(member, index) in teamMembers"
+                v-for="(member, index) in state.teamMembers"
                 :key="member.username"
                 class="member-card"
               >
@@ -110,9 +110,9 @@
       </div>
 
       <!-- Invite ID Display -->
-      <div v-if="inviteLink" class="invite-card">
-        <div class="invite-header">
-          <h5>Invite ID Generated!</h5>
+      <div v-if="state.inviteLink" class="invite-card card-base">
+        <h5>
+          Invite ID Generated!
           <button @click="copyInviteLink" class="copy-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M16 4H18C18.5304 4 19.0391 4.21071 19.4142 4.58579C19.7893 4.96086 20 5.46957 20 6V18C20 18.5304 19.7893 19.0391 19.4142 19.4142C19.0391 19.7893 18.5304 20 18 20H6C5.46957 20 4.96086 19.7893 4.58579 19.4142C4.21071 19.0391 4 18.5304 4 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -120,21 +120,22 @@
             </svg>
             Copy ID
           </button>
-        </div>
+        </h5>
         <div class="invite-link">
           <input
-            :value="inviteLink"
+            :value="state.inviteLink"
             readonly
             class="invite-input"
             ref="inviteInput"
           />
         </div>
-        <p class="invite-expires">Share this ID with your friends. Expires in 7 days.</p>
+        <p class="invite-description">Share this ID with your friends. Expires in 7 days.</p>
+        <p class="invite-description">If you successfully invite a friend, you will get 5 points.</p>
       </div>
     </div>
 
     <!-- Create Team Modal -->
-    <div v-if="showCreateTeamModal" class="modal-overlay" @click="closeModals">
+    <div v-if="modals.create" class="modal-overlay" @click="closeModals">
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h3>Create New Team</h3>
@@ -142,7 +143,7 @@
         </div>
         <div class="modal-content">
           <input
-            v-model="newTeamName"
+            v-model="forms.newTeamName"
             placeholder="Enter team name"
             class="modal-input"
             @keyup.enter="createTeam"
@@ -150,8 +151,8 @@
         </div>
         <div class="modal-footer">
           <button @click="closeModals" class="btn btn-secondary">Cancel</button>
-          <button @click="createTeam" class="btn btn-primary" :disabled="createTeamLoading">
-            <div v-if="createTeamLoading" class="btn-spinner"></div>
+          <button @click="createTeam" class="btn btn-primary" :disabled="loadingStates.create">
+            <div v-if="loadingStates.create" class="btn-spinner"></div>
             <span v-else>Create</span>
           </button>
         </div>
@@ -159,7 +160,7 @@
     </div>
 
     <!-- Join Team Modal -->
-    <div v-if="showJoinTeamModal" class="modal-overlay" @click="closeModals">
+    <div v-if="modals.join" class="modal-overlay" @click="closeModals">
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h3>Join Team</h3>
@@ -167,7 +168,7 @@
         </div>
         <div class="modal-content">
           <input
-            v-model="joinInviteId"
+            v-model="forms.joinInviteId"
             placeholder="Enter invite ID"
             class="modal-input"
             @keyup.enter="joinTeam"
@@ -175,8 +176,8 @@
         </div>
         <div class="modal-footer">
           <button @click="closeModals" class="btn btn-secondary">Cancel</button>
-          <button @click="joinTeam" class="btn btn-primary" :disabled="joinTeamLoading">
-            <div v-if="joinTeamLoading" class="btn-spinner"></div>
+          <button @click="joinTeam" class="btn btn-primary" :disabled="loadingStates.join">
+            <div v-if="loadingStates.join" class="btn-spinner"></div>
             <span v-else>Join</span>
           </button>
         </div>
@@ -184,19 +185,19 @@
     </div>
 
     <!-- Leave Team Confirmation Modal -->
-    <div v-if="showLeaveTeamModal" class="modal-overlay" @click="closeModals">
+    <div v-if="modals.leave" class="modal-overlay" @click="closeModals">
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h3>Confirm Leave Team</h3>
           <button @click="closeModals" class="close-btn">&times;</button>
         </div>
         <div class="modal-content">
-          <p>Are you sure you want to leave "{{ currentTeam ? currentTeam.name : 'this team' }}"?</p>
+          <p>Are you sure you want to leave "{{ state.currentTeam ? state.currentTeam.name : 'this team' }}"?</p>
         </div>
         <div class="modal-footer">
           <button @click="closeModals" class="btn btn-secondary">Cancel</button>
-          <button @click="leaveTeam" class="btn btn-danger" :disabled="leaveTeamLoading">
-            <div v-if="leaveTeamLoading" class="btn-spinner"></div>
+          <button @click="leaveTeam" class="btn btn-danger" :disabled="loadingStates.leave">
+            <div v-if="loadingStates.leave" class="btn-spinner"></div>
             <span v-else>Leave</span>
           </button>
         </div>
@@ -213,233 +214,131 @@
 <script>
 import { ref, onMounted } from 'vue'
 
-// API服务函数 - 直接集成在组件中
+// API服务函数
 const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
 
-// 获取访问令牌
-const getAccessToken = () => {
+// 通用API调用函数
+const apiCall = async (endpoint, options = {}) => {
   const token = localStorage.getItem('access_token')
-  if (!token) {
-    throw new Error('No access token found. Please sign in.')
+  if (!token) throw new Error('No access token found. Please sign in.')
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    ...options
+  })
+
+  if (!response.ok) {
+    if (response.status === 404) return null
+    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
+    throw new Error(errorData.detail || 'API request failed')
   }
-  return token
+
+  return await response.json()
 }
-
-// 获取当前团队信息 - 通过leaderboard API
-const getCurrentTeamAPI = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/leaderboard/my-team/`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAccessToken()}`
-      }
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null // 用户没有团队
-      }
-      const errorData = await response.json()
-      throw new Error(errorData.detail || 'Failed to get team info')
-    }
-
-    const data = await response.json()
-    return data.team // 返回团队信息
-  } catch (error) {
-    console.error('Error getting team info:', error)
-    throw error
-  }
-}
-
-// 创建团队
-const createTeamAPI = async (teamName) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/team/create/`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAccessToken()}`
-      },
-      body: JSON.stringify({
-        name: teamName
-      })
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.detail || 'Failed to create team')
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error creating team:', error)
-    throw error
-  }
-}
-
-// 生成团队邀请
-const generateTeamInviteAPI = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/team/invite/`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAccessToken()}`
-      }
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.detail || 'Failed to generate invite')
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error generating invite:', error)
-    throw error
-  }
-}
-
-// 接受团队邀请
-const acceptTeamInviteAPI = async (inviteId) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/team/invite/${inviteId}/accept/`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAccessToken()}`
-      }
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
-      throw new Error(errorData.detail || `Failed to accept invite: ${response.status}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error accepting invite:', error)
-    throw error
-  }
-}
-
-// 离开团队
-const leaveTeamAPI = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/team/leave/`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAccessToken()}`
-      }
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
-      throw new Error(errorData.detail || `Failed to leave team: ${response.status}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error leaving team:', error)
-    throw error
-  }
-}
-
-// 获取团队用户列表
-const getTeamMembersAPI = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/leaderboard/my-team/`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${getAccessToken()}`
-      }
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null // 用户没有团队
-      }
-      const errorData = await response.json()
-      throw new Error(errorData.detail || 'Failed to get team members')
-    }
-
-    const data = await response.json()
-    return data.leaderboard || [] // 返回用户列表
-  } catch (error) {
-    console.error('Error getting team members:', error)
-    throw error
-  }
-}
+const getCurrentTeamAPI = () => apiCall('/leaderboard/my-team/')
+const createTeamAPI = (teamName) => apiCall('/team/create/', {
+  method: 'POST',
+  body: JSON.stringify({ name: teamName })
+})
+const generateTeamInviteAPI = () => apiCall('/team/invite/', { method: 'POST' })
+const acceptTeamInviteAPI = (inviteId) => apiCall(`/team/invite/${inviteId}/accept/`, { method: 'POST' })
+const leaveTeamAPI = () => apiCall('/team/leave/', { method: 'POST' })
+const getTeamMembersAPI = () => apiCall('/leaderboard/my-team/')
 
 export default {
   name: 'TeamInfoSection',
   setup() {
-    const loading = ref(true)
-    const currentTeam = ref(null)
-    const teamMembers = ref([])
-    const error = ref(null)
+    // 状态管理
+    const state = ref({
+      loading: true,
+      currentTeam: null,
+      teamMembers: [],
+      error: null,
+      inviteLink: ''
+    })
 
-    // Modal states
-    const showCreateTeamModal = ref(false)
-    const showJoinTeamModal = ref(false)
-    const showLeaveTeamModal = ref(false)
+    // 模态框状态
+    const modals = ref({
+      create: false,
+      join: false,
+      leave: false
+    })
 
-    // Form states
-    const newTeamName = ref('')
-    const joinInviteId = ref('')
-    const inviteLink = ref('')
+    // 表单数据
+    const forms = ref({
+      newTeamName: '',
+      joinInviteId: ''
+    })
 
-    // Loading states
-    const createTeamLoading = ref(false)
-    const joinTeamLoading = ref(false)
-    const leaveTeamLoading = ref(false)
-    const inviteLoading = ref(false)
+    // 加载状态
+    const loadingStates = ref({
+      create: false,
+      join: false,
+      leave: false,
+      invite: false
+    })
 
-    // Toast notification
+    // Toast通知
     const toast = ref({ show: false, message: '', type: '' })
 
+    // 通用错误处理
+    const handleError = (err, defaultMessage) => {
+      console.error(err)
+      state.value.error = err.message || defaultMessage
+      showToast(err.message || defaultMessage, 'error')
+    }
+
+    // 显示Toast
+    const showToast = (message, type = 'success') => {
+      toast.value = { show: true, message, type }
+      setTimeout(() => {
+        toast.value.show = false
+      }, 3000)
+    }
+
+    // 关闭所有模态框
+    const closeModals = () => {
+      modals.value = { create: false, join: false, leave: false }
+      forms.value = { newTeamName: '', joinInviteId: '' }
+    }
+
+    // 加载团队信息
     const loadTeamInfo = async () => {
       try {
-        loading.value = true
-        error.value = null
+        state.value.loading = true
+        state.value.error = null
 
-        // Check if user is authenticated
-        const accessToken = localStorage.getItem('access_token')
-        if (!accessToken) {
-          currentTeam.value = null
+        if (!localStorage.getItem('access_token')) {
+          state.value.currentTeam = null
           return
         }
 
-        currentTeam.value = await getCurrentTeamAPI()
+        const teamData = await getCurrentTeamAPI()
+        state.value.currentTeam = teamData?.team || null
 
-        // 如果有团队，加载团队成员
-        if (currentTeam.value) {
+        if (state.value.currentTeam) {
           await loadTeamMembers()
         }
       } catch (err) {
-        console.error('Error loading team info:', err)
-        error.value = 'Failed to load team information. Please try again.'
-        currentTeam.value = null
+        handleError(err, 'Failed to load team information. Please try again.')
+        state.value.currentTeam = null
       } finally {
-        loading.value = false
+        state.value.loading = false
       }
     }
 
+    // 加载团队成员
     const loadTeamMembers = async () => {
       try {
-        const members = await getTeamMembersAPI()
-        teamMembers.value = members || []
+        const membersData = await getTeamMembersAPI()
+        state.value.teamMembers = membersData?.leaderboard || []
       } catch (err) {
         console.error('Error loading team members:', err)
-        teamMembers.value = []
+        state.value.teamMembers = []
       }
     }
 
@@ -447,107 +346,84 @@ export default {
       loadTeamInfo()
     }
 
-
-    const showMessage = (message, type) => {
-      toast.value.show = true
-      toast.value.message = message
-      toast.value.type = type
-      setTimeout(() => {
-        toast.value.show = false
-      }, 3000)
-    }
-
+    // 创建团队
     const createTeam = async () => {
-      if (!newTeamName.value) {
-        showMessage('Team name cannot be empty', 'error')
+      if (!forms.value.newTeamName.trim()) {
+        showToast('Team name cannot be empty', 'error')
         return
       }
-      createTeamLoading.value = true
+      loadingStates.value.create = true
       try {
-        await createTeamAPI(newTeamName.value)
-        showMessage('Team created successfully!', 'success')
+        await createTeamAPI(forms.value.newTeamName)
+        showToast('Team created successfully!', 'success')
         closeModals()
         await loadTeamInfo()
       } catch (error) {
         console.error('Error creating team:', error)
-        showMessage(error.message || 'Failed to create team', 'error')
+        showToast(error.message || 'Failed to create team', 'error')
       } finally {
-        createTeamLoading.value = false
+        loadingStates.value.create = false
       }
     }
 
     const generateInvite = async () => {
-      inviteLoading.value = true
+      loadingStates.value.invite = true
       try {
         const data = await generateTeamInviteAPI()
-        inviteLink.value = data.invite_id
-        showMessage('Invite ID generated and copied to clipboard!', 'success')
-        await navigator.clipboard.writeText(data.invite_id)
+        state.value.inviteLink = data.invite_id
+        showToast('Invite ID generated successfully!', 'success')
       } catch (error) {
         console.error('Error generating invite:', error)
-        showMessage(error.message || 'Failed to generate invite', 'error')
+        showToast(error.message || 'Failed to generate invite', 'error')
       } finally {
-        inviteLoading.value = false
+        loadingStates.value.invite = false
       }
     }
 
     const copyInviteLink = async () => {
-      if (inviteLink.value) {
+      if (state.value.inviteLink) {
         try {
-          await navigator.clipboard.writeText(inviteLink.value)
-          showMessage('Invite ID copied to clipboard!', 'success')
+          await navigator.clipboard.writeText(state.value.inviteLink)
+          showToast('Invite ID copied to clipboard!', 'success')
         } catch (err) {
           console.error('Failed to copy invite ID:', err)
-          showMessage('Failed to copy invite ID', 'error')
+          showToast('Failed to copy invite ID', 'error')
         }
       }
     }
 
     const joinTeam = async () => {
-      if (!joinInviteId.value) {
-        showMessage('Invite ID cannot be empty', 'error')
+      if (!forms.value.joinInviteId.trim()) {
+        showToast('Invite ID cannot be empty', 'error')
         return
       }
-      joinTeamLoading.value = true
+      loadingStates.value.join = true
       try {
-        await acceptTeamInviteAPI(joinInviteId.value)
-        showMessage('Successfully joined team!', 'success')
+        await acceptTeamInviteAPI(forms.value.joinInviteId)
+        showToast('Successfully joined team!', 'success')
         closeModals()
         await loadTeamInfo()
-
-        // Show toast for friend invitation reward
-        setTimeout(() => {
-          window.showActivityToast()
-        }, 1000)
       } catch (error) {
         console.error('Error joining team:', error)
-        showMessage(error.message || 'Failed to join team', 'error')
+        showToast(error.message || 'Failed to join team', 'error')
       } finally {
-        joinTeamLoading.value = false
+        loadingStates.value.join = false
       }
     }
 
     const leaveTeam = async () => {
-      leaveTeamLoading.value = true
+      loadingStates.value.leave = true
       try {
         await leaveTeamAPI()
-        showMessage('Successfully left team!', 'success')
+        showToast('Successfully left team!', 'success')
         closeModals()
         await loadTeamInfo()
       } catch (error) {
         console.error('Error leaving team:', error)
-        showMessage(error.message || 'Failed to leave team', 'error')
+        showToast(error.message || 'Failed to leave team', 'error')
       } finally {
-        leaveTeamLoading.value = false
+        loadingStates.value.leave = false
       }
-    }
-
-    const closeModals = () => {
-      showCreateTeamModal.value = false
-      showJoinTeamModal.value = false
-      showLeaveTeamModal.value = false
-      newTeamName.value = ''
-      joinInviteId.value = ''
     }
 
     onMounted(() => {
@@ -555,39 +431,28 @@ export default {
     })
 
     return {
-      loading,
-      currentTeam,
-      teamMembers,
-      error,
-      retryLoad,
-      loadTeamMembers,
-      showCreateTeamModal,
-      showJoinTeamModal,
-      showLeaveTeamModal,
-      newTeamName,
-      joinInviteId,
-      inviteLink,
-      createTeamLoading,
-      joinTeamLoading,
-      leaveTeamLoading,
-      inviteLoading,
+      // 状态
+      state,
+      modals,
+      forms,
+      loadingStates,
       toast,
+      // 方法
+      loadTeamInfo,
+      retryLoad,
       createTeam,
-      generateInvite,
-      copyInviteLink,
       joinTeam,
       leaveTeam,
-      closeModals
+      generateInvite,
+      copyInviteLink,
+      closeModals,
+      showToast
     }
   }
 }
 </script>
 
 <style scoped>
-.team-info-section {
-  padding: 0 0 2rem 0;
-}
-
 .section-title {
   font-size: 1.5rem;
   font-weight: 600;
@@ -598,6 +463,7 @@ export default {
 .team-info-container {
   max-width: 1200px;
   margin: 0 auto;
+  margin-bottom: 2rem;
 }
 
 
@@ -740,6 +606,7 @@ export default {
   cursor: pointer;
   text-decoration: none;
   font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .btn-primary {
@@ -763,13 +630,12 @@ export default {
 }
 
 .btn-danger {
-  background: #ef4444;
+  background: red;
   color: white;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .btn-danger:hover {
-  background: #dc2626;
+  background: #c82333;
 }
 
 .btn:disabled {
@@ -811,13 +677,16 @@ export default {
   overflow: hidden;
 }
 
+.modal-header,
+.modal-content,
+.modal-footer {
+  padding: 1.5rem;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border-light);
-  background: var(--violet-light);
 }
 
 .modal-header h3 {
@@ -832,7 +701,6 @@ export default {
   font-size: 1.8rem;
   cursor: pointer;
   color: var(--text-secondary);
-  transition: color 0.2s ease;
 }
 
 .close-btn:hover {
@@ -840,14 +708,12 @@ export default {
 }
 
 .modal-content {
-  padding: 1.5rem;
   text-align: center;
 }
 
 .modal-input {
   width: calc(100% - 2rem);
   padding: 0.8rem 1rem;
-  margin-bottom: 1rem;
   border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 1rem;
@@ -864,36 +730,32 @@ export default {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid var(--border-light);
-  background: var(--bg-primary);
 }
 
 /* Invite Card Styles */
 .invite-card {
-  background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid rgba(34, 197, 94, 0.2);
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.invite-header {
+.invite-card h5 {
+  margin: 0;
+  color: var(--violet-dark);
+  font-size: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
 }
 
-.invite-header h5 {
-  margin: 0;
-  color: #059669;
-  font-size: 1rem;
+.invite-card .copy-btn {
+  margin-left: auto;
 }
 
 .copy-btn {
-  background: #10b981;
-  color: #059669;
+  background: var(--violet-dark);
+  color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -905,7 +767,7 @@ export default {
 }
 
 .copy-btn:hover {
-  background: #047857;
+  background: var(--violet-ultra-dark);
 }
 
 .invite-link {
@@ -915,64 +777,20 @@ export default {
 .invite-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #047857;
+  border: 1px solid var(--violet-dark);
   border-radius: 8px;
-  background: #f0fdf4;
+  background: var(--violet-light);
   font-family: monospace;
   font-size: 0.9rem;
-  color: #059669;
+  color: var(--violet-dark);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.invite-expires {
+.invite-description {
   font-size: 0.85rem;
   color: var(--text-secondary, #666);
   text-align: right;
   margin: 0;
-}
-
-/* Toast Notification */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 20px;
-  border-radius: 8px;
-  color: white;
-  font-weight: 500;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  z-index: 1001;
-  opacity: 0;
-  animation: slideIn 0.3s forwards, fadeOut 0.3s 2.7s forwards;
-}
-
-.toast.success {
-  background-color: #059669;
-}
-
-.toast.error {
-  background-color: #dc2626;
-}
-
-@keyframes slideIn {
-  from {
-    bottom: 0;
-    opacity: 0;
-  }
-  to {
-    bottom: 20px;
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
 }
 
 @keyframes fadeIn {
@@ -1017,6 +835,34 @@ export default {
   .no-team-title {
     font-size: 1.25rem;
   }
+
+  .member-card {
+    padding: 0.75rem;
+  }
+
+  .member-rank {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    margin-right: 0.75rem;
+  }
+
+  .member-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    margin-right: 0.75rem;
+  }
+
+  .member-main-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .member-stats {
+    align-self: flex-start;
+  }
 }
 
 /* Team Members Section */
@@ -1056,7 +902,7 @@ export default {
 .member-rank {
   width: 32px;
   height: 32px;
-  color: var(--violet-ultra-dark);;
+  color: var(--violet-ultra-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1139,38 +985,6 @@ export default {
   background: var(--violet-light);
   border-radius: 12px;
   border: 1px solid var(--violet-sage);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-
-  .member-card {
-    padding: 0.75rem;
-  }
-
-  .member-rank {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-    margin-right: 0.75rem;
-  }
-
-  .member-avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-    margin-right: 0.75rem;
-  }
-
-  .member-main-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .member-stats {
-    align-self: flex-start;
-  }
 }
 
 @media (max-width: 480px) {

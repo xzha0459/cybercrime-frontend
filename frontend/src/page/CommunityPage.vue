@@ -52,7 +52,7 @@ export default {
 .page-subtitle {
   font-size: 1.25rem;
   opacity: 0.9;
-  max-width: 700px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 

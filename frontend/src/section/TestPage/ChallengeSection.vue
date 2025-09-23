@@ -207,6 +207,25 @@
                 </div>
               </div>
 
+              <!-- Test Details Section -->
+              <div v-if="currentTestResult" class="test-details-section">
+                <div class="test-details-header">
+                  <h3 class="test-details-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="test-details-icon">
+                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Test Details
+                    <button @click="viewHistoryDetails(currentTestResult)" class="view-details-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 12L9 12M12 9L12 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      View Details
+                    </button>
+                  </h3>
+                </div>
+
+              </div>
+
               <!-- AI Feedback Section -->
               <div v-if="testResult && testResult.feedback" class="feedback-section">
                 <div class="feedback-header">
@@ -239,9 +258,92 @@
               </div>
             </div>
 
+
             <div class="results-actions">
               <button @click="retakeTest" class="retake-btn">Retake Test</button>
               <button @click="goBackToModules" class="results-back-btn">Back to Modules</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test History Details Modal -->
+    <div v-if="selectedHistoryAttempt" class="modal-overlay" @click="closeHistoryModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Test Details</h3>
+          <button @click="closeHistoryModal" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="test-summary">
+            <div class="summary-row">
+              <span>Category:</span>
+              <span>{{ getCategoryDisplayName(selectedHistoryAttempt.category, selectedHistoryAttempt) }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Score:</span>
+              <span>{{ getFormattedScore(selectedHistoryAttempt.accuracy_pct) }}%</span>
+            </div>
+            <div class="summary-row">
+              <span>Correct Answers:</span>
+              <span>{{ selectedHistoryAttempt.correct_count }}/{{ selectedHistoryAttempt.total_questions }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Date:</span>
+              <span>{{ formatDate(selectedHistoryAttempt.finished_at) }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Duration:</span>
+              <span>{{ calculateDuration(selectedHistoryAttempt.started_at, selectedHistoryAttempt.finished_at) }}</span>
+            </div>
+          </div>
+
+          <!-- Question Details -->
+          <div v-if="selectedHistoryAttempt.quiz_question_attempts" class="questions-detail">
+            <h4>Question Details</h4>
+            <div
+              v-for="(qa, index) in selectedHistoryAttempt.quiz_question_attempts"
+              :key="index"
+              class="question-item"
+            >
+              <div v-if="qa.question" class="question-content">
+                <div class="question-header">
+                  <div class="question-number">Q{{ index + 1 }}</div>
+                  <div class="question-status" :class="qa.is_correct ? 'correct' : 'incorrect'">
+                    {{ qa.is_correct ? '✓ Correct' : '✗ Incorrect' }}
+                  </div>
+                </div>
+
+                <div class="question-text">
+                  {{ qa.question.question_text }}
+                </div>
+
+                <div class="options-list">
+                  <div
+                    v-for="(option, optIndex) in qa.question.options"
+                    :key="optIndex"
+                    class="option-item"
+                    :class="{
+                      'correct': option.is_answer,
+                      'selected': qa.chosen_answer === option.identifier,
+                      'wrong-selected': qa.chosen_answer === option.identifier && !option.is_answer
+                    }"
+                  >
+                    <span class="option-identifier">{{ option.identifier }}.</span>
+                    <span class="option-text">{{ option.text }}</span>
+                    <span v-if="option.is_answer" class="correct-indicator">✓ Correct Answer</span>
+                    <span v-if="qa.chosen_answer === option.identifier && !option.is_answer" class="wrong-indicator">✗ Your Answer</span>
+                  </div>
+                </div>
+
+                <!-- Explanation if available -->
+                <div v-if="qa.question.explanation" class="question-explanation">
+                  <h5>Explanation:</h5>
+                  <p>{{ qa.question.explanation }}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -283,6 +385,11 @@ export default {
     const loading = ref(false)
     const error = ref(null)
     const testResult = ref(null)
+
+    // Test history state
+    const currentTestResult = ref(null)
+    const historyLoading = ref(false)
+    const selectedHistoryAttempt = ref(null)
 
     // Check user authentication status
     const checkAuthStatus = async () => {
@@ -712,6 +819,9 @@ export default {
         // 重新获取用户stats以更新challenge_level
         await fetchUserStats()
 
+        // 加载测试历史以显示在结果页面
+        await loadTestHistory()
+
       } catch (err) {
         console.error('Error finishing test:', err)
         // 即使提交失败，也显示结果页面
@@ -856,6 +966,112 @@ export default {
       return icons[level] || icons[1]
     }
 
+    // Test history methods
+    const loadTestHistory = async () => {
+      try {
+        historyLoading.value = true
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempts/`, {
+          headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch test history: ${response.status}`)
+        }
+
+        const data = await response.json()
+        // 只处理已完成的测试 (有finished_at的记录)
+        const completedAttempts = (Array.isArray(data) ? data : [])
+          .filter(attempt => attempt.finished_at)
+          .sort((a, b) => new Date(b.finished_at) - new Date(a.finished_at)) // 按时间倒序排列
+
+        // 只取最新的一个测试结果
+        currentTestResult.value = completedAttempts.length > 0 ? completedAttempts[0] : null
+
+      } catch (err) {
+        console.error('Error loading test history:', err)
+        currentTestResult.value = null
+      } finally {
+        historyLoading.value = false
+      }
+    }
+
+    const refreshTestHistory = () => {
+      loadTestHistory()
+    }
+
+    const viewHistoryDetails = async (attempt) => {
+      try {
+        // 使用与TestHistorySection相同的API端点获取详细信息
+        const response = await fetch(`${API_BASE_URL}/quizzes/attempts/${attempt.id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${getAccessToken()}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (response.ok) {
+          const detailedAttempt = await response.json()
+          selectedHistoryAttempt.value = detailedAttempt
+        } else {
+          selectedHistoryAttempt.value = attempt // 如果无法获取详情，使用基本信息
+        }
+      } catch (error) {
+        console.error('Error loading test details:', error)
+        selectedHistoryAttempt.value = attempt
+      }
+    }
+
+    const closeHistoryModal = () => {
+      selectedHistoryAttempt.value = null
+    }
+
+    // Helper methods for test history display
+    const getCategoryDisplayName = (category, attempt) => {
+      // 优先使用 module_name
+      if (attempt && attempt.module_name) {
+        return attempt.module_name
+      }
+      // 如果没有 module_name，显示默认文本
+      return 'Mixed Categories'
+    }
+
+    const getFormattedScore = (accuracyPct) => {
+      if (accuracyPct === null || accuracyPct === undefined || isNaN(accuracyPct)) return 0
+      return Math.round(Number(accuracyPct))
+    }
+
+    const getScoreClass = (accuracy) => {
+      if (!accuracy) return 'poor'
+      const percentage = accuracy * 100
+      if (percentage >= 90) return 'excellent'
+      if (percentage >= 75) return 'good'
+      if (percentage >= 60) return 'fair'
+      return 'poor'
+    }
+
+    const formatDate = (dateString) => {
+      if (!dateString) return 'N/A'
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    const calculateDuration = (startTime, endTime) => {
+      if (!startTime || !endTime) return 'N/A'
+      const start = new Date(startTime)
+      const end = new Date(endTime)
+      const diffInMinutes = Math.round((end - start) / (1000 * 60))
+      return `${diffInMinutes} min`
+    }
+
     // 监听当前步骤变化，自动恢复已保存的答案
     watch(currentStep, (newStep) => {
       if (newStep > 0 && newStep <= testQuestions.value.length) {
@@ -910,6 +1126,11 @@ export default {
       getCompletedModuleCount,
       getLevelIcon,
 
+      // Test history state
+      currentTestResult,
+      historyLoading,
+      selectedHistoryAttempt,
+
       // Methods
       switchLevel,
       selectModule,
@@ -920,7 +1141,16 @@ export default {
       selectAnswer,
       nextQuestion,
       previousQuestion,
-      retakeTest
+      retakeTest,
+      loadTestHistory,
+      refreshTestHistory,
+      viewHistoryDetails,
+      closeHistoryModal,
+      getCategoryDisplayName,
+      getFormattedScore,
+      getScoreClass,
+      formatDate,
+      calculateDuration
     }
   }
 }
@@ -1460,6 +1690,49 @@ export default {
   text-align: center;
 }
 
+/* Test Details Section */
+.test-details-section {
+  margin-top: 1.5rem;
+}
+
+.test-details-header {
+  margin-bottom: 1.5rem;
+}
+
+.test-details-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.test-details-icon {
+  color: var(--violet-deep);
+}
+
+.view-details-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--violet-deep);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-light);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.view-details-btn:hover {
+  background: var(--violet-dark);
+}
+
+
 /* Feedback Section */
 .feedback-section {
   margin-top: 1.5rem;
@@ -1772,5 +2045,224 @@ export default {
 .nav-back-btn:hover {
   background: var(--text-secondary);
   transform: translateY(-1px);
+}
+
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 1000px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--violet-sage);
+}
+
+.modal-header h3 {
+  color: var(--violet-dark);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--violet-deep);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(83, 43, 136, 0.1);
+}
+
+.modal-body {
+  padding: 0;
+}
+
+.test-summary {
+  margin-bottom: 25px;
+  background: var(--violet-light);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--violet-sage);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 15px;
+}
+
+.summary-row span:first-child {
+  color: var(--violet-deep);
+  font-weight: 500;
+}
+
+.summary-row span:last-child {
+  color: var(--violet-dark);
+  font-weight: 600;
+}
+
+.questions-detail h4 {
+  color: var(--violet-dark);
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.question-item {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid var(--violet-sage);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.question-number {
+  color: var(--violet-dark);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.question-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.question-status.correct {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.question-status.incorrect {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.question-text {
+  color: var(--violet-dark);
+  margin-bottom: 15px;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-content .option-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  position: relative;
+  border-radius: 6px;
+  border: 1px solid rgba(200, 177, 228, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.modal-content .option-item.correct {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+.modal-content .option-item.selected {
+  background: rgba(0, 123, 255, 0.1);
+  border: 1px solid rgba(0, 123, 255, 0.3);
+}
+.modal-content .option-item.wrong-selected {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.modal-content .option-identifier {
+  font-weight: bold;
+  color: var(--violet-dark);
+  margin-right: 10px;
+}
+
+.modal-content .option-text {
+  color: var(--violet-dark);
+  flex: 1;
+}
+
+.correct-indicator {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.wrong-indicator {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* 选项状态样式 */
+.modal-content .option-item.correct .option-text { color: #28a745; font-weight: 600; }
+.modal-content .option-item.selected .option-text { color: #007bff; font-weight: 600; }
+.modal-content .option-item.wrong-selected .option-text { color: #dc3545; font-weight: 600; }
+
+.question-explanation {
+  margin-top: 15px;
+  padding: 15px;
+  background: var(--violet-light);
+  border-radius: 8px;
+  border-left: 3px solid var(--violet-deep);
+}
+
+.question-explanation h5 {
+  margin: 0 0 12px 0;
+  color: var(--violet-dark);
+  font-weight: 600;
+}
+
+.question-explanation p {
+  margin: 0;
+  color: var(--violet-deep);
+  line-height: 1.7;
 }
 </style>

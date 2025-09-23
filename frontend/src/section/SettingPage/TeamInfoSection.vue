@@ -1,5 +1,8 @@
 <template>
   <div class="team-info-section">
+    <div class="section-header">
+      <h2 class="section-title">Team Management</h2>
+    </div>
     <div class="team-info-container">
 
       <!-- Loading State -->
@@ -578,6 +581,13 @@ export default {
 <style scoped>
 .team-info-section {
   padding: 0 0 2rem 0;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
 .team-info-container {

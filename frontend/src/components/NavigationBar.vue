@@ -40,6 +40,9 @@
               <div class="dropdown-item" @click="() => { goToUserCenter(); isUserDropdownOpen = false; }">
                 User Center
               </div>
+              <div class="dropdown-item" @click="() => { goToSettings(); isUserDropdownOpen = false; }">
+                Settings
+              </div>
               <div class="dropdown-item" @click="() => { signOut(); isUserDropdownOpen = false; }">
                 Sign Out
               </div>
@@ -141,6 +144,10 @@ export default {
 
     const goToUserCenter = () => {
       router.push('/user-center')
+    }
+
+    const goToSettings = () => {
+      router.push('/settings')
     }
 
     const goToSignUp = () => {
@@ -268,6 +275,7 @@ export default {
       signIn,
       signOut,
       goToUserCenter,
+      goToSettings,
       goToSignUp,
       goToSignIn,
       goToHome,

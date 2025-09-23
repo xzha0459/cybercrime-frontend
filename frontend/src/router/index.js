@@ -11,6 +11,7 @@ import VideoPage from '../page/VideoPage.vue'
 import PrivacyPolicyPage from '../page/PrivacyPolicyPage.vue'
 import SupportPage from '../page/SupportPage.vue'
 import InfographicPage from '../page/InfographicPage.vue'
+import SettingPage from '../page/SettingPage.vue'
 
 const routes = [
   {
@@ -72,6 +73,11 @@ const routes = [
     path: '/infographic',
     name: 'Infographic',
     component: InfographicPage,
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: SettingPage,
   },
 ]
 

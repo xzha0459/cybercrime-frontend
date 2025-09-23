@@ -1,13 +1,12 @@
 <template>
   <div class="privacy-section">
-    <div class="privacy-container">
+    <div class="section-header">
+      <h2 class="section-title">Privacy Settings</h2>
+    </div>
 
+    <div class="privacy-container">
       <!-- Privacy Card -->
       <div class="privacy-card card-base">
-        <div class="card-header">
-          <h2 class="card-title">Privacy Settings</h2>
-        </div>
-
         <!-- Loading -->
         <div v-if="loading" class="loading-state">
           <div class="spinner"></div>
@@ -133,6 +132,14 @@ export default {
   padding: 0 0 2rem 0;
 }
 
+/* Header */
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
 .privacy-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -145,20 +152,6 @@ export default {
   box-shadow: 0 4px 15px var(--shadow-light);
   padding: 2rem;
   margin-top: 1rem;
-}
-
-/* Header */
-.card-header {
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--border-light);
-  padding-bottom: 0.75rem;
-}
-
-.card-title {
-  margin: 0;
-  font-size: 1.5rem;
-  color: var(--violet-ultra-dark);
-  font-weight: 700;
 }
 
 /* Privacy Options */

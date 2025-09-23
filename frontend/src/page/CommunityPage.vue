@@ -10,9 +10,6 @@
     <div class="page-content">
       <div class="container">
         <div class="community-grid">
-          <div class="user-stats-section">
-            <UserStatsSection />
-          </div>
           <div class="leaderboard-section">
             <LeaderboardSection />
           </div>
@@ -24,13 +21,11 @@
 
 <script>
 import LeaderboardSection from '../section/CommunityPage/LeaderboardSection.vue'
-import UserStatsSection from '../section/CommunityPage/UserStatsSection.vue'
 
 export default {
   name: 'CommunityPage',
   components: {
-    LeaderboardSection,
-    UserStatsSection
+    LeaderboardSection
   }
 }
 </script>
@@ -76,12 +71,8 @@ export default {
   gap: 2rem;
 }
 
-.user-stats-section {
-  order: 1;
-}
-
 .leaderboard-section {
-  order: 2;
+  order: 1;
 }
 
 @media (max-width: 768px) {

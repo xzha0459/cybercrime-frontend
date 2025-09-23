@@ -317,8 +317,8 @@ const acceptTeamInviteAPI = async (inviteId) => {
     })
 
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.detail || 'Failed to accept invite')
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
+      throw new Error(errorData.detail || `Failed to accept invite: ${response.status}`)
     }
 
     return await response.json()
@@ -341,8 +341,8 @@ const leaveTeamAPI = async () => {
     })
 
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.detail || 'Failed to leave team')
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
+      throw new Error(errorData.detail || `Failed to leave team: ${response.status}`)
     }
 
     return await response.json()
@@ -514,6 +514,11 @@ export default {
         showMessage('Successfully joined team!', 'success')
         closeModals()
         await loadTeamInfo()
+
+        // Show toast for friend invitation reward
+        setTimeout(() => {
+          window.showActivityToast()
+        }, 1000)
       } catch (error) {
         console.error('Error joining team:', error)
         showMessage(error.message || 'Failed to join team', 'error')

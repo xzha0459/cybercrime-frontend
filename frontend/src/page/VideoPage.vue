@@ -273,6 +273,11 @@ const fetchRelatedVideos = async (id) => {
 
 const handleVideoEnded = () => {
   showRecommendations.value = true
+
+  // Show toast after video completion
+  setTimeout(() => {
+    window.showActivityToast()
+  }, 1000)
 }
 
 

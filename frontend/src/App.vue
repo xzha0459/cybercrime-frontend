@@ -6,18 +6,23 @@
 
     <!-- AI ChatBot -->
     <ChatBot v-if="!isAuthPage && !isChallengePage" />
+
+    <!-- Global Toast -->
+    <Toast />
   </div>
 </template>
 
 <script>
 import NavigationBar from '@/components/NavigationBar.vue'
 import ChatBot from '@/components/ChatBot.vue'
+import Toast from '@/components/PopToast.vue'
 
 export default {
   name: 'App',
   components: {
     NavigationBar,
     ChatBot,
+    Toast,
   },
   computed: {
     isAuthPage() {

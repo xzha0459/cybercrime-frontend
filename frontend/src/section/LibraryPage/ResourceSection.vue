@@ -197,6 +197,23 @@
 
     </div>
 
+    <!-- Article Popup Modal -->
+    <div v-if="showArticlePopup" class="popup-overlay" @click="closeArticlePopup">
+      <div class="popup-content" @click.stop>
+        <div class="popup-header">
+          <h3 class="popup-title">{{ selectedArticle?.title }}</h3>
+        </div>
+
+        <div class="popup-body">
+          <p class="popup-description">{{ selectedArticle?.description }}</p>
+        </div>
+
+        <div class="popup-footer">
+          <button class="popup-btn cancel-btn" @click="closeArticlePopup">Cancel</button>
+          <button class="popup-btn read-btn" @click="openOriginalLink">Read Original</button>
+        </div>
+      </div>
+    </div>
 
   </section>
 </template>
@@ -213,6 +230,10 @@ const showAllVideos = ref(false)
 const showAllArticles = ref(false)
 const showAllContent = ref(false)
 const articles = ref([])
+
+// Popup state
+const showArticlePopup = ref(false)
+const selectedArticle = ref(null)
 
 
 
@@ -265,10 +286,27 @@ const getArticleThumbnail = (article) => {
 }
 
 const handleArticleClick = async (article) => {
+  // Show popup instead of directly opening link
+  selectedArticle.value = article
+  showArticlePopup.value = true
+}
+
+const closeArticlePopup = () => {
+  showArticlePopup.value = false
+  selectedArticle.value = null
+}
+
+const openOriginalLink = async () => {
+  if (!selectedArticle.value) return
+
+  // Save the link before closing popup
+  const articleLink = selectedArticle.value.link
+  console.log('Opening link:', articleLink)
+
   const token = localStorage.getItem("access_token")
 
   try {
-    const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/${article.id}/click/`, {
+    const res = await fetch(`https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/articles/${selectedArticle.value.id}/click/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -282,12 +320,19 @@ const handleArticleClick = async (article) => {
     if (!res.ok) {
       throw new Error(`Failed with status ${res.status}`)
     }
+
+    // Show toast after successful article click
+    setTimeout(() => {
+      window.showActivityToast()
+    }, 1000)
   } catch (err) {
     console.error("Error awarding article points:", err)
   }
 
-  // only open after request succeeds
-  window.open(article.link, "_blank", "noopener,noreferrer")
+  // Close popup and open link
+  closeArticlePopup()
+  console.log('Attempting to open:', articleLink)
+  window.open(articleLink, "_blank", "noopener,noreferrer")
 }
 
 
@@ -710,5 +755,124 @@ onMounted(async () => {
 /* View More Button Animation */
 .view-more-btn svg.rotated {
   transform: rotate(180deg);
+}
+
+/* Article Popup Styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  z-index: 9999;
+  padding: 0.5rem;
+}
+
+.popup-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.popup-header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.popup-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+
+.popup-body {
+  padding: 1.5rem;
+}
+
+.popup-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.popup-footer {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.popup-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn {
+  background: var(--bg-light);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.cancel-btn:hover {
+  background: var(--bg-secondary);
+}
+
+.read-btn {
+  background: var(--violet-dark);
+  color: white;
+}
+
+.read-btn:hover {
+  background: var(--violet-ultra-dark);
+}
+
+/* Responsive Popup */
+@media (max-width: 768px) {
+  .popup-overlay {
+    padding: 1rem;
+  }
+
+  .popup-content {
+    max-width: 350px;
+    max-height: 70vh;
+  }
+
+  .popup-header {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+
+  .popup-title {
+    font-size: 1.1rem;
+  }
+
+  .popup-body {
+    padding: 1rem;
+  }
+
+  .popup-footer {
+    padding: 0.75rem 1rem 1rem 1rem;
+    flex-direction: column;
+  }
+
+  .popup-btn {
+    padding: 0.875rem 1.5rem;
+  }
 }
 </style>

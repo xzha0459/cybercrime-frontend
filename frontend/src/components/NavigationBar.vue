@@ -8,6 +8,7 @@
 
       <!-- Desktop Navigation Links -->
       <div class="nav-links desktop-nav">
+        <router-link to="/infographic" class="nav-link">Infographic</router-link>
         <div class="nav-dropdown" @click="toggleActivityDropdown">
           <span class="nav-link dropdown-trigger">Activity</span>
           <div class="dropdown-menu" :class="{ open: isActivityDropdownOpen }">
@@ -18,7 +19,7 @@
         </div>
         <router-link to="/community" class="nav-link">Community</router-link>
         <router-link to="/support" class="nav-link">Support</router-link>
-        <router-link to="/infographic" class="nav-link">Infographic</router-link>
+
       </div>
 
       <!-- Desktop Right side buttons -->

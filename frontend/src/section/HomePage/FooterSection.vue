@@ -68,6 +68,18 @@
             <h3 class="section-title">About</h3>
             <ul class="links-list">
               <li class="link-item">
+                <router-link to="/support" class="link-text">
+                  <span class="arrow-icon">▶</span>
+                  Support
+                </router-link>
+              </li>
+              <li class="link-item">
+                <router-link to="/about" class="link-text">
+                  <span class="arrow-icon">▶</span>
+                  About Us
+                </router-link>
+              </li>
+              <li class="link-item">
                 <router-link to="/privacy-policy" class="link-text">
                   <span class="arrow-icon">▶</span>
                   Privacy Policy

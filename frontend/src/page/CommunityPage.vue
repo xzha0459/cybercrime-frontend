@@ -16,16 +16,19 @@
         </div>
       </div>
     </div>
+    <FooterSection />
   </div>
 </template>
 
 <script>
 import LeaderboardSection from '../section/CommunityPage/LeaderboardSection.vue'
+import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
   name: 'CommunityPage',
   components: {
-    LeaderboardSection
+    LeaderboardSection,
+    FooterSection
   }
 }
 </script>

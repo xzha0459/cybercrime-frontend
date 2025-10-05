@@ -20,6 +20,7 @@
         </section>
       </div>
     </div>
+    <FooterSection />
   </div>
 </template>
 
@@ -28,13 +29,15 @@
 // import RadarChart from '@/components/Visualization/Radarchart.vue'
 import GroupedBarChart from '@/components/Visualization/GroupedBarChart.vue'
 import HeatmapChart from '@/components/Visualization/Heatmap.vue'
+import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
   name: 'InfographicSection',
   components: {
     // RadarChart,
     GroupedBarChart,
-    HeatmapChart
+    HeatmapChart,
+    FooterSection
   },
   data() {
     return {

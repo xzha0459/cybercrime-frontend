@@ -12,6 +12,7 @@ import PrivacyPolicyPage from '../page/PrivacyPolicyPage.vue'
 import SupportPage from '../page/SupportPage.vue'
 import InfographicPage from '../page/InfographicPage.vue'
 import SettingPage from '../page/SettingPage.vue'
+import AboutUsPage from '../page/AboutUsPage.vue'
 
 const routes = [
   {
@@ -65,6 +66,11 @@ const routes = [
     component: PrivacyPolicyPage,
   },
   {
+    path: '/about',
+    name: 'AboutUs',
+    component: AboutUsPage,
+  },
+  {
     path: '/support',
     name: 'Support',
     component: SupportPage,
@@ -84,6 +90,14 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // 如果有保存的位置（浏览器前进/后退），使用保存的位置
+    if (savedPosition) {
+      return savedPosition
+    }
+    // 否则滚动到页面顶部
+    return { top: 0 }
+  }
 })
 
 export default router

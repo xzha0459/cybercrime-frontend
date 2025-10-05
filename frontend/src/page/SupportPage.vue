@@ -1,200 +1,216 @@
 <template>
   <div class="support-page">
-    <div class="page-header">
+    <div class="page-content">
+      <div class="page-header">
+        <div class="container">
+          <h1 class="page-title">Cybercrime Support & Recovery  AU</h1>
+          <p class="page-subtitle">Healing and moving forward after experiencing online harm - Australian Resources</p>
+        </div>
+      </div>
+
       <div class="container">
-        <h1 class="page-title">Cybercrime Support & Recovery  AU</h1>
-        <p class="page-subtitle">Healing and moving forward after experiencing online harm - Australian Resources</p>
-      </div>
-    </div>
-
-    <div class="container">
-      <div class="page-body">
-        <div class="notice">
-          <h2>Need Immediate Help?</h2>
-          <p>If you're in immediate danger or having thoughts of self-harm, please contact emergency services (000) or Lifeline (13 11 14) immediately. Your safety is the top priority.</p>
-        </div>
-
-        <div class="support-section">
-          <h2>Understanding Your Experience</h2>
-          <p>Experiencing cybercrime can be traumatic and overwhelming. Your feelings are valid and you deserve support. Recovery is possible, and you're not alone.</p>
-          <div class="warning-box">
-            <h3>Remember: It's Not Your Fault</h3>
-            <p>Cybercriminals are skilled at manipulation and deception. Being targeted doesn't reflect any weakness or failure on your part. Focus on healing and moving forward rather than self-blame.</p>
+        <div class="page-body">
+          <div class="notice">
+            <h2>Need Immediate Help?</h2>
+            <p>If you're in immediate danger or having thoughts of self-harm, please contact emergency services (000) or Lifeline (13 11 14) immediately. Your safety is the top priority.</p>
           </div>
-        </div>
 
-        <div class="support-section">
-          <h2>Immediate Steps</h2>
-          <div class="grid">
-            <div class="card">
-              <h3>Secure Your Digital Life</h3>
-              <ul>
-                <li>Change passwords and enable 2FA</li>
-                <li>Review privacy settings</li>
-                <li>Monitor accounts; call your bank if needed</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Document Everything</h3>
-              <ul>
-                <li>Keep screenshots, emails and messages</li>
-                <li>Record dates, times and details</li>
-                <li>Create a simple timeline</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Report (Australia)</h3>
-              <ul>
-                <li>Police (000 for emergencies)</li>
-                <li>Scamwatch, eSafety, platform reporting</li>
-                <li>Australian Financial Complaints Authority if required</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Seek Support</h3>
-              <ul>
-                <li>Talk to trusted friends and family</li>
-                <li>Contact Lifeline or Beyond Blue</li>
-                <li>Consider professional counselling</li>
-              </ul>
+          <div class="support-section">
+            <h2>Understanding Your Experience</h2>
+            <p>Experiencing cybercrime can be traumatic and overwhelming. Your feelings are valid and you deserve support. Recovery is possible, and you're not alone.</p>
+            <div class="warning-box">
+              <h3>Remember: It's Not Your Fault</h3>
+              <p>Cybercriminals are skilled at manipulation and deception. Being targeted doesn't reflect any weakness or failure on your part. Focus on healing and moving forward rather than self-blame.</p>
             </div>
           </div>
-        </div>
 
-        <div class="support-section">
-          <h2>Emotional Recovery Tips</h2>
-          <div class="grid">
-            <div class="card">
-              <h3>Practice Self‑Care</h3>
-              <ul>
-                <li>Sleep regularly and exercise</li>
-                <li>Mindfulness, hobbies, nutritious meals</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Process Emotions</h3>
-              <ul>
-                <li>Journal, talk to others, breathing exercises</li>
-                <li>Use mindfulness apps if helpful</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Rebuild Confidence</h3>
-              <ul>
-                <li>Small goals and celebrate progress</li>
-                <li>Learn digital safety skills</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Gradual Re‑engagement</h3>
-              <ul>
-                <li>Take breaks; return online gradually</li>
-                <li>Use privacy tools and set boundaries</li>
-              </ul>
+          <div class="support-section">
+            <h2>Immediate Steps</h2>
+            <div class="grid">
+              <div class="card">
+                <h3>Secure Your Digital Life</h3>
+                <ul>
+                  <li>Change passwords and enable 2FA</li>
+                  <li>Review privacy settings</li>
+                  <li>Monitor accounts; call your bank if needed</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Document Everything</h3>
+                <ul>
+                  <li>Keep screenshots, emails and messages</li>
+                  <li>Record dates, times and details</li>
+                  <li>Create a simple timeline</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Report (Australia)</h3>
+                <ul>
+                  <li>Police (000 for emergencies)</li>
+                  <li>Scamwatch, eSafety, platform reporting</li>
+                  <li>Australian Financial Complaints Authority if required</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Seek Support</h3>
+                <ul>
+                  <li>Talk to trusted friends and family</li>
+                  <li>Contact Lifeline or Beyond Blue</li>
+                  <li>Consider professional counselling</li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="support-section">
-          <h2>Long‑term Healing Strategies</h2>
-          <p>Recovery from cybercrime trauma is a process that takes time. Focus on building long‑term resilience and healthy coping mechanisms:</p>
-          <div class="grid">
-            <div class="card">
-              <h3>Set Realistic Goals</h3>
-              <ul>
-                <li>Break recovery into manageable steps</li>
-                <li>Celebrate progress, not just outcomes</li>
-                <li>Be patient with yourself</li>
-                <li>Adjust goals as needed</li>
-                <li>Focus on personal growth</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Build Support Networks</h3>
-              <ul>
-                <li>Maintain connections with supportive people</li>
-                <li>Join online or offline support communities</li>
-                <li>Consider peer support groups</li>
-                <li>Volunteer to help others (when ready)</li>
-                <li>Build professional support team</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Educate Yourself</h3>
-              <ul>
-                <li>Learn about cybersecurity best practices</li>
-                <li>Stay informed about new scam tactics</li>
-                <li>Understand your rights</li>
-                <li>Learn about trauma and recovery</li>
-                <li>Share knowledge to help others</li>
-                <li>Follow Australian Cyber Security Centre updates</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Develop Coping Skills</h3>
-              <ul>
-                <li>Practice stress management techniques</li>
-                <li>Develop problem‑solving skills</li>
-                <li>Learn to recognise triggers</li>
-                <li>Build emotional regulation skills</li>
-                <li>Create healthy routines</li>
-              </ul>
+          <div class="support-section">
+            <h2>Emotional Recovery Tips</h2>
+            <div class="grid">
+              <div class="card">
+                <h3>Practice Self‑Care</h3>
+                <ul>
+                  <li>Sleep regularly and exercise</li>
+                  <li>Mindfulness, hobbies, nutritious meals</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Process Emotions</h3>
+                <ul>
+                  <li>Journal, talk to others, breathing exercises</li>
+                  <li>Use mindfulness apps if helpful</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Rebuild Confidence</h3>
+                <ul>
+                  <li>Small goals and celebrate progress</li>
+                  <li>Learn digital safety skills</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Gradual Re‑engagement</h3>
+                <ul>
+                  <li>Take breaks; return online gradually</li>
+                  <li>Use privacy tools and set boundaries</li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="support-section">
-          <h2>When to Seek Professional Help</h2>
-          <ul class="bullet">
-            <li>Persistent anxiety, depression, or fear</li>
-            <li>Sleep disturbances or nightmares</li>
-            <li>Difficulty concentrating or making decisions</li>
-            <li>Social withdrawal or isolation</li>
-            <li>Intrusive thoughts about the incident</li>
-            <li>Avoidance of technology or online activities</li>
-            <li>Thoughts of self‑harm</li>
-            <li>Difficulty functioning in daily life</li>
-          </ul>
-          <p>In Australia: You can access mental health support through Medicare with a Mental Health Treatment Plan from your GP, which provides subsidised sessions with psychologists and other mental health professionals.</p>
-        </div>
-
-        <div class="resources">
-          <h2>Australian Crisis Resources & Support</h2>
-          <div class="resource-list">
-            <div class="resource-item"><strong>Emergency Services</strong> 000<br>Police, fire, ambulance</div>
-            <div class="resource-item"><strong>Lifeline Australia</strong> 13 11 14<br>24/7 crisis support and suicide prevention</div>
-            <div class="resource-item"><strong>Beyond Blue</strong> 1300 22 4636<br>Depression, anxiety and mental health support</div>
-            <div class="resource-item"><strong>Kids Helpline</strong> 1800 55 1800<br>For young people aged 5–25</div>
-            <div class="resource-item"><strong>ACORN (Australian Cybercrime Online Reporting Network)</strong> <a href="https://acorn.gov.au" target="_blank" rel="noopener">acorn.gov.au</a><br>Report cybercrimes</div>
-            <div class="resource-item"><strong>Scamwatch (ACCC)</strong> <a href="https://scamwatch.gov.au" target="_blank" rel="noopener">scamwatch.gov.au</a><br>Report and learn about scams</div>
-            <div class="resource-item"><strong>Australian Cyber Security Centre (ACSC)</strong> <a href="https://cyber.gov.au" target="_blank" rel="noopener">cyber.gov.au</a><br>Cybersecurity guidance and resources</div>
-            <div class="resource-item"><strong>Legal Aid Australia</strong> <a href="https://nationallegalaid.org" target="_blank" rel="noopener">nationallegalaid.org</a><br>Free legal advice and assistance</div>
-            <div class="resource-item"><strong>Victims Services</strong> Contact your state's victim services<br>for support and compensation</div>
-            <div class="resource-item"><strong>ReachOut Australia</strong> <a href="https://au.reachout.com" target="_blank" rel="noopener">au.reachout.com</a><br>Mental health resources for young people</div>
-            <div class="resource-item"><strong>Australian Financial Complaints Authority</strong> <a href="https://afca.org.au" target="_blank" rel="noopener">afca.org.au</a><br>Financial disputes and complaints</div>
-            <div class="resource-item"><strong>eSafety Commissioner</strong> <a href="https://esafety.gov.au" target="_blank" rel="noopener">esafety.gov.au</a><br>Online safety, cyberbullying, and image-based abuse</div>
+          <div class="support-section">
+            <h2>Long‑term Healing Strategies</h2>
+            <p>Recovery from cybercrime trauma is a process that takes time. Focus on building long‑term resilience and healthy coping mechanisms:</p>
+            <div class="grid">
+              <div class="card">
+                <h3>Set Realistic Goals</h3>
+                <ul>
+                  <li>Break recovery into manageable steps</li>
+                  <li>Celebrate progress, not just outcomes</li>
+                  <li>Be patient with yourself</li>
+                  <li>Adjust goals as needed</li>
+                  <li>Focus on personal growth</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Build Support Networks</h3>
+                <ul>
+                  <li>Maintain connections with supportive people</li>
+                  <li>Join online or offline support communities</li>
+                  <li>Consider peer support groups</li>
+                  <li>Volunteer to help others (when ready)</li>
+                  <li>Build professional support team</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Educate Yourself</h3>
+                <ul>
+                  <li>Learn about cybersecurity best practices</li>
+                  <li>Stay informed about new scam tactics</li>
+                  <li>Understand your rights</li>
+                  <li>Learn about trauma and recovery</li>
+                  <li>Share knowledge to help others</li>
+                  <li>Follow Australian Cyber Security Centre updates</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Develop Coping Skills</h3>
+                <ul>
+                  <li>Practice stress management techniques</li>
+                  <li>Develop problem‑solving skills</li>
+                  <li>Learn to recognise triggers</li>
+                  <li>Build emotional regulation skills</li>
+                  <li>Create healthy routines</li>
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="support-section quote">
-          <h2>Remember: You Will Get Through This</h2>
-          <p>“Healing is not linear. Every step forward, no matter how small, is progress.”</p>
+          <div class="support-section">
+            <h2>When to Seek Professional Help</h2>
+            <ul class="bullet">
+              <li>Persistent anxiety, depression, or fear</li>
+              <li>Sleep disturbances or nightmares</li>
+              <li>Difficulty concentrating or making decisions</li>
+              <li>Social withdrawal or isolation</li>
+              <li>Intrusive thoughts about the incident</li>
+              <li>Avoidance of technology or online activities</li>
+              <li>Thoughts of self‑harm</li>
+              <li>Difficulty functioning in daily life</li>
+            </ul>
+            <p>In Australia: You can access mental health support through Medicare with a Mental Health Treatment Plan from your GP, which provides subsidised sessions with psychologists and other mental health professionals.</p>
+          </div>
+
+          <div class="resources">
+            <h2>Australian Crisis Resources & Support</h2>
+            <div class="resource-list">
+              <div class="resource-item"><strong>Emergency Services</strong> 000<br>Police, fire, ambulance</div>
+              <div class="resource-item"><strong>Lifeline Australia</strong> 13 11 14<br>24/7 crisis support and suicide prevention</div>
+              <div class="resource-item"><strong>Beyond Blue</strong> 1300 22 4636<br>Depression, anxiety and mental health support</div>
+              <div class="resource-item"><strong>Kids Helpline</strong> 1800 55 1800<br>For young people aged 5–25</div>
+              <div class="resource-item"><strong>ACORN (Australian Cybercrime Online Reporting Network)</strong> <a href="https://acorn.gov.au" target="_blank" rel="noopener">acorn.gov.au</a><br>Report cybercrimes</div>
+              <div class="resource-item"><strong>Scamwatch (ACCC)</strong> <a href="https://scamwatch.gov.au" target="_blank" rel="noopener">scamwatch.gov.au</a><br>Report and learn about scams</div>
+              <div class="resource-item"><strong>Australian Cyber Security Centre (ACSC)</strong> <a href="https://cyber.gov.au" target="_blank" rel="noopener">cyber.gov.au</a><br>Cybersecurity guidance and resources</div>
+              <div class="resource-item"><strong>Legal Aid Australia</strong> <a href="https://nationallegalaid.org" target="_blank" rel="noopener">nationallegalaid.org</a><br>Free legal advice and assistance</div>
+              <div class="resource-item"><strong>Victims Services</strong> Contact your state's victim services<br>for support and compensation</div>
+              <div class="resource-item"><strong>ReachOut Australia</strong> <a href="https://au.reachout.com" target="_blank" rel="noopener">au.reachout.com</a><br>Mental health resources for young people</div>
+              <div class="resource-item"><strong>Australian Financial Complaints Authority</strong> <a href="https://afca.org.au" target="_blank" rel="noopener">afca.org.au</a><br>Financial disputes and complaints</div>
+              <div class="resource-item"><strong>eSafety Commissioner</strong> <a href="https://esafety.gov.au" target="_blank" rel="noopener">esafety.gov.au</a><br>Online safety, cyberbullying, and image-based abuse</div>
+            </div>
+          </div>
+
+          <div class="support-section quote">
+            <h2>Remember: You Will Get Through This</h2>
+            <p>"Healing is not linear. Every step forward, no matter how small, is progress."</p>
+          </div>
         </div>
       </div>
     </div>
+    <FooterSection />
   </div>
 </template>
 
 <script>
+import FooterSection from '../section/HomePage/FooterSection.vue'
+
 export default {
-  name: 'SupportPage'
+  name: 'SupportPage',
+  components: {
+    FooterSection
+  }
 }
 </script>
 
 <style scoped>
 .support-page {
   background: var(--violet-dark);
-  padding-bottom: 4rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
@@ -226,6 +242,8 @@ export default {
   background: var(--violet-light);
   border-radius: 12px;
   padding: 3rem;
+  margin-bottom: 4rem;
+  flex: 1;
 }
 
 .support-section {

@@ -165,14 +165,14 @@
             <div class="resource-item"><strong>Lifeline Australia</strong> 13 11 14<br>24/7 crisis support and suicide prevention</div>
             <div class="resource-item"><strong>Beyond Blue</strong> 1300 22 4636<br>Depression, anxiety and mental health support</div>
             <div class="resource-item"><strong>Kids Helpline</strong> 1800 55 1800<br>For young people aged 5–25</div>
-            <div class="resource-item"><strong>ACORN (Australian Cybercrime Online Reporting Network)</strong> acorn.gov.au<br>Report cybercrimes</div>
-            <div class="resource-item"><strong>Scamwatch (ACCC)</strong> scamwatch.gov.au<br>Report and learn about scams</div>
-            <div class="resource-item"><strong>Australian Cyber Security Centre (ACSC)</strong> cyber.gov.au<br>Cybersecurity guidance and resources</div>
-            <div class="resource-item"><strong>Legal Aid Australia</strong> nationallegalaid.org<br>Free legal advice and assistance</div>
+            <div class="resource-item"><strong>ACORN (Australian Cybercrime Online Reporting Network)</strong> <a href="https://acorn.gov.au" target="_blank" rel="noopener">acorn.gov.au</a><br>Report cybercrimes</div>
+            <div class="resource-item"><strong>Scamwatch (ACCC)</strong> <a href="https://scamwatch.gov.au" target="_blank" rel="noopener">scamwatch.gov.au</a><br>Report and learn about scams</div>
+            <div class="resource-item"><strong>Australian Cyber Security Centre (ACSC)</strong> <a href="https://cyber.gov.au" target="_blank" rel="noopener">cyber.gov.au</a><br>Cybersecurity guidance and resources</div>
+            <div class="resource-item"><strong>Legal Aid Australia</strong> <a href="https://nationallegalaid.org" target="_blank" rel="noopener">nationallegalaid.org</a><br>Free legal advice and assistance</div>
             <div class="resource-item"><strong>Victims Services</strong> Contact your state's victim services<br>for support and compensation</div>
-            <div class="resource-item"><strong>ReachOut Australia</strong> au.reachout.com<br>Mental health resources for young people</div>
-            <div class="resource-item"><strong>Australian Financial Complaints Authority</strong> afca.org.au<br>Financial disputes and complaints</div>
-            <div class="resource-item"><strong>eSafety Commissioner</strong> esafety.gov.au<br>Online safety, cyberbullying, and image-based abuse</div>
+            <div class="resource-item"><strong>ReachOut Australia</strong> <a href="https://au.reachout.com" target="_blank" rel="noopener">au.reachout.com</a><br>Mental health resources for young people</div>
+            <div class="resource-item"><strong>Australian Financial Complaints Authority</strong> <a href="https://afca.org.au" target="_blank" rel="noopener">afca.org.au</a><br>Financial disputes and complaints</div>
+            <div class="resource-item"><strong>eSafety Commissioner</strong> <a href="https://esafety.gov.au" target="_blank" rel="noopener">esafety.gov.au</a><br>Online safety, cyberbullying, and image-based abuse</div>
           </div>
         </div>
 
@@ -368,6 +368,18 @@ export default {
   display: block;
   color: #234e52;
   margin-bottom: 0.25rem;
+}
+
+.resource-item a {
+  color: #38b2ac;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.resource-item a:hover {
+  color: #2c7a7b;
+  text-decoration: underline;
 }
 
 .quote {

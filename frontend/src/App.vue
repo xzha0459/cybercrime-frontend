@@ -39,12 +39,28 @@ export default {
     }
   },
   mounted() {
-    // 启动token过期检查
-    startTokenExpirationCheck()
+    // 只在非认证页面启动token过期检查
+    if (!this.isAuthPage) {
+      startTokenExpirationCheck()
+    }
   },
   beforeUnmount() {
     // 停止token过期检查
     stopTokenExpirationCheck()
+  },
+  watch: {
+    // 监听路由变化，在认证页面和非认证页面之间切换时管理token检查
+    '$route'(to) {
+      const isAuthPage = to.path === '/signup' || to.path === '/signin'
+
+      if (isAuthPage) {
+        // 进入认证页面时停止检查
+        stopTokenExpirationCheck()
+      } else {
+        // 离开认证页面时开始检查
+        startTokenExpirationCheck()
+      }
+    }
   }
 }
 </script>

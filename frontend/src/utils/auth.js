@@ -34,15 +34,19 @@ function autoLogout() {
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user_info')
 
-    // 刷新页面或跳转到登录页
-    window.location.href = '/signin'
+    // 使用路由跳转而不是页面刷新
+    if (window.location.pathname !== '/signin') {
+      window.location.href = '/signin'
+    }
 
     console.log('User automatically logged out due to token expiration')
   } catch (error) {
     console.error('Error during auto logout:', error)
     // 如果出错，至少清除localStorage
     localStorage.clear()
-    window.location.href = '/signin'
+    if (window.location.pathname !== '/signin') {
+      window.location.href = '/signin'
+    }
   }
 }
 

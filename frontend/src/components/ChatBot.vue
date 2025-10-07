@@ -75,6 +75,14 @@
             </div>
           </div>
         </div>
+
+        <!-- 追问建议（跟随消息区域滚动） -->
+        <div v-if="followUps.length && !isTyping" class="followups">
+          <div class="followup-title">You may also ask:</div>
+          <div class="followup-chips">
+            <button v-for="q in followUps" :key="q" class="chip" @click="chooseFollowUp(q)">{{ q }}</button>
+          </div>
+        </div>
       </div>
 
       <!-- 输入区域 -->
@@ -117,6 +125,7 @@ const isTyping = ref(false)
 const messagesContainer = ref(null)
 const showRetry = ref(false)
 const lastFailedMessage = ref('')
+const followUps = ref([])
 
 const toggleChat = () => {
   isOpen.value = !isOpen.value
@@ -140,6 +149,7 @@ const sendMessage = async () => {
   const currentInput = inputMessage.value
   inputMessage.value = ''
   showRetry.value = false
+  followUps.value = []
 
   // 滚动到底部
   nextTick(() => {
@@ -288,6 +298,12 @@ const callGenerateAPI = async (prompt) => {
 
     if (data.response) {
       addBotMessage(data.response)
+      // 设置追问
+      if (Array.isArray(data.follow_up_questions) && data.follow_up_questions.length) {
+        followUps.value = data.follow_up_questions
+      } else {
+        followUps.value = []
+      }
     } else {
       throw new Error('Invalid response format')
     }
@@ -318,6 +334,12 @@ const addBotMessage = (text) => {
   nextTick(() => {
     scrollToBottom()
   })
+}
+
+// 选择追问
+const chooseFollowUp = (q) => {
+  inputMessage.value = q
+  sendMessage()
 }
 
 // 添加错误消息
@@ -356,7 +378,7 @@ onMounted(() => {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 1000;
+  z-index: 10000; /* top-most */
 }
 
 /* 聊天按钮 */
@@ -552,13 +574,8 @@ onMounted(() => {
   animation: typing 1.4s infinite ease-in-out;
 }
 
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.4s;
-}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes typing {
   0%, 60%, 100% {
@@ -576,6 +593,32 @@ onMounted(() => {
   padding: 1rem;
   border-top: 1px solid var(--border-light);
   background: white;
+}
+
+/* follow-ups */
+.followups { padding: 0 1rem; }
+
+.followup-title {
+  font-size: 0.85rem;
+  color: var(--violet-ultra-dark);
+  opacity: 0.8;
+  margin: 0 0 0.5rem 0;
+}
+
+.followup-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.chip {
+  background: var(--violet-light);
+  color: var(--violet-deep);
+  border: 1px solid var(--violet-sage);
+  padding: 0.35rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: #e9ddff;
 }
 
 .input-container {
@@ -625,7 +668,6 @@ onMounted(() => {
 .send-btn:disabled {
   background: var(--text-secondary);
   cursor: not-allowed;
-  transform: none;
 }
 
 /* 重试按钮 */

@@ -138,21 +138,12 @@ export default {
     // 获取全局排行榜数据（公开访问）
     const fetchGlobalLeaderboard = async () => {
       try {
-        const accessToken = localStorage.getItem('access_token')
-
-        const headers = {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-
-        // 如果有token，添加到headers中
-        if (accessToken) {
-          headers['Authorization'] = `Bearer ${accessToken}`
-        }
-
         const response = await fetch(`${API_BASE_URL}/leaderboard/global/`, {
           method: 'GET',
-          headers: headers
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         })
 
         if (!response.ok) {
@@ -169,21 +160,12 @@ export default {
     // 获取团队排行榜数据（公开访问）
     const fetchTeamsLeaderboard = async () => {
       try {
-        const accessToken = localStorage.getItem('access_token')
-
-        const headers = {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-
-        // 如果有token，添加到headers中
-        if (accessToken) {
-          headers['Authorization'] = `Bearer ${accessToken}`
-        }
-
         const response = await fetch(`${API_BASE_URL}/leaderboard/teams/`, {
           method: 'GET',
-          headers: headers
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         })
 
         if (!response.ok) {

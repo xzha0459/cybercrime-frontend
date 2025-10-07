@@ -48,10 +48,10 @@
       <div class="status-summary">
         <div class="status-info">
           <h3 class="status-title">{{ results.is_safe ? 'Safe' : 'Unsafe' }}</h3>
-          <p class="status-desc">{{ getAnalysisText() }}</p>
+          <p class="status-desc">{{ results.analysis || getAnalysisText() }}</p>
         </div>
         <div class="status-badge" :class="results.is_safe ? 'safe' : 'unsafe'">
-          {{ getRiskLevel() }}
+          {{ results.risk_level || getRiskLevel() }}
         </div>
       </div>
 
@@ -72,6 +72,16 @@
         <div v-if="results.details?.registrar" class="info-item">
           <span class="info-label">Registrar:</span>
           <span class="info-value">{{ results.details.registrar }}</span>
+        </div>
+      </div>
+
+      <!-- 可疑模式列表 -->
+      <div v-if="results.suspicious_patterns?.length" class="threats-list">
+        <h4 class="threats-title">Suspicious Patterns Detected</h4>
+        <div class="threat-items">
+          <div v-for="pattern in results.suspicious_patterns" :key="pattern" class="threat-item">
+            {{ pattern }}
+          </div>
         </div>
       </div>
 
@@ -139,6 +149,9 @@ export default {
 
     getRiskLevel() {
       if (!this.results) return 'Unknown';
+      // 优先使用后端返回的risk_level
+      if (this.results.risk_level) return this.results.risk_level;
+      // 降级到原有的逻辑
       if (this.results.blacklisted) return 'High';
       if (!this.results.is_safe) return 'Medium';
       if (this.results.matches?.length) return 'Low-Medium';
@@ -147,6 +160,9 @@ export default {
 
     getAnalysisText() {
       if (!this.results) return 'No analysis available';
+      // 优先使用后端返回的analysis
+      if (this.results.analysis) return this.results.analysis;
+      // 降级到原有的逻辑
       if (this.results.blacklisted) return 'This URL is blacklisted and should be avoided.';
       if (!this.results.is_safe) return 'This URL has been flagged as potentially unsafe. Exercise caution when visiting.';
       if (this.results.matches?.length) return `URL matched security database entries. Review carefully before proceeding.`;
@@ -377,6 +393,7 @@ export default {
 .status-desc {
   color: var(--text-secondary);
   margin: 0;
+  padding: 1rem;
   line-height: 1.5;
 }
 
@@ -441,10 +458,15 @@ export default {
 }
 
 .threats-list {
-  background: white;
+  background: var(--violet-light);
   border-radius: 12px;
   padding: 1.5rem;
+  margin-bottom: 1.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .threats-title {

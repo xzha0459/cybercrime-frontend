@@ -55,11 +55,16 @@ export function checkTokenExpiration() {
   const accessToken = localStorage.getItem('access_token')
   const refreshToken = localStorage.getItem('refresh_token')
 
+  // 如果没有token，说明用户未登录，不需要检查
+  if (!accessToken && !refreshToken) {
+    return true
+  }
+
   let accessTokenExpired = false
   let refreshTokenExpired = false
 
   // 检查access token是否过期
-  if (isTokenExpired(accessToken)) {
+  if (accessToken && isTokenExpired(accessToken)) {
     accessTokenExpired = true
     // 立即删除过期的access token
     localStorage.removeItem('access_token')
@@ -67,7 +72,7 @@ export function checkTokenExpiration() {
   }
 
   // 检查refresh token是否过期
-  if (isTokenExpired(refreshToken)) {
+  if (refreshToken && isTokenExpired(refreshToken)) {
     refreshTokenExpired = true
     // 立即删除过期的refresh token
     localStorage.removeItem('refresh_token')
@@ -99,12 +104,16 @@ export function checkTokenExpiration() {
 export function getValidAccessToken() {
   const accessToken = localStorage.getItem('access_token')
 
-  if (!accessToken || isTokenExpired(accessToken)) {
-    // 如果access token过期，立即删除
-    if (accessToken) {
-      localStorage.removeItem('access_token')
-      console.log('Expired access token removed in getValidAccessToken')
-    }
+  // 如果没有access token，直接返回null（用户未登录）
+  if (!accessToken) {
+    return null
+  }
+
+  // 如果access token过期
+  if (isTokenExpired(accessToken)) {
+    // 立即删除过期的access token
+    localStorage.removeItem('access_token')
+    console.log('Expired access token removed in getValidAccessToken')
 
     // 检查refresh token
     const refreshToken = localStorage.getItem('refresh_token')

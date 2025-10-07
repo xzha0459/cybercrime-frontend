@@ -154,16 +154,14 @@ const isAnswerCorrect = ref(null)
 
 const fetchVideo = async () => {
   const token = localStorage.getItem('access_token')
-  if (!token) {
-    console.error('No access token found')
-    return
-  }
+  const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
   try {
     loading.value = true
-    const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    const response = await fetch(
+      'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/',
+      { headers }
+    )
 
     if (!response.ok) {
       console.error('Failed to fetch videos')
@@ -172,7 +170,9 @@ const fetchVideo = async () => {
 
     const videosData = await response.json()
     const currentId = route.params.id
-    const foundVideo = videosData.find(v => v.id === currentId || v.id === currentId.toString())
+    const foundVideo = videosData.find(
+      (v) => v.id === currentId || v.id === currentId.toString()
+    )
 
     if (!foundVideo) {
       console.error('Video not found')
@@ -185,8 +185,6 @@ const fetchVideo = async () => {
     showRecommendations.value = false
     selectedAnswer.value = null
     isAnswerCorrect.value = null
-
-
   } catch (err) {
     console.error('Error fetching video:', err)
   } finally {

@@ -47,6 +47,7 @@
 
 <script>
 import { ref, onMounted } from "vue"
+import { getValidAccessToken } from '@/utils/auth.js'
 
 const API_BASE_URL = "https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com"
 
@@ -65,9 +66,14 @@ export default {
     ]
 
     const getAccessToken = () => {
-      const token = localStorage.getItem("access_token")
-      if (!token) throw new Error("No access token found")
-      return token
+      try {
+        const token = getValidAccessToken()
+        if (!token) throw new Error("No valid access token found")
+        return token
+      } catch (error) {
+        console.error("Error getting access token:", error)
+        throw error
+      }
     }
 
     const fetchPrivacySettings = async () => {

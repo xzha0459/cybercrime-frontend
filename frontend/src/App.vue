@@ -20,6 +20,7 @@ import NavigationBar from '@/components/NavigationBar.vue'
 import ChatBot from '@/components/ChatBot.vue'
 import BackToTop from '@/components/BackToTop.vue'
 import Toast from '@/components/PopToast.vue'
+import { startTokenExpirationCheck, stopTokenExpirationCheck } from '@/utils/auth.js'
 
 export default {
   name: 'App',
@@ -36,6 +37,14 @@ export default {
     isChallengePage() {
       return this.$route.path === '/challenge'
     }
+  },
+  mounted() {
+    // 启动token过期检查
+    startTokenExpirationCheck()
+  },
+  beforeUnmount() {
+    // 停止token过期检查
+    stopTokenExpirationCheck()
   }
 }
 </script>

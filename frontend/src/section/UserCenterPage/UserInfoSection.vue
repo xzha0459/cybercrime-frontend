@@ -78,6 +78,7 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getValidAccessToken } from '@/utils/auth.js'
 // 导入badge图片
 import NoviceScholarBadge from '@/assets/Badges/Novice Scholar.png'
 import KnowledgeExplorerBadge from '@/assets/Badges/Knowledge Explorer.png'
@@ -158,9 +159,9 @@ export default {
     // 获取Access Token
     const getAccessToken = () => {
       try {
-        const token = localStorage.getItem('access_token')
+        const token = getValidAccessToken()
         if (!token) {
-          throw new Error('No access token found')
+          throw new Error('No valid access token found')
         }
         return token
       } catch (error) {

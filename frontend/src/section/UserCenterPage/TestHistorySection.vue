@@ -184,6 +184,8 @@
 
 <script>
 
+import { getValidAccessToken } from '@/utils/auth.js'
+
 export default {
   name: 'TestHistorySection',
   data() {
@@ -247,9 +249,9 @@ export default {
     // 获取Access Token
     async getAccessToken() {
       try {
-        const token = localStorage.getItem('access_token')
+        const token = getValidAccessToken()
         if (!token) {
-          throw new Error('No access token found')
+          throw new Error('No valid access token found')
         }
         return token
       } catch (error) {

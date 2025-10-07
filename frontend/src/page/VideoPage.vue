@@ -154,15 +154,18 @@ const isAnswerCorrect = ref(null)
 
 const fetchVideo = async () => {
   const token = localStorage.getItem('access_token')
-  if (!token) {
-    console.error('No access token found')
-    return
-  }
 
   try {
     loading.value = true
+
+    // 构建请求头
+    const headers = {}
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+
     const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers
     })
 
     if (!response.ok) {
@@ -185,7 +188,6 @@ const fetchVideo = async () => {
     showRecommendations.value = false
     selectedAnswer.value = null
     isAnswerCorrect.value = null
-
 
   } catch (err) {
     console.error('Error fetching video:', err)
@@ -241,18 +243,18 @@ const handleSaveProgress = async (progressData) => {
 
 const fetchRelatedVideos = async (id) => {
   const token = localStorage.getItem('access_token')
-  if (!token) {
-    console.error('No access token found')
-    return
-  }
 
   try {
+    // 构建请求头
+    const headers = {}
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+
     const response = await fetch(
       `https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/videos/${id}/related/`,
       {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers
       }
     )
 

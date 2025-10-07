@@ -51,17 +51,39 @@ export function checkTokenExpiration() {
   const accessToken = localStorage.getItem('access_token')
   const refreshToken = localStorage.getItem('refresh_token')
 
+  let accessTokenExpired = false
+  let refreshTokenExpired = false
+
+  // 检查access token是否过期
+  if (isTokenExpired(accessToken)) {
+    accessTokenExpired = true
+    // 立即删除过期的access token
+    localStorage.removeItem('access_token')
+    console.log('Access token expired and removed')
+  }
+
+  // 检查refresh token是否过期
+  if (isTokenExpired(refreshToken)) {
+    refreshTokenExpired = true
+    // 立即删除过期的refresh token
+    localStorage.removeItem('refresh_token')
+    console.log('Refresh token expired and removed')
+  }
+
   // 如果两个token都过期了，自动登出
-  if (isTokenExpired(accessToken) && isTokenExpired(refreshToken)) {
+  if (accessTokenExpired && refreshTokenExpired) {
+    // 删除用户信息
+    localStorage.removeItem('user_info')
     autoLogout()
     return false
   }
 
   // 如果access token过期但refresh token还有效，可以尝试刷新
-  if (isTokenExpired(accessToken) && !isTokenExpired(refreshToken)) {
+  if (accessTokenExpired && !refreshTokenExpired) {
     console.log('Access token expired, refresh token still valid')
     // 这里可以添加token刷新逻辑
     // 暂时先登出，后续可以实现token刷新
+    localStorage.removeItem('user_info')
     autoLogout()
     return false
   }
@@ -74,15 +96,28 @@ export function getValidAccessToken() {
   const accessToken = localStorage.getItem('access_token')
 
   if (!accessToken || isTokenExpired(accessToken)) {
+    // 如果access token过期，立即删除
+    if (accessToken) {
+      localStorage.removeItem('access_token')
+      console.log('Expired access token removed in getValidAccessToken')
+    }
+
     // 检查refresh token
     const refreshToken = localStorage.getItem('refresh_token')
     if (!refreshToken || isTokenExpired(refreshToken)) {
+      // 如果refresh token也过期，删除并登出
+      if (refreshToken) {
+        localStorage.removeItem('refresh_token')
+        console.log('Expired refresh token removed in getValidAccessToken')
+      }
+      localStorage.removeItem('user_info')
       autoLogout()
       return null
     }
 
     // 如果refresh token有效但access token过期，暂时登出
     // 后续可以实现token刷新逻辑
+    localStorage.removeItem('user_info')
     autoLogout()
     return null
   }

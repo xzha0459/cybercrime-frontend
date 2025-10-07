@@ -4,7 +4,7 @@
       <div class="section-header">
         <div class="title-section">
           <h2 class="section-title">Leaderboard</h2>
-          <p class="section-subtitle">{{ currentView === 'users' ? 'Top 10 performers in cybersecurity challenges' : 'Top 10 teams by total points' }}</p>
+          <p class="section-subtitle">{{ currentView === 'users' ? 'Top 10 performers in cybersecurity challenges' : 'Top 5 teams by total points' }}</p>
         </div>
       </div>
 
@@ -39,7 +39,6 @@
         <p>{{ error }}</p>
         <div class="error-actions">
           <button @click="loadData" class="retry-btn">Try Again</button>
-          <router-link v-if="error.includes('sign in')" to="/signin" class="signin-btn">Sign In</router-link>
         </div>
       </div>
 
@@ -136,22 +135,26 @@ export default {
 
     const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
 
-    // 获取全局排行榜数据
+    // 获取全局排行榜数据（公开访问）
     const fetchGlobalLeaderboard = async () => {
       try {
         const accessToken = localStorage.getItem('access_token')
-        if (!accessToken) {
-          throw new Error('No access token found')
+
+        const headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+
+        // 如果有token，添加到headers中
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`
         }
 
         const response = await fetch(`${API_BASE_URL}/leaderboard/global/`, {
           method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          }
+          headers: headers
         })
+
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data')
         }
@@ -163,22 +166,26 @@ export default {
       }
     }
 
-    // 获取团队排行榜数据
+    // 获取团队排行榜数据（公开访问）
     const fetchTeamsLeaderboard = async () => {
       try {
         const accessToken = localStorage.getItem('access_token')
-        if (!accessToken) {
-          throw new Error('No access token found')
+
+        const headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+
+        // 如果有token，添加到headers中
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`
         }
 
         const response = await fetch(`${API_BASE_URL}/leaderboard/teams/`, {
           method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          }
+          headers: headers
         })
+
         if (!response.ok) {
           throw new Error('Failed to fetch teams leaderboard data')
         }
@@ -234,13 +241,6 @@ export default {
         loading.value = true
         error.value = null
 
-        // 检查是否有访问令牌
-        const accessToken = localStorage.getItem('access_token')
-        if (!accessToken) {
-          error.value = 'Please sign in to view the leaderboard'
-          return
-        }
-
         if (currentView.value === 'users') {
           // 获取全局排行榜数据
           const globalData = await fetchGlobalLeaderboard()
@@ -248,16 +248,11 @@ export default {
         } else {
           // 获取团队排行榜数据
           const teamsData = await fetchTeamsLeaderboard()
-
-          leaderboardData.value = teamsData.slice(0, 10) // 取前10个团队
+          leaderboardData.value = teamsData.slice(0, 5) // 取前5个团队
         }
 
       } catch (err) {
-        if (err.message === 'No access token found') {
-          error.value = 'Please sign in to view the leaderboard'
-        } else {
-          error.value = 'Failed to load leaderboard data'
-        }
+        error.value = 'Failed to load leaderboard data'
         console.error('Error loading data:', err)
       } finally {
         loading.value = false

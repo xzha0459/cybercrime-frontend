@@ -285,8 +285,6 @@ const fetchCompletedResources = async () => {
     completedVideos.value = new Set(videoTitles)
     completedArticles.value = new Set(articleTitles)
 
-    console.log("✅ Completed videos:", completedVideos.value)
-    console.log("✅ Completed articles:", completedArticles.value)
   } catch (err) {
     console.error("Error fetching completed tasks:", err)
   }
@@ -381,7 +379,7 @@ const openOriginalLink = async () => {
 
     // Show toast after successful article click
     if (data && data.awarded === true) {
-      window.showActivityToast()
+      window.showActivityToast(15000)
     }
 
     // ✅ Reload page after a short delay (so toast still shows)

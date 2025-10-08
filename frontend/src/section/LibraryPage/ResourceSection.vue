@@ -68,6 +68,7 @@
           :key="article.id"
           href="javascript:void(0)"
           class="article-card"
+          :class="{ completed: completedArticles.has(article.title.trim().toLowerCase()) }"
           @click.prevent="handleArticleClick(article)"
         >
           <div class="card-thumbnail article-thumbnail">
@@ -77,6 +78,7 @@
               class="thumbnail-image"
               @error="onImageError"
             />
+            <div v-if="completedArticles.has(article.title.trim().toLowerCase())" class="completed-badge">✓ Completed</div>
             <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
           </div>
 
@@ -94,12 +96,14 @@
         <!-- Videos -->
         <div
           v-for="video in displayedVideos"
-          :key="`video-${video.id}`"
-          class="content-card video-card"
+          :key="video.id"
+          class="video-card"
+          :class="{ completed: completedVideos.has(video.title.trim().toLowerCase()) }"
           @click="loadVideo(video.id)"
         >
-          <div class="card-thumbnail video-thumbnail">
+          <div class="video-thumbnail">
             <img :src="getYouTubeThumbnail(video.link)" :alt="video.title" class="thumbnail-image" />
+            <div v-if="completedVideos.has(video.title.trim().toLowerCase())" class="completed-badge">✓ Completed</div>
             <div class="play-overlay">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
@@ -127,6 +131,7 @@
           :key="article.id"
           href="javascript:void(0)"
           class="article-card"
+          :class="{ completed: completedArticles.has(article.title.trim().toLowerCase()) }"
           @click.prevent="handleArticleClick(article)"
         >
           <div class="article-thumbnail">
@@ -136,6 +141,7 @@
               class="thumbnail-image"
               @error="onImageError"
             />
+            <div v-if="completedArticles.has(article.title.trim().toLowerCase())" class="completed-badge">✓ Completed</div>
             <div class="duration-badge">{{ article.suggested_reading_time }} min</div>
           </div>
 
@@ -159,10 +165,12 @@
           v-for="video in displayedVideos"
           :key="video.id"
           class="video-card"
+          :class="{ completed: completedVideos.has(video.title.trim().toLowerCase()) }"
           @click="loadVideo(video.id)"
         >
           <div class="video-thumbnail">
             <img :src="getYouTubeThumbnail(video.link)" :alt="video.title" class="thumbnail-image" />
+            <div v-if="completedVideos.has(video.title.trim().toLowerCase())" class="completed-badge">✓ Completed</div>
             <div class="play-overlay">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
@@ -225,6 +233,8 @@ import placeholderImage from '@/assets/placeholder.jpg'
 
 const router = useRouter()
 
+const completedVideos = ref(new Set())
+const completedArticles = ref(new Set())
 const videos = ref([])
 const showAllVideos = ref(false)
 const showAllArticles = ref(false)
@@ -235,6 +245,56 @@ const articles = ref([])
 const showArticlePopup = ref(false)
 const selectedArticle = ref(null)
 
+
+const fetchCompletedResources = async () => {
+  const token = localStorage.getItem("access_token")
+  if (!token) return
+
+  try {
+    const res = await fetch("https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/leaderboard/activity", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    if (!res.ok) {
+      console.error("Failed to fetch task log")
+      return
+    }
+
+    const data = await res.json()
+
+    // Extract completed video titles
+    const videoTitles = data
+      .filter(
+        t =>
+          t.reward === "WATCH_VIDEO" ||
+          (t.meta && t.meta.event === "video_completed")
+      )
+      .map(t => t.meta?.video_title?.trim().toLowerCase())
+      .filter(Boolean)
+
+    // Extract completed article titles
+    const articleTitles = data
+      .filter(
+        t =>
+          t.reward === "READ_ARTICLE" ||
+          (t.meta && t.meta.event === "article_clicked")
+      )
+      .map(t => t.meta?.article_title?.trim().toLowerCase())
+      .filter(Boolean)
+
+    completedVideos.value = new Set(videoTitles)
+    completedArticles.value = new Set(articleTitles)
+
+    console.log("✅ Completed videos:", completedVideos.value)
+    console.log("✅ Completed articles:", completedArticles.value)
+  } catch (err) {
+    console.error("Error fetching completed tasks:", err)
+  }
+}
+
+const refreshCompletedResources = async () => {
+  await fetchCompletedResources()
+}
 
 
 const fetchArticles = async () => {
@@ -321,10 +381,12 @@ const openOriginalLink = async () => {
 
     // Show toast after successful article click
     if (data && data.awarded === true) {
-      setTimeout(() => {
-        window.showActivityToast()
-      }, 1000)
+      window.showActivityToast()
     }
+
+    // ✅ Reload page after a short delay (so toast still shows)
+    await refreshCompletedResources()
+    
   } catch (err) {
     console.error("Error awarding article points:", err)
   }
@@ -464,6 +526,8 @@ const getViewMoreText = () => {
 onMounted(async () => {
   await fetchVideos()
   await fetchArticles()
+  await fetchCompletedResources()
+
 
 })
 </script>
@@ -636,6 +700,26 @@ onMounted(async () => {
 }
 
 /* Card Content */
+
+.completed-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(56, 201, 74, 0.9);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  z-index: 5;
+}
+
+.video-card.completed,
+.article-card.completed {
+  opacity: 0.8;
+  filter: grayscale(0.3);
+}
+
 .video-info,
 .article-info {
   padding: 1rem;

@@ -3,9 +3,9 @@
     <!-- 未认证时显示注册提示 -->
     <div v-if="!isAuthenticated" class="auth-required">
       <div class="auth-card">
-        <h2>Sign Up Required</h2>
-        <p>Please sign up to access the cybersecurity challenges</p>
-        <button @click="redirectToSignUp" class="signup-btn">Sign Up</button>
+        <h2>Sign In Required</h2>
+        <p>Please sign in to access the cybersecurity challenges</p>
+        <button @click="redirectToSignUp" class="signup-btn">Sign In</button>
       </div>
     </div>
 
@@ -437,7 +437,7 @@ export default {
 
     // Redirect to sign up function
     const redirectToSignUp = () => {
-      router.push('/signup')
+      router.push('/signin')
     }
 
     // 获取Access Token

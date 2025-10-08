@@ -5,7 +5,7 @@
         <!-- 左侧列 - 公司信息 -->
         <div class="footer-column">
           <div class="company-info">
-            <h3 class="company-name">Prime Hexa</h3>
+            <h3 class="company-name">Prism Sync</h3>
             <p class="company-tagline">FOSTER DIGITAL CITIZENSHIP</p>
             <div class="social-icons">
               <div class="social-icon">
@@ -94,7 +94,7 @@
       <!-- 版权信息 -->
       <div class="footer-divider"></div>
       <div class="copyright">
-        <p>COPYRIGHT @Prime Hexa</p>
+        <p>COPYRIGHT @Prism Sync</p>
       </div>
     </div>
   </footer>

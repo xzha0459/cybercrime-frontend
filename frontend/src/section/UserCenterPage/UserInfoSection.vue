@@ -18,9 +18,9 @@
               <div class="user-details">
                 <div class="username-container">
                   <h3 class="username">{{ userInfo.username || 'User' }}</h3>
-                  <div v-if="getUserBadges(points).length > 0" class="user-badges">
+                  <div v-if="getUserBadges().length > 0" class="user-badges">
                     <div
-                      v-for="badge in getUserBadges(points)"
+                      v-for="badge in getUserBadges()"
                       :key="badge.name"
                       class="user-badge"
                     >
@@ -28,7 +28,10 @@
                     </div>
                   </div>
                 </div>
-                <p v-if="userInfo.age" class="age">Age: {{ userInfo.age }}</p>
+                <div v-if="badgeInfo" class="badge-container">
+                  <span class="badge-label">Title:</span>
+                  <span class="badge">{{ badgeInfo.name }}</span>
+                </div>
                 <p v-if="userInfo.createdAt" class="member-since">
                   Member since: {{ formatDate(userInfo.createdAt) }}
                 </p>
@@ -94,6 +97,7 @@ export default {
     const userInfo = ref(null)
     const authError = ref(null)
     const points = ref(0)
+    const badgeInfo = ref(null)
 
     const checkAuthStatus = async () => {
       try {
@@ -116,12 +120,7 @@ export default {
         isAuthenticated.value = true
         userInfo.value = {
           username: storedUserInfo.username || 'User',
-          email: storedUserInfo.email || 'No email available',
-          age: storedUserInfo.age || null,
           createdAt: storedUserInfo.date_joined || new Date().toISOString(),
-          testCount: 0,
-          linkChecks: 0,
-          libraryVisits: 0,
         }
 
         // 获取用户积分
@@ -139,7 +138,7 @@ export default {
 
     const getUserInitial = () => {
       if (!userInfo.value) return '?'
-      const name = userInfo.value.username || userInfo.value.email
+      const name = userInfo.value.username
       return name.charAt(0).toUpperCase()
     }
 
@@ -170,17 +169,18 @@ export default {
       }
     }
 
-    // 获取用户积分
+    // 获取用户积分和徽章信息
     const fetchUserStats = async () => {
       try {
         const accessToken = localStorage.getItem('access_token')
         if (!accessToken) {
           points.value = 0
+          badgeInfo.value = null
           return
         }
 
         const API_BASE_URL = 'https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com'
-        const response = await fetch(`${API_BASE_URL}/stats/`, {
+        const response = await fetch(`${API_BASE_URL}/leaderboard/me/`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -192,12 +192,15 @@ export default {
         if (response.ok) {
           const data = await response.json()
           points.value = data.points || 0
+          badgeInfo.value = data.badge || null
         } else {
           points.value = 0
+          badgeInfo.value = null
         }
       } catch (err) {
         console.error('Error fetching user stats:', err)
         points.value = 0
+        badgeInfo.value = null
       }
     }
 
@@ -212,8 +215,9 @@ export default {
     }
 
     // 根据积分获取所有符合条件的徽章
-    const getUserBadges = (userPoints) => {
+    const getUserBadges = () => {
       const badges = []
+      const userPoints = points.value
 
       if (userPoints >= 10) {
         badges.push({
@@ -256,6 +260,7 @@ export default {
       userInfo,
       authError,
       points,
+      badgeInfo,
       getUserInitial,
       formatDate,
       goToSignIn,
@@ -274,7 +279,6 @@ export default {
 .user-info-container {
   max-width: 1600px;
   margin: 0 auto;
-  /* padding: 0 2rem; */
 }
 
 .section-title {
@@ -420,10 +424,34 @@ export default {
   object-fit: contain;
 }
 
-.age, .member-since {
+.member-since {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
   color: var(--violet-deep);
+}
+
+.badge-container {
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-label {
+  font-size: 1rem;
+  color: var(--violet-deep);
+  font-weight: 500;
+}
+
+.badge {
+  background: var(--violet-deep);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 /* Not Authenticated State */
@@ -551,11 +579,4 @@ export default {
   }
 }
 
-@media (max-width: 480px) {
-  .user-profile {
-    padding: 1rem;
-  }
-
-
-}
 </style>

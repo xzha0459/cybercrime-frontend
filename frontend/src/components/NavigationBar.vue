@@ -24,7 +24,7 @@
 
       <!-- Desktop Right side buttons -->
       <div class="nav-buttons desktop-nav">
-        <div v-if="!isAuthenticated">
+        <div v-if="!isAuthenticated" class="auth-buttons">
           <button @click="goToSignIn" class="btn btn-signin" :disabled="loading">
             {{ loading ? 'Loading...' : 'Sign In' }}
           </button>
@@ -83,7 +83,7 @@
 
         <!-- Mobile User Section -->
         <div class="mobile-user-section">
-          <div v-if="!isAuthenticated">
+          <div v-if="!isAuthenticated" class="mobile-auth-buttons">
             <button @click="goToSignIn" class="btn btn-signin mobile-btn" :disabled="loading">
               {{ loading ? 'Loading...' : 'Sign In' }}
             </button>
@@ -325,8 +325,18 @@ export default {
   transition: all 0.3s ease;
 }
 
-.nav-link:hover {
+/* Common hover effects */
+.nav-link:hover,
+.dropdown-item:hover {
   background: var(--violet-sage);
+}
+
+.btn-signin:hover:not(:disabled),
+.btn-logout:hover,
+.mobile-nav-link:hover,
+.mobile-dropdown-item:hover {
+  background: var(--violet-medium);
+  color: var(--text-light);
 }
 
 .nav-link.router-link-active {
@@ -376,20 +386,11 @@ export default {
 
 .dropdown-menu .dropdown-item {
   display: block;
-  padding: 12px 16px;
   text-decoration: none;
-  color: var(--text-primary);
   font-weight: 500;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.dropdown-menu .dropdown-item:last-child {
-  border-bottom: none;
 }
 
 .dropdown-menu .dropdown-item:hover {
-  background: var(--violet-sage);
   color: var(--violet-dark);
 }
 
@@ -416,6 +417,11 @@ export default {
 .nav-buttons {
   display: flex;
   gap: 1rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .user-menu {
@@ -474,10 +480,6 @@ export default {
   border-bottom: none;
 }
 
-.dropdown-item:hover {
-  background: var(--violet-sage);
-}
-
 .user-email {
   color: var(--text-primary);
   font-weight: 500;
@@ -485,7 +487,6 @@ export default {
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   border: 1px solid var(--border-light);
-  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -501,7 +502,7 @@ export default {
 }
 
 .btn {
-  padding: 0.6rem 1.5rem;
+  padding: 0.6rem 1rem;
   border-radius: 6px;
   border: none;
   font-weight: 600;
@@ -537,11 +538,6 @@ export default {
   background: transparent;
   color: var(--text-primary);
   border: 2px solid var(--violet-medium);
-}
-
-.btn-logout:hover {
-  background: var(--violet-medium);
-  color: var(--text-light);
 }
 
 /* Mobile Menu Button */
@@ -660,11 +656,6 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.mobile-nav-link:hover {
-  background: var(--violet-medium);
-  color: var(--text-light);
-}
-
 .mobile-nav-link.router-link-active {
   background: var(--violet-dark);
   color: var(--text-light);
@@ -713,11 +704,6 @@ export default {
   border-bottom: none;
 }
 
-.mobile-dropdown-item:hover {
-  background: var(--violet-medium);
-  color: var(--text-light);
-}
-
 .mobile-dropdown-item.router-link-active {
   background: var(--violet-dark);
   color: var(--text-light);
@@ -726,6 +712,12 @@ export default {
 .mobile-user-section {
   border-top: 1px solid var(--border-light);
   padding-top: 1.5rem;
+}
+
+.mobile-auth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .mobile-user-menu {
@@ -763,29 +755,6 @@ export default {
 .mobile-username {
   color: var(--text-primary);
   font-weight: 500;
-}
-
-.mobile-user-email {
-  color: var(--text-primary);
-  font-weight: 500;
-  background: var(--violet-sage);
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-light);
-  text-align: center;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mobile-user-email.clickable {
-  cursor: pointer;
-}
-
-.mobile-user-email.clickable:hover {
-  background: var(--violet-dark);
-  color: var(--text-light);
 }
 
 .mobile-btn {

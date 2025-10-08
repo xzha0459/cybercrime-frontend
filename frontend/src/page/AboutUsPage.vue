@@ -3,7 +3,7 @@
     <div class="page-content">
       <div class="page-header">
         <div class="container">
-          <h1 class="page-title">About GuardU</h1>
+          <h1 class="page-title">About CyberHabit Hub</h1>
           <p class="page-subtitle">Empowering Digital Citizens Through Cybersecurity Education and Support</p>
         </div>
       </div>
@@ -12,7 +12,7 @@
         <div class="page-body">
           <div class="about-section">
             <h2>Our Mission</h2>
-            <p>At GuardU, we believe that cybersecurity education should be accessible, engaging, and empowering for everyone. Our mission is to foster digital citizenship by providing comprehensive cybersecurity education, practical tools, and support resources that help individuals and communities navigate the digital world safely and confidently.</p>
+            <p>At CyberHabit Hub, we believe that cybersecurity education should be accessible, engaging, and empowering for everyone. Our mission is to foster digital citizenship by providing comprehensive cybersecurity education, practical tools, and support resources that help individuals and communities navigate the digital world safely and confidently.</p>
           </div>
 
           <div class="about-section">
@@ -81,7 +81,7 @@
 
           <div class="about-section">
             <h2>Our Team</h2>
-            <p>GuardU is developed by Prime Hexa, a dedicated team of cybersecurity experts, educators, and developers committed to making the digital world safer for everyone. Our diverse team brings together decades of experience in:</p>
+            <p>CyberHabit Hub is developed by Prism Sync, a dedicated team of cybersecurity experts, educators, and developers committed to making the digital world safer for everyone. Our diverse team brings together decades of experience in:</p>
             <ul class="team-skills">
               <li>Cybersecurity research and analysis</li>
               <li>Educational technology and curriculum design</li>
@@ -115,7 +115,7 @@
 
           <div class="about-section">
             <h2>Get Involved</h2>
-            <p>Join our mission to create a safer digital world. Whether you're looking to learn, contribute, or collaborate, there are many ways to get involved with GuardU:</p>
+            <p>Join our mission to create a safer digital world. Whether you're looking to learn, contribute, or collaborate, there are many ways to get involved with CyberHabit Hub:</p>
             <div class="involvement-grid">
               <div class="involvement-card">
                 <h3>For Learners</h3>
@@ -149,7 +149,7 @@
 
           <div class="about-section quote">
             <h2>Together, We Build a Safer Digital Future</h2>
-            <p>"Cybersecurity is not just about technology—it's about people, education, and community. At GuardU, we're committed to empowering every digital citizen with the knowledge and tools they need to thrive safely online."</p>
+            <p>"Cybersecurity is not just about technology—it's about people, education, and community. At CyberHabit Hub, we're committed to empowering every digital citizen with the knowledge and tools they need to thrive safely online."</p>
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@
       <div class="container">
         <div class="page-body">
           <div class="privacy-section">
-            <h2>Privacy Policy - GuardU</h2>
+            <h2>Privacy Policy - CyberHabit Hub</h2>
             <p class="last-updated">Last updated: October 6, 2025</p>
             <p>Hey there! We know privacy policies can be boring, so we'll keep this short and sweet.</p>
           </div>
@@ -112,7 +112,7 @@
           </div>
 
           <div class="privacy-section quote">
-            <h2>TL;DR</h2>
+            <h2>Quick Summary</h2>
             <p><strong>We check if your links are safe, give you an anonymous login, let you join our community with zero personal info, and forget everything except the progress stats you choose to share. Your privacy = still 100% protected.</strong></p>
           </div>
         </div>

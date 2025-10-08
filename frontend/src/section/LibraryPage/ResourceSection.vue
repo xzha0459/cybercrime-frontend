@@ -315,23 +315,22 @@ const openOriginalLink = async () => {
     })
 
     const data = await res.json().catch(() => null)
-    console.log("Article click response:", res.status, data)
-
     if (!res.ok) {
       throw new Error(`Failed with status ${res.status}`)
     }
 
     // Show toast after successful article click
-    setTimeout(() => {
-      window.showActivityToast()
-    }, 1000)
+    if (data && data.awarded === true) {
+      setTimeout(() => {
+        window.showActivityToast()
+      }, 1000)
+    }
   } catch (err) {
     console.error("Error awarding article points:", err)
   }
-
+  
   // Close popup and open link
   closeArticlePopup()
-  console.log('Attempting to open:', articleLink)
   window.open(articleLink, "_blank", "noopener,noreferrer")
 }
 

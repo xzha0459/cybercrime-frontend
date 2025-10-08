@@ -3,7 +3,7 @@
     <div class="nav-container">
       <!-- Logo/Brand -->
       <div class="nav-brand" @click="goToHome">
-        <img src="./../assets/logo.png" alt="GuardU Logo" class="nav-logo">GuardU
+        <img src="./../assets/logo.png" alt="GuardU Logo" class="nav-logo">CyberHabit Hub
       </div>
 
       <!-- Desktop Navigation Links -->

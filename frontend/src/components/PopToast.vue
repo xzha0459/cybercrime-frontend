@@ -21,7 +21,7 @@ const toastData = ref({
   points: 0
 })
 
-const showActivityToast = async () => {
+const showActivityToast = async (duration = 6000) => {
   try {
     const token = localStorage.getItem("access_token")
     const response = await fetch('https://godo2xgjc9.execute-api.ap-southeast-2.amazonaws.com/leaderboard/activity/', {
@@ -68,6 +68,10 @@ const showActivityToast = async () => {
         }
 
         showToast.value = true
+
+        setTimeout(() => {
+          showToast.value = false
+        }, duration)
       }
     }
   } catch (error) {

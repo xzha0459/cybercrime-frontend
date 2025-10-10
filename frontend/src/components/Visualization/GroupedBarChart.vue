@@ -253,12 +253,12 @@ export default {
         'Median amount lost after recoveries': 'Net Loss'
       }
 
-      // 颜色配置
+      // 颜色配置 - 现代配色方案
       const colors = {
-        'Direct Loss': '#FF4757',           // 鲜红色 - 直接损失
-        'Additional Costs': '#FFA502',      // 亮橙色 - 额外成本
-        'Amount Recovered': '#2ED573',      // 亮绿色 - 恢复金额
-        'Net Loss': '#3742FA'              // 亮蓝色 - 净损失
+        'Direct Loss': '#8B5A96',           // 紫色 - 直接损失
+        'Additional Costs': '#E67E22',      // 橙色 - 额外成本
+        'Amount Recovered': '#16A085',      // 青绿色 - 恢复金额
+        'Net Loss': '#34495E'              // 深灰蓝 - 净损失
       }
 
       return {

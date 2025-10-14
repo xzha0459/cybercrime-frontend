@@ -1,7 +1,10 @@
 <template>
   <section class="resource-section">
     <div class="section-header">
-      <h2 class="section-title">Learning Resources</h2>
+      <div class="title-container">
+        <h2 class="section-title">Learning Resources</h2>
+        <ScoringRulesButton />
+      </div>
       <p class="section-description">
         Access 3-5 minute cybersecurity videos and articles perfect for learning during breaks
       </p>
@@ -216,9 +219,13 @@
           <p class="popup-description">{{ selectedArticle?.description }}</p>
         </div>
 
+        <div class="popup-warning">
+          <p class="warning-text">You will leave our website to an external website！</p>
+        </div>
+
         <div class="popup-footer">
           <button class="popup-btn cancel-btn" @click="closeArticlePopup">Cancel</button>
-          <button class="popup-btn read-btn" @click="openOriginalLink">Read Original</button>
+          <button class="popup-btn read-btn" @click="openOriginalLink">Leave</button>
         </div>
       </div>
     </div>
@@ -230,6 +237,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import placeholderImage from '@/assets/placeholder.jpg'
+import ScoringRulesButton from '@/components/ScoringRulesButton.vue'
 
 const router = useRouter()
 
@@ -384,11 +392,11 @@ const openOriginalLink = async () => {
 
     // ✅ Reload page after a short delay (so toast still shows)
     await refreshCompletedResources()
-    
+
   } catch (err) {
     console.error("Error awarding article points:", err)
   }
-  
+
   // Close popup and open link
   closeArticlePopup()
   window.open(articleLink, "_blank", "noopener,noreferrer")
@@ -536,11 +544,19 @@ onMounted(async () => {
   margin-bottom: 3rem;
 }
 
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
 .section-title {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .section-description {
@@ -847,10 +863,10 @@ onMounted(async () => {
   height: 100%;
   background: rgba(0, 0, 0, 0.3);
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
   z-index: 9999;
-  padding: 0.5rem;
+  padding: 1rem;
 }
 
 .popup-content {
@@ -885,6 +901,21 @@ onMounted(async () => {
   color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
+}
+
+.popup-warning {
+  padding: 0 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.warning-text {
+  font-size: 0.9rem;
+  color: var(--violet-deep);
+  font-weight: 500;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: var(--violet-light);
+  border-radius: 8px;
 }
 
 .popup-footer {

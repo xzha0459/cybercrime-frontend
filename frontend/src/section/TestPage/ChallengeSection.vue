@@ -51,6 +51,7 @@
                 <div class="step-line" v-if="step < 3"></div>
               </div>
             </div>
+            <ScoringRulesButton />
           </div>
 
           <!-- Level Header -->
@@ -348,15 +349,32 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notification -->
+    <div v-if="showToast" class="level-toast">
+      <div class="toast-content">
+        <div class="toast-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+        </div>
+        <div class="toast-message">{{ toastMessage }}</div>
+        <button @click="showToast = false" class="toast-close">&times;</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import ScoringRulesButton from '@/components/ScoringRulesButton.vue'
 
 export default {
   name: 'ChallengeSection',
+  components: {
+    ScoringRulesButton
+  },
   emits: ['challenge-status-changed'],
   setup(props, { emit }) {
     const router = useRouter()
@@ -578,10 +596,29 @@ export default {
     // Methods
 
     // 切换level显示
+    // Toast state
+    const showToast = ref(false)
+    const toastMessage = ref('')
+
+    const showToastMessage = (message) => {
+      toastMessage.value = message
+      showToast.value = true
+      setTimeout(() => {
+        showToast.value = false
+      }, 3000)
+    }
+
     const switchLevel = (level) => {
       if (isLevelUnlocked(level)) {
         currentLevel.value = level
         selectedModule.value = null
+      } else {
+        // Show toast for locked level
+        if (level === 3) {
+          showToastMessage('Please complete Level 2 first to unlock Level 3')
+        } else if (level === 2) {
+          showToastMessage('Please complete Level 1 first to unlock Level 2')
+        }
       }
     }
 
@@ -1131,6 +1168,10 @@ export default {
       historyLoading,
       selectedHistoryAttempt,
 
+      // Toast state
+      showToast,
+      toastMessage,
+
       // Methods
       switchLevel,
       selectModule,
@@ -1197,6 +1238,10 @@ export default {
 /* Progress Indicator */
 .progress-indicator {
   margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 }
 
 .progress-steps {
@@ -1931,58 +1976,6 @@ export default {
   background: var(--violet-dark);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .module-cards {
-    grid-template-columns: 1fr;
-    gap: 25px;
-  }
-}
-
-@media (max-width: 768px) {
-  .challenge-content {
-    padding: 10px;
-  }
-
-  .task-title {
-    font-size: 2rem;
-  }
-
-  .task-description {
-    font-size: 1rem;
-  }
-
-  .module-cards {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .module-card {
-    padding: 20px;
-    height: auto;
-    min-height: 250px;
-  }
-
-  .module-icon {
-    width: 50px;
-    height: 50px;
-  }
-
-  .module-icon svg {
-    width: 40px;
-    height: 40px;
-  }
-
-  .progress-steps {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .step-line {
-    width: 40px;
-  }
-}
-
 /* Challenge Levels Styles */
 .challenge-levels {
   max-width: 1200px;
@@ -2264,5 +2257,139 @@ export default {
   margin: 0;
   color: var(--violet-deep);
   line-height: 1.7;
+}
+
+/* Level Toast Styles */
+.level-toast {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 10000;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast-content {
+  background: var(--violet-deep);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(83, 43, 136, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  color: white;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.toast-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .level-toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .toast-content {
+    min-width: auto;
+    padding: 12px 16px;
+  }
+
+  .toast-message {
+    font-size: 0.9rem;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .module-cards {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .challenge-content {
+    padding: 10px;
+  }
+
+  .task-title {
+    font-size: 2rem;
+  }
+
+  .task-description {
+    font-size: 1rem;
+  }
+
+  .module-cards {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .module-card {
+    padding: 20px;
+    height: auto;
+    min-height: 250px;
+  }
+
+  .module-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .module-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .progress-steps {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .step-line {
+    width: 40px;
+  }
 }
 </style>

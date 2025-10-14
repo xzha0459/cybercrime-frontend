@@ -14,7 +14,7 @@
               <input
                 v-model="inputUrl"
                 type="url"
-                placeholder="example-url.com"
+                placeholder="https://example-url.com"
                 class="url-input"
                 @keyup.enter="checkUrlSafety"
                 :disabled="isLoading"
@@ -234,7 +234,7 @@ export default {
   width: calc(100% - 4rem);
   box-shadow: 0 12px 40px var(--shadow-dark);
   text-align: center;
-  margin: -45vh auto 2rem auto;
+  margin: -40vh auto 2rem auto;
 }
 
 .card-content {

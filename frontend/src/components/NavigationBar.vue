@@ -10,7 +10,7 @@
       <div class="nav-links desktop-nav">
         <router-link to="/infographic" class="nav-link">Infographic</router-link>
         <div class="nav-dropdown" @click="toggleActivityDropdown">
-          <span class="nav-link dropdown-trigger">Activity</span>
+          <span class="nav-link dropdown-trigger" :class="{ 'router-link-active': isActivityActive }">Activity</span>
           <div class="dropdown-menu" :class="{ open: isActivityDropdownOpen }">
             <router-link to="/link-check" class="dropdown-item" @click="closeActivityDropdown">Link Check</router-link>
             <router-link to="/library" class="dropdown-item" @click="closeActivityDropdown">Library</router-link>
@@ -69,7 +69,7 @@
         <!-- Mobile Navigation Links -->
         <div class="mobile-nav-links">
           <div class="mobile-dropdown" @click="toggleMobileActivityDropdown">
-            <span class="mobile-nav-link dropdown-trigger">Activity</span>
+            <span class="mobile-nav-link dropdown-trigger" :class="{ 'router-link-active': isActivityActive }">Activity</span>
             <div class="mobile-dropdown-menu" :class="{ open: isMobileActivityDropdownOpen }">
               <router-link to="/link-check" class="mobile-dropdown-item" @click="closeMobileMenu">Link Check</router-link>
               <router-link to="/library" class="mobile-dropdown-item" @click="closeMobileMenu">Library</router-link>
@@ -109,13 +109,14 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 export default {
   name: 'NavigationBar',
   setup() {
     const router = useRouter()
+    const route = useRoute()
     const isAuthenticated = ref(false)
     const loading = ref(false)
     const userEmail = ref(null)
@@ -123,6 +124,12 @@ export default {
     const isUserDropdownOpen = ref(false)
     const isActivityDropdownOpen = ref(false)
     const isMobileActivityDropdownOpen = ref(false)
+
+    // 计算属性：检查当前路由是否属于 Activity 子菜单
+    const isActivityActive = computed(() => {
+      const activityRoutes = ['/link-check', '/library', '/challenge']
+      return activityRoutes.includes(route.path)
+    })
 
     const signIn = async () => {
       router.push('/signin')
@@ -273,6 +280,7 @@ export default {
       isUserDropdownOpen,
       isActivityDropdownOpen,
       isMobileActivityDropdownOpen,
+      isActivityActive,
       signIn,
       signOut,
       goToUserCenter,

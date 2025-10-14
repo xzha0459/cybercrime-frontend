@@ -3,7 +3,10 @@
     <div class="container">
       <div class="section-header">
         <div class="title-section">
-          <h2 class="section-title">Leaderboard</h2>
+          <div class="title-container">
+            <h2 class="section-title">Leaderboard</h2>
+            <LeaderboardInfoButton />
+          </div>
           <p class="section-subtitle">{{ currentView === 'users' ? 'Top 10 performers in cybersecurity challenges' : 'Top 5 teams by total points' }}</p>
         </div>
       </div>
@@ -124,9 +127,13 @@
 
 <script>
 import { ref, onMounted } from 'vue'
+import LeaderboardInfoButton from '@/components/LeaderboardInfoButton.vue'
 
 export default {
   name: 'LeaderboardSection',
+  components: {
+    LeaderboardInfoButton
+  },
   setup() {
     const leaderboardData = ref([])
     const loading = ref(true)
@@ -278,10 +285,18 @@ export default {
   text-align: center;
 }
 
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
 .section-title {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   color: var(--text-primary, #333);
 }
 

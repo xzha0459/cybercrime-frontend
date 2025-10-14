@@ -1,7 +1,7 @@
 <template>
   <div class="user-info-section">
     <div class="user-info-container">
-      <h2 class="section-title">User Information</h2>
+      <h2 class="section-title">User Center</h2>
 
           <!-- Loading State -->
           <div v-if="loading" class="loading-state">

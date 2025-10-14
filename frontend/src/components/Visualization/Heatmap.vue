@@ -1,21 +1,6 @@
 <template>
   <div class="heatmap-section">
-    <div class="header">
-      <div class="header-content">
-        <div class="title-section">
-          <h3>Cybercrime Victimization Rate by Age Group</h3>
-          <p>Heatmap visualization showing victimization rates across different age groups and crime types</p>
-        </div>
-        <div class="download-section">
-          <button @click="exportChart" class="download-btn" :disabled="loading || error">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-            </svg>
-            Download Chart
-          </button>
-        </div>
-      </div>
-    </div>
+
 
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
@@ -33,108 +18,9 @@
       <!-- Main ECharts Visualization -->
       <div class="chart-container">
         <div ref="chartRef" class="main-chart"></div>
-        <div class="data-source">
-          <p>Sourced from: © Commonwealth of Australia, Australian Institute of Criminology (AIC)</p>
-        </div>
       </div>
 
-      <!-- Insights Panel -->
-      <div v-if="insights" class="insights-panel">
-        <h4>Data Insights Analysis</h4>
 
-        <!-- Key Statistics -->
-        <div class="insight-section">
-          <h5 class="section-title">Key Figures Summary</h5>
-          <div class="stats-grid">
-            <div class="stat-item">
-              <div class="stat-value">{{ getHighestRate() }}%</div>
-              <div class="stat-label">Young people's cybercrime victimization rate</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ getOnlineHarassmentRate() }}%</div>
-              <div class="stat-label">Young people's online harassment victimization rate</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ getFraudScamsRate() }}%</div>
-              <div class="stat-label">65+ group fraud and scams victimization rate</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ getRiskRatio() }}x</div>
-              <div class="stat-label">Young vs elderly overall victimization rate difference</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Key Findings -->
-        <div class="insight-section">
-          <h5 class="section-title">Key Findings</h5>
-          <div class="key-findings">
-            <div class="finding-item">
-              <strong>"Age is a significant factor in cybercrime vulnerability"</strong>
-            </div>
-            <div class="finding-item">
-              "18-34 age group has the highest victimization rates across all crime types"
-            </div>
-            <div class="finding-item">
-              "Online fraud affects all age groups, but young people's victimization rate is 4x higher than elderly"
-            </div>
-          </div>
-        </div>
-
-        <!-- Age Group Analysis -->
-        <div class="insight-section">
-          <h5 class="section-title">Age Group Characteristics</h5>
-          <div class="age-analysis">
-            <div class="age-group">
-              <h6 class="age-title">18 – 34: High-Risk Group</h6>
-              <ul>
-                <li>Highest victimization rates across all crime types</li>
-                <li>Particularly vulnerable to online harassment and identity crime</li>
-                <li>Likely causes: More frequent online activity and social media usage</li>
-              </ul>
-            </div>
-            <div class="age-group">
-              <h6 class="age-title">35 – 64: Medium Risk</h6>
-              <ul>
-                <li>Relatively balanced victimization patterns</li>
-                <li>Malware and identity crime are main threats</li>
-              </ul>
-            </div>
-            <div class="age-group">
-              <h6 class="age-title">65+: Relatively Safer</h6>
-              <ul>
-                <li>Lowest overall victimization rates</li>
-                <li>Still need attention for fraud protection</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Recommendations -->
-        <div class="insight-section">
-          <h5 class="section-title">Action Recommendations</h5>
-          <div class="recommendations">
-            <div class="recommendation-item">
-              <strong>Young People:</strong> Strengthen privacy settings, be cautious with social sharing
-            </div>
-            <div class="recommendation-item">
-              <strong>Middle-aged:</strong> Regularly update security software, identify phishing emails
-            </div>
-            <div class="recommendation-item">
-              <strong>Elderly:</strong> Improve fraud awareness, verify suspicious contacts
-            </div>
-          </div>
-        </div>
-
-        <!-- Trend Analysis -->
-        <div class="insight-section">
-          <h5 class="section-title">Trend Analysis</h5>
-          <div class="trend-analysis">
-            <h6>"Digital Native Paradox"</h6>
-            <p>Although young people are more familiar with technology, their high-frequency online activities and risky behaviors make them the primary targets of cybercrime. There is a complex relationship between age and cybersecurity awareness.</p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -145,6 +31,7 @@ import * as echarts from 'echarts'
 
 export default {
   name: 'HeatmapChart',
+  emits: ['insights'],
   props: {
     data: {
       type: Array,
@@ -155,7 +42,7 @@ export default {
       default: true
     }
   },
-  setup(props) {
+  setup(props, { emit, expose }) {
     const chartRef = ref(null)
     const chartInstance = ref(null)
     const loading = ref(true)
@@ -347,12 +234,31 @@ export default {
         })
 
         insights.value = generateHeatmapInsights(processedData)
+        emit('insights', insights.value)
 
       } catch (error) {
         console.error('Error initializing chart:', error)
         error.value = 'Chart initialization failed: ' + error.message
       }
     }
+
+    // 导出图表为图片
+    const getImageDataURL = (opts = {}) => {
+      if (!chartInstance.value) return null
+      try {
+        return chartInstance.value.getDataURL({
+          type: 'png',
+          pixelRatio: 2,
+          backgroundColor: getComputedStyle(document.body).getPropertyValue('--text-light') || '#ffffff',
+          ...opts
+        })
+      } catch (e) {
+        console.warn('Failed to export heatmap image:', e)
+        return null
+      }
+    }
+
+    expose({ getImageDataURL })
 
     // 生成洞察
     const generateHeatmapInsights = (processedData) => {
@@ -370,17 +276,28 @@ export default {
         current[2] < min[2] ? current : min
       )
 
+      // 计算各年龄段的平均受害率
+      const ageAverages = ageGroups.map((age, idx) => {
+        const values = dataMatrix.filter(d => d[1] === idx).map(d => d[2])
+        const avg = values.length ? values.reduce((s, v) => s + v, 0) / values.length : 0
+        return { age, avg }
+      })
+
+      // 计算各犯罪类型的平均受害率
+      const crimeAverages = crimeTypes.map((crime, idx) => {
+        const values = dataMatrix.filter(d => d[0] === idx).map(d => d[2])
+        const avg = values.length ? values.reduce((s, v) => s + v, 0) / values.length : 0
+        return { crime, avg }
+      })
+
+      const topCrime = crimeAverages.reduce((a, b) => (b.avg > a.avg ? b : a), { crime: '', avg: 0 })
+      const topAge = ageAverages.reduce((a, b) => (b.avg > a.avg ? b : a), { age: '', avg: 0 })
+
       return {
-        highestRisk: {
-          crime: crimeTypes[maxRiskPoint[0]],
-          age: ageGroups[maxRiskPoint[1]],
-          rate: maxRiskPoint[2]
-        },
-        lowestRisk: {
-          crime: crimeTypes[minRiskPoint[0]],
-          age: ageGroups[minRiskPoint[1]],
-          rate: minRiskPoint[2]
-        }
+        highestRisk: { crime: crimeTypes[maxRiskPoint[0]], age: ageGroups[maxRiskPoint[1]], rate: maxRiskPoint[2] },
+        lowestRisk: { crime: crimeTypes[minRiskPoint[0]], age: ageGroups[minRiskPoint[1]], rate: minRiskPoint[2] },
+        topAverageCrime: topCrime,
+        topAverageAge: topAge
       }
     }
 
@@ -426,97 +343,9 @@ export default {
       }
     }
 
-    // 统计函数
-    const getHighestRate = () => {
-      if (!chartData.value || chartData.value.length === 0) {
-        return '0.0'
-      }
 
-      const youngAnyCrime = chartData.value.find(item =>
-        item.age === '18 – 34' &&
-        item.main_type === 'Any cybercrime (all)' &&
-        item.prevalence_2024 !== undefined &&
-        item.prevalence_2024 !== null
-      )
 
-      if (youngAnyCrime) {
-        return youngAnyCrime.prevalence_2024.toFixed(1)
-      }
 
-      return '0.0'
-    }
-
-    const getOnlineHarassmentRate = () => {
-      if (!chartData.value || chartData.value.length === 0) {
-        return '0.0'
-      }
-
-      const youngHarassment = chartData.value.find(item =>
-        item.age === '18 – 34' && item.main_type === 'Online abuse and harassment'
-      )
-
-      if (youngHarassment) {
-        return youngHarassment.prevalence_2024.toFixed(1)
-      }
-
-      return '0.0'
-    }
-
-    const getFraudScamsRate = () => {
-      if (!chartData.value || chartData.value.length === 0) {
-        return '0.0'
-      }
-
-      const elderlyFraud = chartData.value.find(item =>
-        item.age === '65+' && item.main_type === 'Fraud and scams'
-      )
-
-      if (elderlyFraud) {
-        return elderlyFraud.prevalence_2024.toFixed(1)
-      }
-
-      return '0.0'
-    }
-
-    const getRiskRatio = () => {
-      if (!chartData.value || chartData.value.length === 0) {
-        return '0.0'
-      }
-
-      const youngCrimes = chartData.value.filter(item => item.age === '18 – 34')
-      const youngAvgRate = youngCrimes.length > 0
-        ? youngCrimes.reduce((sum, item) => sum + (item.prevalence_2024 || 0), 0) / youngCrimes.length
-        : 0
-
-      const oldCrimes = chartData.value.filter(item =>
-        item.age === '65+' || item.age === '65 +' || item.age === '65+ years'
-      )
-      const oldAvgRate = oldCrimes.length > 0
-        ? oldCrimes.reduce((sum, item) => sum + (item.prevalence_2024 || 0), 0) / oldCrimes.length
-        : 0
-
-      if (oldAvgRate > 0) {
-        return (youngAvgRate / oldAvgRate).toFixed(1)
-      }
-
-      return '0.0'
-    }
-
-    // 导出图表
-    const exportChart = () => {
-      if (chartInstance.value) {
-        const url = chartInstance.value.getDataURL({
-          type: 'png',
-          pixelRatio: 2,
-          backgroundColor: '#fff'
-        })
-
-        const link = document.createElement('a')
-        link.download = 'heatmap-chart.png'
-        link.href = url
-        link.click()
-      }
-    }
 
     // 数据监听
     watch(() => props.data, (newData) => {
@@ -611,11 +440,7 @@ export default {
       error,
       insights,
       fetchData,
-      exportChart,
-      getHighestRate,
-      getOnlineHarassmentRate,
-      getFraudScamsRate,
-      getRiskRatio
+      getImageDataURL
     }
   }
 }
@@ -625,69 +450,10 @@ export default {
 .heatmap-section {
   background: var(--bg-primary);
   border-radius: 12px;
-  padding: 2rem;
   font-family: inherit;
 }
 
-.header {
-  margin-bottom: 2rem;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-}
-
-.title-section {
-  flex: 1;
-  text-align: left;
-}
-
-.title-section h3 {
-  font-size: 1.8rem;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.title-section p {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.download-section {
-  flex-shrink: 0;
-}
-
-.download-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--violet-ultra-dark);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px var(--shadow-light);
-}
-
-.download-btn:hover:not(:disabled) {
-  background: var(--violet-dark);
-}
-
-.download-btn:disabled {
-  background: var(--violet-sage);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
+/* header removed */
 
 .loading, .error-state {
   display: flex;
@@ -778,180 +544,14 @@ export default {
   font-style: italic;
 }
 
-/* Analysis Panel Container */
-.insights-panel {
-  background: transparent;
-  border-radius: 0;
-  padding: 2rem 0;
-}
-
-.insights-panel h4 {
-  margin: 0 0 1.5rem 0;
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-/* Insight Section Container */
-.insight-section {
-  margin-bottom: 1rem;
-  padding: 1.5rem;
-  background: var(--violet-dark);
-  border-radius: 8px;
-}
-
-.section-title {
-  margin: 0 0 1rem 0;
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Key Figures Summary Section */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 1.5rem;
-  background: var(--violet-light);
-  color: var(--text-primary);
-  border-radius: 8px;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  opacity: 0.9;
-  line-height: 1.3;
-}
-
-/* Key Findings Section */
-.key-findings {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.finding-item {
-  padding: 1rem;
-  background: var(--violet-light);
-  border-radius: 8px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--text-primary);
-}
-
-/* Age Group Characteristics Section */
-.age-analysis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.age-group {
-  padding: 1.5rem;
-  background: var(--violet-light);
-  border-radius: 8px;
-}
-
-.age-title {
-  margin: 0 0 0.75rem 0;
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.age-group ul {
-  margin: 0;
-  padding-left: 1rem;
-}
-
-.age-group li {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-}
-
-/* Action Recommendations Section */
-.recommendations {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.recommendation-item {
-  padding: 1rem;
-  background: var(--violet-light);
-  border-radius: 8px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--text-primary);
-}
-
-/* Trend Analysis Section */
-.trend-analysis {
-  padding: 1.5rem;
-  background: var(--violet-light);
-  border-radius: 8px;
-}
-
-.trend-analysis h6 {
-  margin: 0 0 0.75rem 0;
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.trend-analysis p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
 @media (max-width: 768px) {
   .heatmap-section {
     padding: 1rem;
   }
 
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .title-section {
-    text-align: center;
-  }
-
   .main-chart {
     height: 400px;
     min-height: 350px;
-  }
-
-  .insights-panel {
-    padding: 1rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .age-analysis {
-    grid-template-columns: 1fr;
   }
 }
 

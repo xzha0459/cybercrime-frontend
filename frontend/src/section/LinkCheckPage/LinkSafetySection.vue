@@ -205,8 +205,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 2rem 2rem 2rem;
-  min-height: 90vh;
+  padding: 0 2rem 1rem 2rem;
+  min-height: 0vh;
 }
 
 .main-container {

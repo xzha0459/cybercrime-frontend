@@ -3,19 +3,27 @@
     <div class="page-header">
       <div class="container">
         <h1 class="page-title">Educational Library</h1>
-        <p class="page-subtitle">Access cybersecurity videos, articles, and infographics to enhance your digital safety knowledge</p>
+        <p class="page-subtitle">
+          Access cybersecurity videos, articles, and infographics to enhance your digital safety knowledge
+        </p>
       </div>
     </div>
 
     <div class="page-content">
       <div class="container">
-        <!-- US 3.1 Section - Resource -->
         <ResourceSection />
+
+        <!-- Continue Button -->
+        <router-link to="/challenge" class="continue-button">
+          Continue to Challenge Section
+        </router-link>
       </div>
     </div>
+
     <FooterSection />
   </div>
 </template>
+
 
 <script>
 import ResourceSection from '../section/LibraryPage/ResourceSection.vue'
@@ -64,6 +72,26 @@ export default {
   max-width: 100%;
   margin: 0 auto;
   padding: 0 8rem;
+}
+
+.continue-button {
+  display: block;
+  width: fit-content;
+  margin: 2rem auto 3rem auto; /* ensure it's visible and balanced */
+  padding: 1rem 2rem;
+  background: var(--violet-deep);
+  color: var(--violet-light);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 12px var(--shadow-dark);
+}
+
+.continue-button:hover {
+  background: var(--violet-dark);
 }
 
 @media (max-width: 768px) {

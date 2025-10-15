@@ -4,6 +4,11 @@
     <div class="section-header">
       <h2>Challenge History</h2>
       <div class="stats-summary">
+        <div class="stat-item-challenge">
+          <router-link to="/challenge">
+            Continue to Challenge Page
+          </router-link>
+        </div>
         <div class="stat-item">
           <span class="stat-number">{{ totalTests }}</span>
           <span class="stat-label">Total Tests</span>
@@ -466,6 +471,47 @@ export default {
 
 <style scoped>
 /* 测试历史样式 */
+
+.stat-item-challenge {
+  border-radius: 12px;
+  padding: 0;            /* let the link control spacing */
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* make the link look exactly like your continue-button */
+.stat-item-challenge a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
+  padding: 1rem 2rem;
+
+  background: var(--violet-deep);
+  color: var(--violet-light);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  text-align: center;
+
+  box-shadow: 0 4px 12px var(--shadow-dark);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.stat-item-challenge a:hover {
+  background: var(--violet-dark);
+  transform: translateY(-2px);
+}
+
+.stat-item-challenge:active {
+  transform: translateY(-1px) scale(0.99);
+  box-shadow: 0 3px 8px rgba(80, 60, 140, 0.15);
+}
+
 .test-history-section {
   background: white;
   border-radius: 15px;
@@ -498,7 +544,7 @@ export default {
   gap: 30px;
 }
 
-.stat-item {
+.stat-item{
   text-align: center;
   background: var(--violet-light);
   padding: 15px 20px;

@@ -15,6 +15,10 @@
           </div>
         </div>
       </div>
+
+      <router-link to="/library" class="continue-button">
+        Go to Library Section
+      </router-link>
     </div>
     <FooterSection />
   </div>
@@ -77,6 +81,28 @@ export default {
 .leaderboard-section {
   order: 1;
 }
+
+.continue-button {
+  display: block;
+  width: fit-content;
+  margin: 2rem auto 3rem auto;
+  padding: 1rem 2rem;
+  background: var(--violet-deep);
+  color: var(--violet-light);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px var(--shadow-dark);
+}
+
+.continue-button:hover {
+  background: var(--violet-dark);
+  transform: translateY(-2px);
+}
+
 
 @media (max-width: 768px) {
   .page-title {

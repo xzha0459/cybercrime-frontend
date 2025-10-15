@@ -13,21 +13,20 @@
           <div class="section-content">
             <div class="section-header">
               <h2 class="section-title">Cybercrime Financial Impact & Victimization Overview</h2>
-              <button class="download-btn" @click="downloadVisuals">Download Chart</button>
-              <select class="download-select" v-model="downloadChoice" aria-label="Select charts to download">
-                <option value="both">Both charts</option>
-                <option value="bar">Financial Impact only</option>
-                <option value="heatmap">Victimization only</option>
-              </select>
-
+              <button class="download-btn" @click="openDownloadModal">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                Download Chart
+              </button>
             </div>
             <div class="charts-row">
               <div class="chart-col">
-                <!-- Financial Impact Comparison Grouped Bar Chart -->
+            <!-- Financial Impact Comparison Grouped Bar Chart -->
                 <GroupedBarChart ref="barRef" @insights="financialInsights = $event" />
               </div>
               <div class="chart-col">
-                <!-- Cybercrime Victimization Rate Heatmap by Age Group -->
+            <!-- Cybercrime Victimization Rate Heatmap by Age Group -->
                 <HeatmapChart ref="heatmapRef" @insights="victimInsights = $event" />
               </div>
             </div>
@@ -172,6 +171,14 @@
 
           </div>
         </section>
+
+        <!-- Download Modal -->
+        <DownloadModal
+          :is-visible="showDownloadModal"
+          :bar-chart-ref="$refs.barRef"
+          :heatmap-ref="$refs.heatmapRef"
+          @close="closeDownloadModal"
+        />
       </div>
     </div>
     <FooterSection />
@@ -183,6 +190,7 @@
 // import RadarChart from '@/components/Visualization/Radarchart.vue'
 import GroupedBarChart from '@/components/Visualization/GroupedBarChart.vue'
 import HeatmapChart from '@/components/Visualization/Heatmap.vue'
+import DownloadModal from '@/components/DownloadModal.vue'
 import FooterSection from '../section/HomePage/FooterSection.vue'
 
 export default {
@@ -191,6 +199,7 @@ export default {
     // RadarChart,
     GroupedBarChart,
     HeatmapChart,
+    DownloadModal,
     FooterSection
   },
   data() {
@@ -199,29 +208,16 @@ export default {
       loading: false,
       financialInsights: null,
       victimInsights: null,
-      downloadChoice: 'both'
+      showDownloadModal: false
     }
   },
   methods: {
-    downloadVisuals() {
-      const needBar = this.downloadChoice === 'both' || this.downloadChoice === 'bar'
-      const needHeat = this.downloadChoice === 'both' || this.downloadChoice === 'heatmap'
+    openDownloadModal() {
+      this.showDownloadModal = true
+    },
 
-      const bar = needBar && this.$refs.barRef && this.$refs.barRef.getImageDataURL && this.$refs.barRef.getImageDataURL()
-      const heat = needHeat && this.$refs.heatmapRef && this.$refs.heatmapRef.getImageDataURL && this.$refs.heatmapRef.getImageDataURL()
-
-      const triggerDownload = (dataUrl, filename) => {
-        if (!dataUrl) return
-        const a = document.createElement('a')
-        a.href = dataUrl
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-      }
-
-      if (needBar) triggerDownload(bar, 'financial_impact.png')
-      if (needHeat) triggerDownload(heat, 'victimization_heatmap.png')
+    closeDownloadModal() {
+      this.showDownloadModal = false
     }
   }
 }
@@ -284,25 +280,19 @@ export default {
   gap: 0.75rem;
 }
 
-.download-select {
-  border: 1px solid var(--border-light);
-  background: var(--text-light);
-  color: var(--text-primary);
-  border-radius: 999px;
-  padding: 0.45rem 0.75rem;
-  font-size: 0.9rem;
-}
-
 .download-btn {
   border: 1px solid var(--border-light);
   background: var(--violet-dark);
   color: var(--text-light);
   border-radius: 999px;
-  padding: 0.6rem 0.9rem;
+  padding: 0.6rem 1.3rem 0.6rem 0.9rem;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .download-btn:hover {
